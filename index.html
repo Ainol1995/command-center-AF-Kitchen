@@ -12,7 +12,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&family=Nunito:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script>
     if (window.tailwind) {
       tailwind.config = {
@@ -50,6 +50,31 @@
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     @keyframes fadeSlide { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
     .animate-in { animation: fadeSlide 0.22s ease-out forwards; }
+
+    /* User appearance settings — default values preserve the original UI. */
+    :root {
+      --ui-accent: #f59e0b;
+      --ui-accent-hover: #d97706;
+      --ui-accent-soft: #fffbeb;
+      --ui-accent-dark: #92400e;
+      --ui-accent-contrast: #1c1917;
+      --ui-page-bg: #faf8f5;
+      --ui-root-size: 16px;
+      --ui-card-shadow: 0 2px 10px -2px rgba(28, 25, 23, 0.04);
+    }
+    html { font-size: var(--ui-root-size); }
+    body { background-color: var(--ui-page-bg); }
+    .card-soft { box-shadow: var(--ui-card-shadow); }
+    html[data-theme-accent-custom="true"] .bg-amber-500 { background-color: var(--ui-accent) !important; color: var(--ui-accent-contrast) !important; }
+    html[data-theme-accent-custom="true"] .bg-amber-600 { background-color: var(--ui-accent-hover) !important; }
+    html[data-theme-accent-custom="true"] .hover\:bg-amber-600:hover { background-color: var(--ui-accent-hover) !important; }
+    html[data-theme-accent-custom="true"] .bg-amber-50 { background-color: var(--ui-accent-soft) !important; }
+    html[data-theme-accent-custom="true"] .text-amber-600 { color: var(--ui-accent-hover) !important; }
+    html[data-theme-accent-custom="true"] .text-amber-700, html[data-theme-accent-custom="true"] .text-amber-800 { color: var(--ui-accent-dark) !important; }
+    html[data-theme-accent-custom="true"] .border-amber-500 { border-color: var(--ui-accent) !important; }
+    html[data-theme-accent-custom="true"] button.bg-stone-900 { background-color: var(--ui-accent) !important; border-color: var(--ui-accent) !important; color: var(--ui-accent-contrast) !important; }
+    html[data-theme-accent-custom="true"] button.hover\:bg-stone-800:hover { background-color: var(--ui-accent-hover) !important; }
+    html[data-theme-accent-custom="true"] button.bg-amber-500, html[data-theme-accent-custom="true"] button.bg-stone-900 { transition: background-color .18s ease, border-color .18s ease, color .18s ease; }
   </style>
 </head>
 <body class="min-h-screen pb-24">
@@ -406,6 +431,9 @@
           <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5 text-amber-600"></i>
           <span class="hidden sm:inline">Setup</span>
         </button>
+        <button type="button" onclick="openAppearanceSettings()" title="Tetapan paparan dan tema" class="text-xs font-bold text-stone-700 bg-white hover:bg-stone-100 border border-stone-200 p-2 rounded-xl shadow-sm">
+          <i data-lucide="palette" class="w-3.5 h-3.5 text-amber-600"></i>
+        </button>
         <button type="button" onclick="lockAppNow()" title="Kunci Paparan (PIN)"
           class="text-xs font-bold text-stone-700 bg-white hover:bg-rose-50 hover:text-rose-700 border border-stone-200 p-2 rounded-xl shadow-sm">
           <i data-lucide="lock" class="w-3.5 h-3.5"></i>
@@ -534,14 +562,32 @@
 
         <!-- EXPANDABLE FULL ORDERS FILTER PANEL (STATUS + ONLINE/CASH + PICKUP/COD + TARIKH) -->
         <div id="orders-filter-panel" class="hidden p-3 rounded-2xl bg-stone-50 border border-stone-200 space-y-2.5 animate-in">
-          <div class="flex items-center justify-between">
-            <span class="text-[11px] font-extrabold text-stone-700">Tapis Seluruh Rekod Tempahan</span>
-            <button type="button" onclick="resetOrdersListFilter()" class="text-[10px] font-bold text-amber-700 hover:underline">Reset Tapisan</button>
+          <div class="flex items-center justify-between gap-2">
+            <div class="min-w-0">
+              <span class="text-[11px] font-extrabold text-stone-700">Tapis Seluruh Rekod Tempahan</span>
+              <span class="ml-1.5 text-[9px] font-extrabold uppercase tracking-wide bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded-md">Padanan OR / ATAU</span>
+            </div>
+            <button type="button" onclick="resetOrdersListFilter()" class="text-[10px] font-bold text-amber-700 hover:underline shrink-0">Reset Tapisan</button>
           </div>
 
           <input type="text" id="orders-search-input" oninput="ordersListFilter.search = this.value; renderOrdersSection();"
             placeholder="Cari nama pelanggan, nota kek, kawasan COD atau ID..."
             class="w-full px-3 py-2 text-xs rounded-xl border border-stone-200 bg-white" />
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <label class="text-[10px] font-bold text-stone-500 flex flex-col gap-1">
+              Susunan Tarikh
+              <select id="orders-sort-select" onchange="setOrdersSort(this.value)" class="w-full px-2.5 py-2 text-xs rounded-xl border border-stone-200 bg-white text-stone-700">
+                <option value="upcoming">Akan datang dahulu (terdekat)</option>
+                <option value="newest">Tarikh terbaru dahulu</option>
+                <option value="oldest">Tarikh lama dahulu</option>
+              </select>
+            </label>
+            <div class="rounded-xl bg-white border border-stone-200 px-3 py-2 flex flex-col justify-center">
+              <span class="text-[10px] font-bold text-stone-500">Cara tapisan</span>
+              <span class="text-[11px] font-extrabold text-amber-800">Mana-mana syarat dipenuhi</span>
+            </div>
+          </div>
 
           <!-- Status Filter Pills -->
           <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
@@ -632,10 +678,15 @@
             <h2 class="text-base font-extrabold text-stone-900">Inventori &amp; Stock Bahan</h2>
             <p class="text-[11px] text-stone-500">Pantau baki stok (%), restock 1 pek, atau tambah barang baharu</p>
           </div>
-          <button type="button" onclick="openStockModal(null)" class="text-xs font-bold bg-stone-900 hover:bg-stone-800 text-white px-3 py-2 rounded-xl flex items-center gap-1.5 shrink-0 shadow-xs">
-            <i data-lucide="plus" class="w-3.5 h-3.5 text-amber-400"></i>
-            <span>Tambah Barang</span>
-          </button>
+          <div class="flex items-center gap-1.5 shrink-0">
+            <button type="button" onclick="exportStockCSV()" title="Muat turun senarai inventori CSV" class="text-[10px] font-bold bg-white hover:bg-stone-50 text-stone-700 border border-stone-200 px-2.5 py-2 rounded-xl flex items-center gap-1">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i><span class="hidden sm:inline">CSV</span>
+            </button>
+            <button type="button" onclick="openStockModal(null)" class="text-xs font-bold bg-stone-900 hover:bg-stone-800 text-white px-3 py-2 rounded-xl flex items-center gap-1.5 shadow-xs">
+              <i data-lucide="plus" class="w-3.5 h-3.5 text-amber-400"></i>
+              <span>Tambah Barang</span>
+            </button>
+          </div>
         </div>
 
         <!-- 3 Clean KPI Boxes -->
@@ -671,6 +722,16 @@
           <input type="text" id="stock-search-input" oninput="stockFilter.search = this.value; renderStockList();"
             placeholder="Cari nama bahan mentah atau pembungkusan..."
             class="w-full px-3 py-2 text-xs rounded-xl border border-stone-200 bg-stone-50" />
+          <div class="flex items-center justify-between gap-2">
+            <label class="text-[10px] font-bold text-stone-500 shrink-0">Susun inventori</label>
+            <select id="stock-sort-select" onchange="setStockSort(this.value)" class="flex-1 max-w-[230px] px-2.5 py-2 text-[11px] font-semibold rounded-xl border border-stone-200 bg-white text-stone-700">
+              <option value="low">Stok rendah dahulu</option>
+              <option value="name">Nama A – Z</option>
+              <option value="stock-asc">Baki paling sedikit</option>
+              <option value="stock-desc">Baki paling banyak</option>
+              <option value="value-desc">Nilai stok tertinggi</option>
+            </select>
+          </div>
           <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
             <button type="button" onclick="setStockCategoryFilter('all')" id="stk-cat-all" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-stone-900 text-white shrink-0">Semua</button>
             <button type="button" onclick="setStockCategoryFilter('low')" id="stk-cat-low" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-stone-100 text-rose-700 shrink-0">Stok Rendah</button>
@@ -856,6 +917,93 @@
         </button>
       </div>
     </nav>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- MODAL: APPEARANCE / THEME SETTINGS                        -->
+  <!-- ========================================================= -->
+  <div id="appearance-modal" class="fixed inset-0 z-[60] hidden bg-stone-900/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl p-5 max-h-[90vh] overflow-y-auto space-y-4 animate-in">
+      <div class="flex items-center justify-between border-b border-stone-100 pb-3">
+        <div>
+          <span class="text-[10px] font-extrabold uppercase tracking-wider bg-amber-100 text-amber-800 px-2 py-0.5 rounded-md">Personalisasi</span>
+          <h3 class="text-base font-extrabold text-stone-900 mt-1">Tetapan Tema & Paparan</h3>
+          <p class="text-[11px] text-stone-500 mt-0.5">Ubah penampilan tanpa mengubah data tempahan atau inventori.</p>
+        </div>
+        <button type="button" onclick="closeAppearanceSettings(false)" class="p-1.5 rounded-xl bg-stone-100 text-stone-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+
+      <div class="space-y-3.5">
+        <div class="rounded-2xl bg-stone-50 border border-stone-200 p-3.5 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <div><div class="text-xs font-extrabold text-stone-800">Warna utama butang</div><div class="text-[10px] text-stone-500">Warna butang tindakan dan elemen aksen</div></div>
+            <input id="appearance-accent" type="color" value="#f59e0b" oninput="previewAppearanceSettings()" class="w-10 h-9 p-0.5 bg-white border border-stone-200 rounded-lg cursor-pointer" />
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button type="button" onclick="setAppearanceAccent('#f59e0b')" class="w-7 h-7 rounded-full border-2 border-white ring-1 ring-stone-300" style="background:#f59e0b" title="Amber"></button>
+            <button type="button" onclick="setAppearanceAccent('#2563eb')" class="w-7 h-7 rounded-full border-2 border-white ring-1 ring-stone-300" style="background:#2563eb" title="Biru"></button>
+            <button type="button" onclick="setAppearanceAccent('#0f766e')" class="w-7 h-7 rounded-full border-2 border-white ring-1 ring-stone-300" style="background:#0f766e" title="Teal"></button>
+            <button type="button" onclick="setAppearanceAccent('#16a34a')" class="w-7 h-7 rounded-full border-2 border-white ring-1 ring-stone-300" style="background:#16a34a" title="Hijau"></button>
+            <button type="button" onclick="setAppearanceAccent('#7c3aed')" class="w-7 h-7 rounded-full border-2 border-white ring-1 ring-stone-300" style="background:#7c3aed" title="Ungu"></button>
+            <button type="button" onclick="setAppearanceAccent('#e11d48')" class="w-7 h-7 rounded-full border-2 border-white ring-1 ring-stone-300" style="background:#e11d48" title="Merah jambu"></button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <label class="space-y-1">
+            <span class="block text-xs font-extrabold text-stone-700">Jenis tulisan</span>
+            <select id="appearance-font" onchange="previewAppearanceSettings()" class="w-full px-3 py-2.5 text-xs rounded-xl border border-stone-200 bg-white">
+              <option value="'Plus Jakarta Sans', sans-serif">Plus Jakarta Sans</option>
+              <option value="'Inter', sans-serif">Inter</option>
+              <option value="'Poppins', sans-serif">Poppins</option>
+              <option value="'Nunito', sans-serif">Nunito</option>
+              <option value="Arial, sans-serif">Arial</option>
+              <option value="system-ui, sans-serif">System Default</option>
+            </select>
+          </label>
+          <label class="space-y-1">
+            <span class="block text-xs font-extrabold text-stone-700">Warna latar aplikasi</span>
+            <select id="appearance-bg" onchange="previewAppearanceSettings()" class="w-full px-3 py-2.5 text-xs rounded-xl border border-stone-200 bg-white">
+              <option value="#faf8f5">Warm Cream (asal)</option>
+              <option value="#f8fafc">Soft Grey</option>
+              <option value="#f2f8f5">Soft Mint</option>
+              <option value="#f7f5fb">Soft Lavender</option>
+              <option value="#fffaf2">Vanilla</option>
+            </select>
+          </label>
+          <label class="space-y-1">
+            <span class="block text-xs font-extrabold text-stone-700">Saiz tulisan</span>
+            <select id="appearance-size" onchange="previewAppearanceSettings()" class="w-full px-3 py-2.5 text-xs rounded-xl border border-stone-200 bg-white">
+              <option value="15px">Kecil</option>
+              <option value="16px">Normal</option>
+              <option value="17px">Besar</option>
+            </select>
+          </label>
+          <label class="space-y-1">
+            <span class="block text-xs font-extrabold text-stone-700">Bayang kad</span>
+            <select id="appearance-shadow" onchange="previewAppearanceSettings()" class="w-full px-3 py-2.5 text-xs rounded-xl border border-stone-200 bg-white">
+              <option value="soft">Lembut</option>
+              <option value="strong">Lebih jelas</option>
+              <option value="none">Tanpa bayang</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="rounded-xl border border-stone-200 p-3 space-y-2">
+          <div class="text-[10px] font-bold uppercase tracking-wide text-stone-400">Pratonton</div>
+          <div class="flex items-center justify-between gap-3">
+            <div class="min-w-0"><div class="text-xs font-extrabold text-stone-800">Contoh butang utama</div><div class="text-[10px] text-stone-500">Tema akan digunakan pada paparan aplikasi.</div></div>
+            <span class="px-3 py-2 rounded-xl text-[10px] font-extrabold" style="background:var(--ui-accent);color:var(--ui-accent-contrast)">Simpan</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex gap-2 pt-1">
+        <button type="button" onclick="resetAppearanceSettings()" class="px-3 py-3 rounded-xl border border-stone-200 bg-white text-stone-700 text-xs font-bold">Reset Asal</button>
+        <button type="button" onclick="closeAppearanceSettings(false)" class="flex-1 px-3 py-3 rounded-xl border border-stone-200 bg-white text-stone-700 text-xs font-bold">Batal</button>
+        <button type="button" onclick="saveAppearanceSettings()" class="flex-1 px-3 py-3 rounded-xl bg-stone-900 text-white text-xs font-extrabold">Simpan Tema</button>
+      </div>
+    </div>
   </div>
 
   <!-- ========================================================= -->
@@ -1147,8 +1295,19 @@
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     }
 
+    function getDefaultAppearance() {
+      return {
+        accent: '#f59e0b',
+        font: "'Plus Jakarta Sans', sans-serif",
+        background: '#faf8f5',
+        fontSize: '16px',
+        shadow: 'soft'
+      };
+    }
+
     function getDefaultConfig() {
       return {
+        appearance: getDefaultAppearance(),
         isConfigured: false,
         bizName: 'Dapur Marble Kak Nina',
         ownerName: 'Kak Nina',
@@ -1239,6 +1398,7 @@
     }
 
     let config = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null') || getDefaultConfig();
+    config.appearance = Object.assign({}, getDefaultAppearance(), config.appearance || {});
     let orders = JSON.parse(localStorage.getItem(ORDERS_KEY) || 'null') || getDefaultOrders();
     let activeSetupStep = 1;
     let activeRecipeTarget = config.sizes[0]?.id || 'size_6';
@@ -1258,11 +1418,12 @@
     };
 
     let ordersListExpanded = false;
+    let nextOrderIndex = 0;
     let ordersListFilter = {
-      preset: 'all', from: '', to: '', status: 'all', payMethod: 'all', delivery: 'all', search: ''
+      preset: 'all', from: '', to: '', status: 'all', payMethod: 'all', delivery: 'all', search: '', sort: 'upcoming'
     };
 
-    let stockFilter = { category: 'all', search: '' };
+    let stockFilter = { category: 'all', search: '', sort: 'low' };
     let analisisDatePreset = 'all';
 
     let editingOrderId = null;
@@ -1404,6 +1565,101 @@
     }
 
     // =========================================================
+    // APPEARANCE / THEME SETTINGS
+    // =========================================================
+    function getThemeContrast(hex) {
+      const clean = String(hex || '#f59e0b').replace('#', '');
+      if (!/^[0-9a-f]{6}$/i.test(clean)) return '#1c1917';
+      const rgb = [0, 2, 4].map(i => parseInt(clean.slice(i, i + 2), 16) / 255).map(v =>
+        v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)
+      );
+      const luminance = 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2];
+      return luminance > 0.48 ? '#1c1917' : '#ffffff';
+    }
+
+    function applyAppearanceSettings(settings = config.appearance || getDefaultAppearance()) {
+      const appearance = Object.assign({}, getDefaultAppearance(), settings || {});
+      const root = document.documentElement;
+      const accent = appearance.accent || '#f59e0b';
+      const darkMix = (hex) => {
+        const raw = hex.replace('#', '');
+        if (!/^[0-9a-f]{6}$/i.test(raw)) return '#92400e';
+        const rgb = [0, 2, 4].map(i => parseInt(raw.slice(i, i + 2), 16));
+        return '#' + rgb.map(v => Math.round(v * 0.62).toString(16).padStart(2, '0')).join('');
+      };
+      root.style.setProperty('--ui-accent', accent);
+      root.style.setProperty('--ui-accent-hover', darkMix(accent));
+      root.style.setProperty('--ui-accent-soft', accent.toLowerCase() === '#f59e0b' ? '#fffbeb' : `${accent}18`);
+      if (accent.toLowerCase() === '#f59e0b') root.removeAttribute('data-theme-accent-custom');
+      else root.setAttribute('data-theme-accent-custom', 'true');
+      root.style.setProperty('--ui-accent-dark', darkMix(accent));
+      root.style.setProperty('--ui-accent-contrast', getThemeContrast(accent));
+      root.style.setProperty('--ui-page-bg', appearance.background || '#faf8f5');
+      root.style.setProperty('--ui-root-size', appearance.fontSize || '16px');
+      root.style.setProperty('--ui-card-shadow', appearance.shadow === 'none'
+        ? 'none'
+        : (appearance.shadow === 'strong' ? '0 5px 18px -4px rgba(28, 25, 23, 0.13)' : '0 2px 10px -2px rgba(28, 25, 23, 0.04)'));
+      document.body.style.fontFamily = appearance.font || "'Plus Jakarta Sans', sans-serif";
+      document.body.style.backgroundColor = appearance.background || '#faf8f5';
+      const themeMeta = document.querySelector('meta[name="theme-color"]');
+      if (themeMeta) themeMeta.setAttribute('content', accent.toLowerCase() === '#f59e0b' ? '#1c1917' : accent);
+    }
+
+    function readAppearanceForm() {
+      return {
+        accent: document.getElementById('appearance-accent').value || '#f59e0b',
+        font: document.getElementById('appearance-font').value,
+        background: document.getElementById('appearance-bg').value,
+        fontSize: document.getElementById('appearance-size').value,
+        shadow: document.getElementById('appearance-shadow').value
+      };
+    }
+
+    function openAppearanceSettings() {
+      const appearance = Object.assign({}, getDefaultAppearance(), config.appearance || {});
+      document.getElementById('appearance-accent').value = appearance.accent;
+      document.getElementById('appearance-font').value = appearance.font;
+      document.getElementById('appearance-bg').value = appearance.background;
+      document.getElementById('appearance-size').value = appearance.fontSize;
+      document.getElementById('appearance-shadow').value = appearance.shadow;
+      document.getElementById('appearance-modal').classList.remove('hidden');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function previewAppearanceSettings() {
+      applyAppearanceSettings(readAppearanceForm());
+    }
+
+    function setAppearanceAccent(color) {
+      document.getElementById('appearance-accent').value = color;
+      previewAppearanceSettings();
+    }
+
+    function resetAppearanceSettings() {
+      const defaults = getDefaultAppearance();
+      document.getElementById('appearance-accent').value = defaults.accent;
+      document.getElementById('appearance-font').value = defaults.font;
+      document.getElementById('appearance-bg').value = defaults.background;
+      document.getElementById('appearance-size').value = defaults.fontSize;
+      document.getElementById('appearance-shadow').value = defaults.shadow;
+      previewAppearanceSettings();
+    }
+
+    async function saveAppearanceSettings() {
+      config.appearance = readAppearanceForm();
+      applyAppearanceSettings(config.appearance);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+      document.getElementById('appearance-modal').classList.add('hidden');
+      showToast('Tema dan paparan berjaya disimpan!');
+      if (config.scriptUrl) await pushCloudAction({ action: 'saveConfig', config });
+    }
+
+    function closeAppearanceSettings(saveChanges = false) {
+      document.getElementById('appearance-modal').classList.add('hidden');
+      if (!saveChanges) applyAppearanceSettings(config.appearance || getDefaultAppearance());
+    }
+
+    // =========================================================
     // DATE FILTER ENGINE
     // =========================================================
     function filterOrdersBySpec(allOrders, spec) {
@@ -1528,6 +1784,11 @@
       renderOrdersSection();
     }
 
+    function setOrdersSort(sortMode) {
+      ordersListFilter.sort = sortMode || 'upcoming';
+      renderOrdersSection();
+    }
+
     function setOrdersListDatePreset(preset) {
       ordersListFilter.preset = preset;
       ['all', 'today', 'week', 'month', 'custom'].forEach(p => {
@@ -1554,8 +1815,12 @@
     }
 
     function resetOrdersListFilter() {
-      ordersListFilter = { preset: 'all', from: '', to: '', status: 'all', payMethod: 'all', delivery: 'all', search: '' };
+      ordersListFilter = { preset: 'all', from: '', to: '', status: 'all', payMethod: 'all', delivery: 'all', search: '', sort: 'upcoming' };
       document.getElementById('orders-search-input').value = '';
+      document.getElementById('orders-list-from').value = '';
+      document.getElementById('orders-list-to').value = '';
+      const sortSelect = document.getElementById('orders-sort-select');
+      if (sortSelect) sortSelect.value = 'upcoming';
       setOrdersListStatus('all');
       setOrdersListPayMethod('all');
       setOrdersListDelivery('all');
@@ -1642,6 +1907,8 @@
           }
 
           if (json.data && json.data.config) config = Object.assign({}, config, json.data.config);
+          config.appearance = Object.assign({}, getDefaultAppearance(), config.appearance || {});
+          applyAppearanceSettings(config.appearance);
           if (json.data && Array.isArray(json.data.orders)) {
             orders = json.data.orders;
             localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
@@ -1718,6 +1985,8 @@
             config = Object.assign({}, config, json.data.config, {
               scriptUrl: savedUrl, pin: savedPin, isConfigured: true
             });
+            config.appearance = Object.assign({}, getDefaultAppearance(), config.appearance || {});
+            applyAppearanceSettings(config.appearance);
             localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
           }
           if (Array.isArray(json.data.orders)) {
@@ -1760,6 +2029,8 @@
             config = Object.assign({}, config, json.data.config, {
               scriptUrl: savedUrl, pin: savedPin, isConfigured: true
             });
+            config.appearance = Object.assign({}, getDefaultAppearance(), config.appearance || {});
+            applyAppearanceSettings(config.appearance);
             localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
           }
           if (Array.isArray(json.data.orders)) {
@@ -2115,7 +2386,9 @@
     function resetToSample() {
       const keepUrl = config.scriptUrl;
       const keepPin = config.pin;
+      const keepAppearance = Object.assign({}, getDefaultAppearance(), config.appearance || {});
       config = getDefaultConfig();
+      config.appearance = keepAppearance;
       config.scriptUrl = keepUrl;
       config.pin = keepPin || '123456';
       goSetupStep(activeSetupStep);
@@ -2128,6 +2401,7 @@
       config = {
         isConfigured: false, bizName: '', ownerName: '', tagline: '', currency: 'RM',
         pin: keepPin || '123456', scriptUrl: keepUrl || '', maxFlavours: 2,
+        appearance: getDefaultAppearance(),
         sizes: [{ id: 'size_1', name: 'Saiz Standard', price: 45 }],
         flavours: [{ id: 'flv_1', name: 'Original', active: true }],
         addons: [], ingredients: [], recipes: { 'size_1': [] }, flavourRules: []
@@ -2182,6 +2456,8 @@
           const parsed = JSON.parse(evt.target.result);
           if (parsed && parsed.sizes && parsed.ingredients) {
             config = Object.assign({}, config, parsed);
+            config.appearance = Object.assign({}, getDefaultAppearance(), config.appearance || {});
+            applyAppearanceSettings(config.appearance);
             localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
             goSetupStep(1);
             showToast('Fail konfigurasi berjaya dimuat naik!');
@@ -2268,17 +2544,32 @@
       return html;
     }
 
-    function renderNextOrderCard() {
-      const allActiveOrders = orders
+    function getSortedActiveOrders() {
+      return orders
         .filter(o => o.status === 'Active')
-        .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
+        .sort((a, b) => `${a.date || ''}T${a.time || '00:00'}`.localeCompare(`${b.date || ''}T${b.time || '00:00'}`));
+    }
 
+    function moveNextOrder(direction) {
+      const activeOrders = getSortedActiveOrders();
+      if (!activeOrders.length) return;
+      nextOrderIndex = Math.min(activeOrders.length - 1, Math.max(0, nextOrderIndex + direction));
+      renderNextOrderCard();
+    }
+
+    function renderNextOrderCard() {
+      const allActiveOrders = getSortedActiveOrders();
       const nextCard = document.getElementById('next-order-container');
+
       if (allActiveOrders.length > 0) {
-        const nxt = allActiveOrders[0];
+        if (nextOrderIndex >= allActiveOrders.length) nextOrderIndex = allActiveOrders.length - 1;
+        if (nextOrderIndex < 0) nextOrderIndex = 0;
+        const nxt = allActiveOrders[nextOrderIndex];
         const balance = Number(nxt.total || 0) - Number(nxt.paidAmount || 0);
         const delM = nxt.deliveryMethod || 'Pickup';
         const payM = nxt.paymentMethod || 'Online';
+        const prevDisabled = nextOrderIndex === 0;
+        const nextDisabled = nextOrderIndex === allActiveOrders.length - 1;
 
         nextCard.innerHTML = `
           <div class="rounded-3xl bg-stone-900 text-white p-4 sm:p-5 shadow-md space-y-3">
@@ -2292,6 +2583,17 @@
                 <span class="text-xs font-mono-num text-amber-300 font-bold">${nxt.date} • ${nxt.time}</span>
                 <button type="button" onclick="openOrderModal('${nxt.id}')" class="text-[11px] font-bold bg-stone-800 hover:bg-stone-700 text-stone-200 px-2.5 py-1 rounded-lg flex items-center gap-1" title="Edit Order / Notes">
                   <i data-lucide="pencil" class="w-3 h-3 text-amber-400"></i> Edit
+                </button>
+              </div>
+            </div>
+            <div class="flex items-center justify-between -mt-1">
+              <span class="text-[10px] text-stone-400">Tempahan aktif ${nextOrderIndex + 1} daripada ${allActiveOrders.length}</span>
+              <div class="flex items-center gap-1.5">
+                <button type="button" onclick="moveNextOrder(-1)" ${prevDisabled ? 'disabled' : ''} aria-label="Tempahan sebelumnya" title="Tempahan sebelumnya" class="w-7 h-7 rounded-lg border border-stone-700 flex items-center justify-center ${prevDisabled ? 'opacity-30 cursor-not-allowed' : 'hover:bg-stone-700'}">
+                  <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                </button>
+                <button type="button" onclick="moveNextOrder(1)" ${nextDisabled ? 'disabled' : ''} aria-label="Tempahan seterusnya" title="Tempahan seterusnya" class="w-7 h-7 rounded-lg border border-stone-700 flex items-center justify-center ${nextDisabled ? 'opacity-30 cursor-not-allowed' : 'hover:bg-stone-700'}">
+                  <i data-lucide="chevron-right" class="w-4 h-4"></i>
                 </button>
               </div>
             </div>
@@ -2321,6 +2623,7 @@
           </div>
         `;
       } else {
+        nextOrderIndex = 0;
         nextCard.innerHTML = `
           <div class="card-soft rounded-2xl p-5 text-center space-y-1">
             <div class="text-sm font-bold text-stone-800">Tiada Tempahan Aktif Buat Masa Ini</div>
@@ -2328,6 +2631,7 @@
           </div>
         `;
       }
+      if (window.lucide) lucide.createIcons();
     }
 
     function renderUtamaKpis() {
@@ -2357,6 +2661,31 @@
       document.getElementById('kpi-margin-pct').textContent = `Margin ${marginPct}% (${getSpecShortLabel(kpiFilters.profit)})`;
     }
 
+    function getOrderDateTimeKey(order) {
+      return `${order.date || '0000-00-00'}T${order.time || '00:00'}`;
+    }
+
+    function sortOrderRecords(orderRecords, sortMode) {
+      const result = [...orderRecords];
+      if (sortMode === 'newest') {
+        return result.sort((a, b) => getOrderDateTimeKey(b).localeCompare(getOrderDateTimeKey(a)));
+      }
+      if (sortMode === 'oldest') {
+        return result.sort((a, b) => getOrderDateTimeKey(a).localeCompare(getOrderDateTimeKey(b)));
+      }
+
+      // Upcoming mode: nearest future pickup/COD first, then past records (most recent past first).
+      const today = getTodayISO();
+      const now = new Date();
+      const nowTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+      const nowKey = `${today}T${nowTime}`;
+      const upcoming = result.filter(o => getOrderDateTimeKey(o) >= nowKey)
+        .sort((a, b) => getOrderDateTimeKey(a).localeCompare(getOrderDateTimeKey(b)));
+      const past = result.filter(o => getOrderDateTimeKey(o) < nowKey)
+        .sort((a, b) => getOrderDateTimeKey(b).localeCompare(getOrderDateTimeKey(a)));
+      return [...upcoming, ...past];
+    }
+
     function renderOrdersSection() {
       const listEl = document.getElementById('orders-list');
       const footerEl = document.getElementById('orders-list-footer');
@@ -2367,20 +2696,28 @@
         displayOrders = [...orders].reverse().slice(0, 5);
         badgeEl.textContent = `${Math.min(5, orders.length)} / ${orders.length} Terkini`;
       } else {
-        let filtered = filterOrdersBySpec(orders, ordersListFilter);
-        if (ordersListFilter.status === 'Active') filtered = filtered.filter(o => o.status === 'Active');
-        else if (ordersListFilter.status === 'Completed') filtered = filtered.filter(o => o.status === 'Completed');
-        else if (ordersListFilter.status === 'Deposit') filtered = filtered.filter(o => (Number(o.total || 0) - Number(o.paidAmount || 0)) > 0);
-        else if (ordersListFilter.status === 'Paid') filtered = filtered.filter(o => (Number(o.total || 0) - Number(o.paidAmount || 0)) <= 0);
-
+        // Every active filter group is an alternative (OR). Search text narrows the matches afterwards.
+        const criteria = [];
+        if ((ordersListFilter.preset || 'all') !== 'all') {
+          criteria.push(o => filterOrdersBySpec([o], ordersListFilter).length > 0);
+        }
+        if (ordersListFilter.status !== 'all') {
+          criteria.push(o => {
+            if (ordersListFilter.status === 'Active') return o.status === 'Active';
+            if (ordersListFilter.status === 'Completed') return o.status === 'Completed';
+            if (ordersListFilter.status === 'Deposit') return (Number(o.total || 0) - Number(o.paidAmount || 0)) > 0;
+            if (ordersListFilter.status === 'Paid') return (Number(o.total || 0) - Number(o.paidAmount || 0)) <= 0;
+            return false;
+          });
+        }
         if (ordersListFilter.payMethod !== 'all') {
-          filtered = filtered.filter(o => (o.paymentMethod || 'Online') === ordersListFilter.payMethod);
+          criteria.push(o => (o.paymentMethod || 'Online') === ordersListFilter.payMethod);
         }
-
         if (ordersListFilter.delivery !== 'all') {
-          filtered = filtered.filter(o => (o.deliveryMethod || 'Pickup') === ordersListFilter.delivery);
+          criteria.push(o => (o.deliveryMethod || 'Pickup') === ordersListFilter.delivery);
         }
 
+        let filtered = criteria.length ? orders.filter(o => criteria.some(matches => matches(o))) : [...orders];
         const q = (ordersListFilter.search || '').trim().toLowerCase();
         if (q) {
           filtered = filtered.filter(o =>
@@ -2392,7 +2729,7 @@
           );
         }
 
-        displayOrders = [...filtered].reverse();
+        displayOrders = sortOrderRecords(filtered, ordersListFilter.sort || 'upcoming');
         badgeEl.textContent = `${displayOrders.length} daripada ${orders.length} rekod`;
       }
 
@@ -2575,6 +2912,37 @@
       renderStockList();
     }
 
+    function setStockSort(sortMode) {
+      stockFilter.sort = sortMode || 'low';
+      renderStockList();
+    }
+
+    function exportStockCSV() {
+      const rows = [
+        ['ID', 'Nama Barang', 'Kategori', 'Baki Stok', 'Unit', 'Had Amaran', 'Kuantiti 1 Pek', 'Harga 1 Pek', 'Kos Seunit', 'Nilai Stok', 'Status']
+      ];
+      config.ingredients.forEach(ing => {
+        const stock = Number(ing.stock || 0);
+        const lowAlert = Number(ing.lowAlert || 0);
+        const unitCost = getUnitCost(ing);
+        const status = stock <= 0 ? 'Habis' : (stock <= lowAlert ? 'Rendah' : 'Normal');
+        rows.push([
+          ing.id || '', ing.name || '', ing.category || '', stock, ing.unit || '', lowAlert,
+          Number(ing.packQty || 0), Number(ing.packPrice || 0), unitCost,
+          stock * unitCost, status
+        ]);
+      });
+      const csv = '\uFEFF' + rows.map(row => row.map(value => `"${String(value).replace(/"/g, '""')}"`).join(',')).join('\r\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `inventori-${getTodayISO()}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('Senarai inventori CSV berjaya dimuat turun.');
+    }
+
     function renderStockList() {
       const totalItems = config.ingredients.length;
       const lowItems = config.ingredients.filter(i => Number(i.stock || 0) <= Number(i.lowAlert || 0)).length;
@@ -2592,7 +2960,7 @@
       document.getElementById('stk-health-bar-low').style.width = `${100 - healthPct}%`;
 
       const q = (stockFilter.search || '').trim().toLowerCase();
-      const filtered = config.ingredients
+      let filtered = config.ingredients
         .map((ing, realIdx) => ({ ing, realIdx }))
         .filter(({ ing }) => {
           if (stockFilter.category === 'low') {
@@ -2604,6 +2972,17 @@
           return true;
         });
 
+      const sortMode = stockFilter.sort || 'low';
+      filtered.sort((a, b) => {
+        const stockA = Number(a.ing.stock || 0), stockB = Number(b.ing.stock || 0);
+        const lowA = stockA <= Number(a.ing.lowAlert || 0), lowB = stockB <= Number(b.ing.lowAlert || 0);
+        if (sortMode === 'name') return String(a.ing.name || '').localeCompare(String(b.ing.name || ''), 'ms');
+        if (sortMode === 'stock-asc') return stockA - stockB;
+        if (sortMode === 'stock-desc') return stockB - stockA;
+        if (sortMode === 'value-desc') return (stockB * getUnitCost(b.ing)) - (stockA * getUnitCost(a.ing));
+        return Number(lowB) - Number(lowA) || stockA - stockB;
+      });
+
       const el = document.getElementById('stock-list');
       if (!filtered.length) {
         el.innerHTML = `<div class="card-soft rounded-2xl p-6 text-center text-xs text-stone-400">Tiada barang ditemui dalam kategori ini.</div>`;
@@ -2614,57 +2993,61 @@
         const curStock = Number(ing.stock || 0);
         const lowAlert = Number(ing.lowAlert || 0);
         const packQty = Math.max(1, Number(ing.packQty || 1));
-        const targetCap = Math.max(lowAlert * 3, packQty * 2, curStock, 1);
+        const targetCap = Math.max(lowAlert * 3, packQty * 2, 1);
         const pct = Math.min(100, Math.round((curStock / targetCap) * 100));
         const packsLeft = (curStock / packQty).toFixed(1);
         const itemStockVal = curStock * getUnitCost(ing);
         const isOut = curStock <= 0;
         const isLow = curStock <= lowAlert;
         const isWarn = !isLow && curStock <= lowAlert * 1.5;
-
+        const statusText = isOut ? 'Stok habis' : (isLow ? 'Perlu restock' : (isWarn ? 'Hampir rendah' : 'Stok mencukupi'));
         const barColor = isLow ? 'bg-rose-500' : (isWarn ? 'bg-amber-500' : 'bg-emerald-500');
-        const badgeHtml = isOut
-          ? `<span class="text-[9px] font-extrabold uppercase bg-rose-600 text-white px-1.5 py-0.5 rounded">Habis (0%)</span>`
-          : (isLow
-              ? `<span class="text-[9px] font-extrabold uppercase bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded">Rendah (${pct}%)</span>`
-              : `<span class="text-[9px] font-bold bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded">${pct}% Baki</span>`);
-
+        const categoryIcon = ing.category === 'Pembungkusan' ? 'package' : (ing.category === 'Perisa & Topping' ? 'droplet' : 'wheat');
+        const statusClass = isOut ? 'bg-rose-100 text-rose-700' : (isLow ? 'bg-rose-50 text-rose-700' : (isWarn ? 'bg-amber-50 text-amber-800' : 'bg-emerald-50 text-emerald-700'));
         const stepDelta = ing.unit === 'g' || ing.unit === 'ml' ? 50 : 1;
 
         return `
-          <div class="card-soft rounded-2xl p-3.5 space-y-2.5 ${isLow ? 'border-rose-200 bg-rose-50/30' : ''}">
-            <div class="flex items-start justify-between gap-2">
-              <div class="min-w-0">
-                <div class="flex items-center gap-1.5 flex-wrap">
-                  <span class="text-xs font-extrabold text-stone-900 truncate">${ing.name || 'Bahan Tanpa Nama'}</span>
-                  ${badgeHtml}
+          <div class="card-soft rounded-2xl p-3.5 sm:p-4 space-y-3 ${isLow ? 'border-rose-200 bg-rose-50/30' : ''}">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex items-start gap-2.5 min-w-0">
+                <div class="w-9 h-9 rounded-xl ${isLow ? 'bg-rose-100 text-rose-700' : 'bg-stone-100 text-stone-600'} flex items-center justify-center shrink-0">
+                  <i data-lucide="${categoryIcon}" class="w-4 h-4"></i>
                 </div>
-                <div class="text-[11px] text-stone-500 mt-0.5">
-                  ${ing.category} • ~${packsLeft} pek • Nilai: <strong class="font-mono-num text-stone-700">${fmtMoney(itemStockVal)}</strong>
+                <div class="min-w-0">
+                  <div class="text-xs font-extrabold text-stone-900 leading-snug">${ing.name || 'Bahan Tanpa Nama'}</div>
+                  <div class="flex flex-wrap items-center gap-1 mt-1">
+                    <span class="text-[9px] font-bold bg-stone-100 text-stone-600 px-1.5 py-0.5 rounded">${ing.category || 'Tiada kategori'}</span>
+                    <span class="text-[9px] font-bold ${statusClass} px-1.5 py-0.5 rounded">${statusText}</span>
+                  </div>
                 </div>
               </div>
               <div class="text-right shrink-0">
-                <div class="text-sm font-mono-num font-extrabold ${isLow ? 'text-rose-700' : 'text-stone-900'}">${Math.round(curStock)} ${ing.unit}</div>
-                <div class="text-[10px] font-mono-num text-stone-400">Amaran &le; ${lowAlert}${ing.unit}</div>
+                <div class="text-sm font-mono-num font-extrabold ${isLow ? 'text-rose-700' : 'text-stone-900'}">${curStock.toLocaleString('en-US', { maximumFractionDigits: 2 })} <span class="text-[10px]">${ing.unit}</span></div>
+                <div class="text-[10px] text-stone-400">${pct}% paras sasaran</div>
               </div>
             </div>
 
-            <div class="w-full h-2 bg-stone-100 rounded-full overflow-hidden">
-              <div class="h-full ${barColor} rounded-full transition-all duration-300" style="width: ${pct}%"></div>
+            <div class="space-y-1.5">
+              <div class="w-full h-2.5 bg-stone-100 rounded-full overflow-hidden">
+                <div class="h-full ${barColor} rounded-full transition-all duration-300" style="width: ${pct}%"></div>
+              </div>
+              <div class="grid grid-cols-3 gap-1.5 text-[9px] text-stone-500">
+                <div><span class="block font-bold text-stone-700">~${packsLeft} pek</span>Baki pek</div>
+                <div class="text-center"><span class="block font-bold text-stone-700">${lowAlert} ${ing.unit}</span>Had amaran</div>
+                <div class="text-right"><span class="block font-bold text-stone-700">${fmtMoney(itemStockVal)}</span>Nilai stok</div>
+              </div>
             </div>
 
-            <div class="flex items-center justify-between gap-2 pt-0.5">
+            <div class="flex items-center justify-between gap-2 pt-2 border-t border-stone-100">
               <div class="flex items-center gap-1.5">
-                <button type="button" onclick="adjustStock(${realIdx}, -${stepDelta})" class="w-7 h-7 rounded-lg bg-stone-100 hover:bg-stone-200 font-bold text-stone-700 text-xs">-${stepDelta}</button>
-                <button type="button" onclick="adjustStock(${realIdx}, ${stepDelta})" class="w-7 h-7 rounded-lg bg-stone-100 hover:bg-stone-200 font-bold text-stone-700 text-xs">+${stepDelta}</button>
-                <button type="button" onclick="adjustStock(${realIdx}, ${packQty})" class="px-2.5 h-7 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] flex items-center gap-1 shadow-xs">
-                  <i data-lucide="package-plus" class="w-3 h-3"></i>
-                  <span>+1 Pek (+${packQty}${ing.unit})</span>
+                <button type="button" onclick="adjustStock(${realIdx}, -${stepDelta})" title="Tolak ${stepDelta}${ing.unit}" class="w-8 h-8 rounded-lg bg-stone-100 hover:bg-stone-200 font-bold text-stone-700 text-xs">−${stepDelta}</button>
+                <button type="button" onclick="adjustStock(${realIdx}, ${stepDelta})" title="Tambah ${stepDelta}${ing.unit}" class="w-8 h-8 rounded-lg bg-stone-100 hover:bg-stone-200 font-bold text-stone-700 text-xs">+${stepDelta}</button>
+                <button type="button" onclick="adjustStock(${realIdx}, ${packQty})" class="px-2.5 h-8 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] flex items-center gap-1 shadow-xs">
+                  <i data-lucide="package-plus" class="w-3 h-3"></i><span>+1 Pek</span>
                 </button>
               </div>
-              <button type="button" onclick="openStockModal(${realIdx})" class="px-2.5 h-7 rounded-lg bg-white hover:bg-stone-100 border border-stone-200 text-stone-700 font-bold text-[10px] flex items-center gap-1">
-                <i data-lucide="pencil" class="w-3 h-3 text-amber-600"></i>
-                <span>Edit</span>
+              <button type="button" onclick="openStockModal(${realIdx})" class="px-2.5 h-8 rounded-lg bg-white hover:bg-stone-100 border border-stone-200 text-stone-700 font-bold text-[10px] flex items-center gap-1">
+                <i data-lucide="pencil" class="w-3 h-3 text-amber-600"></i><span>Edit</span>
               </button>
             </div>
           </div>
@@ -3442,6 +3825,8 @@
     });
 
     window.addEventListener('DOMContentLoaded', () => {
+      config.appearance = Object.assign({}, getDefaultAppearance(), config.appearance || {});
+      applyAppearanceSettings(config.appearance);
       const isUnlocked = sessionStorage.getItem(SESSION_UNLOCK_KEY) === '1';
       if (config.isConfigured) {
         if (isUnlocked) {
