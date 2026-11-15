@@ -75,6 +75,8 @@
       border-color: #d97706;
       box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
     }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     @keyframes fadeSlide {
       from { opacity: 0; transform: translateY(6px); }
       to { opacity: 1; transform: translateY(0); }
@@ -113,7 +115,6 @@
             class="w-full text-center tracking-[0.4em] text-xl font-mono-num font-extrabold px-4 py-3 rounded-2xl border border-stone-200 bg-stone-50" />
         </div>
 
-        <!-- Optional Cloud URL input for connecting a second device (phone/laptop) -->
         <div id="lock-cloud-url-box" class="hidden space-y-1.5 pt-1">
           <label class="block text-[11px] font-bold text-stone-600">URL Google Apps Script (Untuk Sync Peranti Baharu)</label>
           <input type="url" id="unlock-script-url" placeholder="https://script.google.com/macros/s/.../exec"
@@ -121,7 +122,7 @@
           <p class="text-[11px] text-stone-400">Tampal pautan Web App Google anda sekali sahaja pada peranti ini.</p>
         </div>
 
-        <button id="btn-unlock-submit" onclick="handleUnlock()"
+        <button type="button" id="btn-unlock-submit" onclick="handleUnlock()"
           class="w-full bg-stone-900 hover:bg-stone-800 text-white font-extrabold text-sm py-3.5 rounded-2xl shadow-md flex items-center justify-center gap-2 transition">
           <i data-lucide="unlock" class="w-4 h-4 text-amber-400"></i>
           <span id="btn-unlock-label">Buka Kunci &amp; Sync</span>
@@ -143,7 +144,6 @@
   <!-- VIEW 1: FIRST-TIME SETUP WIZARD (PANDUAN SETUP)           -->
   <!-- ========================================================= -->
   <div id="setup-view" class="hidden max-w-2xl mx-auto px-4 pt-5 pb-12">
-    <!-- Top Banner -->
     <div class="flex items-center justify-between mb-4 gap-2">
       <div class="flex items-center gap-2.5">
         <div class="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center shadow-sm shrink-0">
@@ -155,7 +155,7 @@
         </div>
       </div>
       <div class="flex items-center gap-1.5 shrink-0">
-        <button onclick="openCloudLoginFromSetup()" class="text-xs font-bold text-stone-700 bg-white hover:bg-stone-50 border border-stone-200 px-2.5 py-1.5 rounded-xl flex items-center gap-1 shadow-sm" title="Log masuk guna PIN jika sudah setup di peranti lain">
+        <button type="button" onclick="openCloudLoginFromSetup()" class="text-xs font-bold text-stone-700 bg-white hover:bg-stone-50 border border-stone-200 px-2.5 py-1.5 rounded-xl flex items-center gap-1 shadow-sm" title="Log masuk guna PIN jika sudah setup di peranti lain">
           <i data-lucide="cloud-download" class="w-3.5 h-3.5 text-amber-600"></i>
           <span class="hidden sm:inline">Sync Peranti</span>
         </button>
@@ -164,45 +164,43 @@
           <span class="hidden sm:inline">Import</span>
           <input type="file" id="import-json-input" accept=".json" class="hidden" onchange="importConfigJSON(event)" />
         </label>
-        <button id="btn-back-dashboard" onclick="switchToDashboard()" class="hidden text-xs font-bold text-amber-800 bg-amber-100 hover:bg-amber-200 px-3 py-1.5 rounded-xl items-center gap-1">
+        <button type="button" id="btn-back-dashboard" onclick="switchToDashboard()" class="hidden text-xs font-bold text-amber-800 bg-amber-100 hover:bg-amber-200 px-3 py-1.5 rounded-xl items-center gap-1">
           <span>Dashboard</span>
           <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
         </button>
       </div>
     </div>
 
-    <!-- Helper Banner: Pre-filled vs Blank -->
     <div class="card-soft rounded-2xl p-3.5 mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gradient-to-r from-amber-50/80 to-white">
       <div class="text-xs text-stone-600 leading-relaxed">
         <strong class="text-stone-900">Tip Mesra Pengguna:</strong> Contoh data permulaan telah diisi supaya anda mudah nampak cara sistem mengira kos &amp; stok. Anda boleh terus ubah atau kosongkan borang ini.
       </div>
       <div class="flex items-center gap-2 shrink-0">
-        <button onclick="resetToSample()" class="text-[11px] font-semibold px-2.5 py-1.5 rounded-lg border border-stone-200 bg-white text-stone-700 hover:bg-stone-50">Isi Contoh</button>
-        <button onclick="clearAllSetup()" class="text-[11px] font-semibold px-2.5 py-1.5 rounded-lg border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100">Kosongkan</button>
+        <button type="button" onclick="resetToSample()" class="text-[11px] font-semibold px-2.5 py-1.5 rounded-lg border border-stone-200 bg-white text-stone-700 hover:bg-stone-50">Isi Contoh</button>
+        <button type="button" onclick="clearAllSetup()" class="text-[11px] font-semibold px-2.5 py-1.5 rounded-lg border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100">Kosongkan</button>
       </div>
     </div>
 
-    <!-- Stepper Navigation -->
     <div class="grid grid-cols-4 gap-1.5 mb-5">
-      <button onclick="goSetupStep(1)" id="step-tab-1" class="step-pill-active border border-stone-200 rounded-xl p-2 text-left transition">
+      <button type="button" onclick="goSetupStep(1)" id="step-tab-1" class="step-pill-active border border-stone-200 rounded-xl p-2 text-left transition">
         <div class="text-[10px] font-bold opacity-75">Langkah 1</div>
         <div class="text-xs font-bold truncate">Profil &amp; Cloud</div>
       </button>
-      <button onclick="goSetupStep(2)" id="step-tab-2" class="bg-white border border-stone-200 rounded-xl p-2 text-left transition">
+      <button type="button" onclick="goSetupStep(2)" id="step-tab-2" class="bg-white border border-stone-200 rounded-xl p-2 text-left transition">
         <div class="text-[10px] font-bold text-stone-400">Langkah 2</div>
         <div class="text-xs font-bold text-stone-700 truncate">Perisa &amp; Menu</div>
       </button>
-      <button onclick="goSetupStep(3)" id="step-tab-3" class="bg-white border border-stone-200 rounded-xl p-2 text-left transition">
+      <button type="button" onclick="goSetupStep(3)" id="step-tab-3" class="bg-white border border-stone-200 rounded-xl p-2 text-left transition">
         <div class="text-[10px] font-bold text-stone-400">Langkah 3</div>
         <div class="text-xs font-bold text-stone-700 truncate">Senarai Bahan</div>
       </button>
-      <button onclick="goSetupStep(4)" id="step-tab-4" class="bg-white border border-stone-200 rounded-xl p-2 text-left transition">
+      <button type="button" onclick="goSetupStep(4)" id="step-tab-4" class="bg-white border border-stone-200 rounded-xl p-2 text-left transition">
         <div class="text-[10px] font-bold text-stone-400">Langkah 4</div>
         <div class="text-xs font-bold text-stone-700 truncate">Berat Resipi</div>
       </button>
     </div>
 
-    <!-- STEP 1: BUSINESS PROFILE, CLOUD SYNC & PRODUCT SIZES -->
+    <!-- STEP 1 -->
     <div id="setup-step-1" class="setup-step-panel animate-in space-y-4">
       <div class="card-soft rounded-2xl p-4 sm:p-5 space-y-4">
         <div class="border-b border-stone-100 pb-3">
@@ -233,7 +231,6 @@
         </div>
       </div>
 
-      <!-- Cloud Sync & PIN Security Box -->
       <div class="card-soft rounded-2xl p-4 sm:p-5 space-y-3.5 border-amber-200/80 bg-gradient-to-br from-amber-50/40 to-white">
         <div class="flex items-center justify-between border-b border-stone-100 pb-3">
           <div>
@@ -267,30 +264,28 @@
         </div>
       </div>
 
-      <!-- Product Sizes & Selling Prices -->
       <div class="card-soft rounded-2xl p-4 sm:p-5 space-y-3.5">
         <div class="flex items-center justify-between border-b border-stone-100 pb-3">
           <div>
             <h2 class="text-base font-bold text-stone-900">Saiz Produk &amp; Harga Jualan</h2>
             <p class="text-xs text-stone-500 mt-0.5">Tetapkan pilihan saiz kek atau kotak produk serta harga jualan setiap satu.</p>
           </div>
-          <button onclick="addProductSize()" class="text-xs font-bold bg-stone-900 text-white px-3 py-1.5 rounded-xl flex items-center gap-1 hover:bg-stone-800">
+          <button type="button" onclick="addProductSize()" class="text-xs font-bold bg-stone-900 text-white px-3 py-1.5 rounded-xl flex items-center gap-1 hover:bg-stone-800">
             <i data-lucide="plus" class="w-3.5 h-3.5"></i> Saiz
           </button>
         </div>
-
         <div id="setup-sizes-list" class="space-y-2.5"></div>
       </div>
 
       <div class="flex justify-end">
-        <button onclick="goSetupStep(2)" class="bg-stone-900 hover:bg-stone-800 text-white text-sm font-bold px-5 py-3 rounded-xl flex items-center gap-2 shadow-sm">
+        <button type="button" onclick="goSetupStep(2)" class="bg-stone-900 hover:bg-stone-800 text-white text-sm font-bold px-5 py-3 rounded-xl flex items-center gap-2 shadow-sm">
           <span>Seterusnya: Senarai Perisa</span>
           <i data-lucide="arrow-right" class="w-4 h-4"></i>
         </button>
       </div>
     </div>
 
-    <!-- STEP 2: FLAVOURS & ADD-ONS -->
+    <!-- STEP 2 -->
     <div id="setup-step-2" class="setup-step-panel hidden animate-in space-y-4">
       <div class="card-soft rounded-2xl p-4 sm:p-5 space-y-4">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-stone-100 pb-3">
@@ -306,7 +301,7 @@
 
         <div class="flex gap-2">
           <input type="text" id="new-flavour-name" placeholder="Taip nama perisa baharu (cth: Matcha Green Tea)..." class="flex-1 px-3.5 py-2.5 text-sm rounded-xl border border-stone-200 bg-stone-50/50" onkeydown="if(event.key==='Enter') addFlavourItem()" />
-          <button onclick="addFlavourItem()" class="bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-1.5 shrink-0">
+          <button type="button" onclick="addFlavourItem()" class="bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-1.5 shrink-0">
             <i data-lucide="plus" class="w-4 h-4"></i> Tambah
           </button>
         </div>
@@ -320,7 +315,7 @@
             <h2 class="text-base font-bold text-stone-900">Pilihan Add-On / Topping</h2>
             <p class="text-xs text-stone-500 mt-0.5">Contoh: Chocolate Drizzle, Salted Caramel, atau Kotak Hadiah.</p>
           </div>
-          <button onclick="addAddonItem()" class="text-xs font-bold bg-stone-900 text-white px-3 py-1.5 rounded-xl flex items-center gap-1 hover:bg-stone-800">
+          <button type="button" onclick="addAddonItem()" class="text-xs font-bold bg-stone-900 text-white px-3 py-1.5 rounded-xl flex items-center gap-1 hover:bg-stone-800">
             <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add-On
           </button>
         </div>
@@ -328,17 +323,17 @@
       </div>
 
       <div class="flex items-center justify-between">
-        <button onclick="goSetupStep(1)" class="text-xs font-bold text-stone-600 hover:text-stone-900 px-4 py-2.5 rounded-xl border border-stone-200 bg-white">
+        <button type="button" onclick="goSetupStep(1)" class="text-xs font-bold text-stone-600 hover:text-stone-900 px-4 py-2.5 rounded-xl border border-stone-200 bg-white">
           &larr; Kembali
         </button>
-        <button onclick="goSetupStep(3)" class="bg-stone-900 hover:bg-stone-800 text-white text-sm font-bold px-5 py-3 rounded-xl flex items-center gap-2 shadow-sm">
+        <button type="button" onclick="goSetupStep(3)" class="bg-stone-900 hover:bg-stone-800 text-white text-sm font-bold px-5 py-3 rounded-xl flex items-center gap-2 shadow-sm">
           <span>Seterusnya: Senarai Bahan</span>
           <i data-lucide="arrow-right" class="w-4 h-4"></i>
         </button>
       </div>
     </div>
 
-    <!-- STEP 3: INGREDIENTS & PURCHASE COST -->
+    <!-- STEP 3 -->
     <div id="setup-step-3" class="setup-step-panel hidden animate-in space-y-4">
       <div class="card-soft rounded-2xl p-4 sm:p-5 space-y-4">
         <div class="flex items-center justify-between border-b border-stone-100 pb-3">
@@ -346,26 +341,25 @@
             <h2 class="text-base font-bold text-stone-900">3. Senarai Bahan Mentah &amp; Pembungkusan</h2>
             <p class="text-xs text-stone-500 mt-0.5">Masukkan harga beli 1 pek/botol &amp; beratnya. Sistem akan kira kos per gram/unit secara automatik.</p>
           </div>
-          <button onclick="addIngredientItem()" class="text-xs font-bold bg-amber-500 hover:bg-amber-600 text-white px-3.5 py-2 rounded-xl flex items-center gap-1.5 shrink-0 shadow-sm">
+          <button type="button" onclick="addIngredientItem()" class="text-xs font-bold bg-amber-500 hover:bg-amber-600 text-white px-3.5 py-2 rounded-xl flex items-center gap-1.5 shrink-0 shadow-sm">
             <i data-lucide="plus" class="w-4 h-4"></i> Tambah Bahan
           </button>
         </div>
-
         <div id="setup-ingredients-list" class="space-y-3"></div>
       </div>
 
       <div class="flex items-center justify-between">
-        <button onclick="goSetupStep(2)" class="text-xs font-bold text-stone-600 hover:text-stone-900 px-4 py-2.5 rounded-xl border border-stone-200 bg-white">
+        <button type="button" onclick="goSetupStep(2)" class="text-xs font-bold text-stone-600 hover:text-stone-900 px-4 py-2.5 rounded-xl border border-stone-200 bg-white">
           &larr; Kembali
         </button>
-        <button onclick="goSetupStep(4)" class="bg-stone-900 hover:bg-stone-800 text-white text-sm font-bold px-5 py-3 rounded-xl flex items-center gap-2 shadow-sm">
+        <button type="button" onclick="goSetupStep(4)" class="bg-stone-900 hover:bg-stone-800 text-white text-sm font-bold px-5 py-3 rounded-xl flex items-center gap-2 shadow-sm">
           <span>Seterusnya: Berat Bahan Digunakan</span>
           <i data-lucide="arrow-right" class="w-4 h-4"></i>
         </button>
       </div>
     </div>
 
-    <!-- STEP 4: RECIPE WEIGHTS & AUTO-COSTING -->
+    <!-- STEP 4 -->
     <div id="setup-step-4" class="setup-step-panel hidden animate-in space-y-4">
       <div class="card-soft rounded-2xl p-4 sm:p-5 space-y-4">
         <div class="border-b border-stone-100 pb-3">
@@ -396,7 +390,7 @@
         <div class="space-y-2.5">
           <div class="flex items-center justify-between">
             <span class="text-xs font-bold text-stone-700">Senarai Bahan Digunakan:</span>
-            <button onclick="addRecipeRow()" class="text-xs font-bold text-amber-700 bg-amber-100 hover:bg-amber-200 px-3 py-1.5 rounded-xl flex items-center gap-1">
+            <button type="button" onclick="addRecipeRow()" class="text-xs font-bold text-amber-700 bg-amber-100 hover:bg-amber-200 px-3 py-1.5 rounded-xl flex items-center gap-1">
               <i data-lucide="plus" class="w-3.5 h-3.5"></i> Tambah Bahan ke Resipi
             </button>
           </div>
@@ -410,7 +404,7 @@
             <h3 class="text-sm font-bold text-stone-900">Bahan Tambahan Mengikut Perisa (Opsyenal)</h3>
             <p class="text-xs text-stone-500">Contoh: Jika pelanggan pilih perisa <em>Belgian Chocolate</em>, tolak tambahan 35g Coklat Couverture.</p>
           </div>
-          <button onclick="addFlavourRuleRow()" class="text-xs font-bold text-stone-700 bg-stone-100 hover:bg-stone-200 px-2.5 py-1.5 rounded-xl flex items-center gap-1 shrink-0">
+          <button type="button" onclick="addFlavourRuleRow()" class="text-xs font-bold text-stone-700 bg-stone-100 hover:bg-stone-200 px-2.5 py-1.5 rounded-xl flex items-center gap-1 shrink-0">
             <i data-lucide="plus" class="w-3.5 h-3.5"></i> Tambah
           </button>
         </div>
@@ -418,15 +412,15 @@
       </div>
 
       <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 pt-2">
-        <button onclick="goSetupStep(3)" class="text-xs font-bold text-stone-600 hover:text-stone-900 px-4 py-3 rounded-xl border border-stone-200 bg-white text-center">
+        <button type="button" onclick="goSetupStep(3)" class="text-xs font-bold text-stone-600 hover:text-stone-900 px-4 py-3 rounded-xl border border-stone-200 bg-white text-center">
           &larr; Kembali
         </button>
         <div class="flex flex-col sm:flex-row gap-2">
-          <button onclick="exportConfigJSON()" class="text-xs font-bold text-stone-700 bg-white hover:bg-stone-50 border border-stone-300 px-4 py-3 rounded-xl flex items-center justify-center gap-1.5">
+          <button type="button" onclick="exportConfigJSON()" class="text-xs font-bold text-stone-700 bg-white hover:bg-stone-50 border border-stone-300 px-4 py-3 rounded-xl flex items-center justify-center gap-1.5">
             <i data-lucide="download" class="w-4 h-4"></i>
             <span>Backup (.json)</span>
           </button>
-          <button id="btn-finish-setup" onclick="completeSetupAndLaunch()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-extrabold px-6 py-3 rounded-xl flex items-center justify-center gap-2 shadow-md">
+          <button type="button" id="btn-finish-setup" onclick="completeSetupAndLaunch()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-extrabold px-6 py-3 rounded-xl flex items-center justify-center gap-2 shadow-md">
             <i data-lucide="check-circle-2" class="w-4 h-4"></i>
             <span>Simpan &amp; Lancarkan Command Center</span>
           </button>
@@ -440,7 +434,7 @@
   <!-- ========================================================= -->
   <div id="dashboard-view" class="hidden max-w-2xl mx-auto px-4 pt-4">
     <!-- Top Header -->
-    <header class="flex items-center justify-between gap-2 mb-4">
+    <header class="flex items-center justify-between gap-2 mb-3">
       <div class="min-w-0">
         <div class="flex items-center gap-2">
           <span id="sync-dot" class="w-2 h-2 rounded-full bg-amber-500 shrink-0"></span>
@@ -449,25 +443,72 @@
         <h1 id="dash-biz-title" class="text-lg font-extrabold text-stone-900 tracking-tight truncate">Dapur Marble Kak Nina</h1>
       </div>
       <div class="flex items-center gap-1.5 shrink-0">
-        <button id="btn-manual-sync" onclick="syncFromCloud(false)" title="Sync sekarang dengan Google Sheets"
+        <button type="button" id="btn-manual-sync" onclick="syncFromCloud(false)" title="Sync sekarang dengan Google Sheets"
           class="hidden text-xs font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-2.5 py-2 rounded-xl items-center gap-1">
           <i id="sync-spin-icon" data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
           <span class="hidden sm:inline">Sync</span>
         </button>
-        <button onclick="openSetupWizard(1)" class="text-xs font-bold text-stone-700 bg-white hover:bg-stone-100 border border-stone-200 px-2.5 py-2 rounded-xl flex items-center gap-1 shadow-sm">
+        <button type="button" onclick="openSetupWizard(1)" class="text-xs font-bold text-stone-700 bg-white hover:bg-stone-100 border border-stone-200 px-2.5 py-2 rounded-xl flex items-center gap-1 shadow-sm">
           <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5 text-amber-600"></i>
           <span class="hidden sm:inline">Setup</span>
         </button>
-        <button onclick="lockAppNow()" title="Kunci Paparan (PIN)"
+        <button type="button" onclick="lockAppNow()" title="Kunci Paparan (PIN)"
           class="text-xs font-bold text-stone-700 bg-white hover:bg-rose-50 hover:text-rose-700 border border-stone-200 p-2 rounded-xl shadow-sm">
           <i data-lucide="lock" class="w-3.5 h-3.5"></i>
         </button>
       </div>
     </header>
 
+    <!-- ALWAYS-VISIBLE ALL-TIME TOTAL ORDERS BANNER (FEATURE #5) -->
+    <div class="card-soft rounded-2xl px-3.5 py-2.5 mb-3.5 bg-gradient-to-r from-stone-900 via-stone-800 to-stone-900 text-white flex items-center justify-between gap-2">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div class="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-400/30 text-amber-400 flex items-center justify-center shrink-0">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+        </div>
+        <div class="min-w-0">
+          <div class="text-[10px] font-bold uppercase tracking-wider text-stone-400">Total Semua Order (Sepanjang Masa)</div>
+          <div id="alltime-orders-summary" class="text-xs sm:text-sm font-mono-num font-extrabold text-white truncate">0 order (0 unit produk)</div>
+        </div>
+      </div>
+      <div class="text-right shrink-0">
+        <div class="text-[10px] text-stone-400 font-semibold">Jualan Keseluruhan</div>
+        <div id="alltime-sales-summary" class="text-xs sm:text-sm font-mono-num font-extrabold text-amber-400">RM 0.00</div>
+      </div>
+    </div>
+
     <!-- TAB 1: UTAMA -->
     <section id="tab-utama" class="dash-tab space-y-4 animate-in">
       <div id="next-order-container"></div>
+
+      <!-- DATE FILTER BAR FOR UTAMA KPIs & LIST (FEATURE #2) -->
+      <div class="card-soft rounded-2xl p-3 space-y-2.5">
+        <div class="flex items-center justify-between gap-2">
+          <span class="text-[11px] font-extrabold uppercase tracking-wider text-stone-500 flex items-center gap-1.5">
+            <i data-lucide="filter" class="w-3.5 h-3.5 text-amber-600"></i>
+            <span>Tapis Analisis &amp; Order Ikut Tarikh</span>
+          </span>
+          <span id="utama-filter-badge" class="text-[10px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">Semua Tarikh</span>
+        </div>
+
+        <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
+          <button type="button" onclick="setUtamaDatePreset('all')" id="u-preset-all" class="px-2.5 py-1.5 rounded-xl text-[11px] font-bold bg-stone-900 text-white shrink-0">Semua Tarikh</button>
+          <button type="button" onclick="setUtamaDatePreset('today')" id="u-preset-today" class="px-2.5 py-1.5 rounded-xl text-[11px] font-bold bg-stone-100 text-stone-600 shrink-0">Hari Ini</button>
+          <button type="button" onclick="setUtamaDatePreset('week')" id="u-preset-week" class="px-2.5 py-1.5 rounded-xl text-[11px] font-bold bg-stone-100 text-stone-600 shrink-0">Minggu Ini</button>
+          <button type="button" onclick="setUtamaDatePreset('month')" id="u-preset-month" class="px-2.5 py-1.5 rounded-xl text-[11px] font-bold bg-stone-100 text-stone-600 shrink-0">Bulan Ini</button>
+          <button type="button" onclick="setUtamaDatePreset('custom')" id="u-preset-custom" class="px-2.5 py-1.5 rounded-xl text-[11px] font-bold bg-stone-100 text-stone-600 shrink-0">Pilih Julat</button>
+        </div>
+
+        <div id="utama-custom-range" class="hidden grid grid-cols-2 gap-2 pt-1 border-t border-stone-100">
+          <div>
+            <label class="block text-[10px] font-bold text-stone-400 mb-0.5">Dari Tarikh</label>
+            <input type="date" id="utama-date-from" onchange="renderUtama()" class="w-full px-2.5 py-1.5 text-xs rounded-xl border border-stone-200 font-mono-num bg-stone-50" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-stone-400 mb-0.5">Hingga Tarikh</label>
+            <input type="date" id="utama-date-to" onchange="renderUtama()" class="w-full px-2.5 py-1.5 text-xs rounded-xl border border-stone-200 font-mono-num bg-stone-50" />
+          </div>
+        </div>
+      </div>
 
       <!-- 2x2 Summary & Profit Grid -->
       <div class="grid grid-cols-2 gap-3">
@@ -477,7 +518,7 @@
             <i data-lucide="shopping-bag" class="w-4 h-4 text-amber-500"></i>
           </div>
           <div id="kpi-active-orders" class="text-xl font-mono-num font-extrabold text-stone-900">0</div>
-          <div id="kpi-total-cakes" class="text-[11px] text-stone-500 mt-0.5">0 tempahan direkod</div>
+          <div id="kpi-total-cakes" class="text-[11px] text-stone-500 mt-0.5">0 tempahan dalam tapisan</div>
         </div>
 
         <div class="card-soft rounded-2xl p-3.5">
@@ -495,7 +536,7 @@
             <i data-lucide="wallet" class="w-4 h-4 text-stone-700"></i>
           </div>
           <div id="kpi-gross-sales" class="text-xl font-mono-num font-extrabold text-stone-900">RM 0</div>
-          <div class="text-[11px] text-stone-500 mt-0.5">Terkumpul direkod</div>
+          <div id="kpi-sales-sub" class="text-[11px] text-stone-500 mt-0.5">Mengikut tarikh dipilih</div>
         </div>
 
         <div class="card-soft rounded-2xl p-3.5 bg-gradient-to-br from-emerald-50/70 to-white border-emerald-200/70">
@@ -508,10 +549,10 @@
         </div>
       </div>
 
-      <!-- Recent / Upcoming Orders List -->
+      <!-- Recent / Filtered Orders List with Edit & Delete Buttons -->
       <div class="card-soft rounded-2xl p-4">
         <div class="flex items-center justify-between mb-3">
-          <h2 class="text-sm font-extrabold text-stone-900">Senarai Tempahan Terkini</h2>
+          <h2 class="text-sm font-extrabold text-stone-900">Senarai Tempahan</h2>
           <span id="orders-count-badge" class="text-[11px] font-bold bg-stone-100 text-stone-600 px-2.5 py-0.5 rounded-full">0 rekod</span>
         </div>
         <div id="orders-list" class="space-y-2.5"></div>
@@ -524,11 +565,11 @@
         <div class="flex items-center justify-between mb-3">
           <div>
             <h2 id="cal-month-title" class="text-base font-extrabold text-stone-900">November 2026</h2>
-            <p class="text-[11px] text-stone-500">Tekan tarikh untuk lihat &amp; kemas kini jadual tempahan</p>
+            <p class="text-[11px] text-stone-500">Tekan tarikh untuk lihat, edit atau kemas kini jadual tempahan</p>
           </div>
           <div class="flex items-center gap-1.5">
-            <button onclick="changeCalMonth(-1)" class="p-2 rounded-xl border border-stone-200 hover:bg-stone-50"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
-            <button onclick="changeCalMonth(1)" class="p-2 rounded-xl border border-stone-200 hover:bg-stone-50"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+            <button type="button" onclick="changeCalMonth(-1)" class="p-2 rounded-xl border border-stone-200 hover:bg-stone-50"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+            <button type="button" onclick="changeCalMonth(1)" class="p-2 rounded-xl border border-stone-200 hover:bg-stone-50"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
           </div>
         </div>
 
@@ -544,7 +585,7 @@
       </div>
 
       <div class="card-soft rounded-2xl p-4">
-        <h3 id="selected-date-title" class="text-sm font-extrabold text-stone-900 mb-2.5">Tempahan pada 2026-11-13</h3>
+        <h3 id="selected-date-title" class="text-sm font-extrabold text-stone-900 mb-2.5">Tempahan pada 2026-11-15</h3>
         <div id="selected-date-orders" class="space-y-2.5"></div>
       </div>
     </section>
@@ -555,26 +596,71 @@
         <div class="flex items-center justify-between mb-3">
           <div>
             <h2 class="text-base font-extrabold text-stone-900">Inventori &amp; Stock Bahan</h2>
-            <p class="text-xs text-stone-500">Stok ditolak automatik mengikut berat resipi setiap kali order masuk.</p>
+            <p class="text-xs text-stone-500">Stok ditolak atau dipulangkan automatik mengikut berat resipi &amp; kuantiti.</p>
           </div>
-          <button onclick="openSetupWizard(3)" class="text-xs font-bold text-amber-800 bg-amber-100 px-3 py-1.5 rounded-xl">Urus Bahan</button>
+          <button type="button" onclick="openSetupWizard(3)" class="text-xs font-bold text-amber-800 bg-amber-100 px-3 py-1.5 rounded-xl">Urus Bahan</button>
         </div>
         <div id="stock-list" class="space-y-2.5"></div>
       </div>
     </section>
 
-    <!-- TAB 4: ANALISIS -->
+    <!-- TAB 4: ANALISIS (WITH DATE FILTER - FEATURE #4) -->
     <section id="tab-analisis" class="dash-tab hidden space-y-4 animate-in">
+      <!-- Date Filter Bar for Analisis -->
+      <div class="card-soft rounded-2xl p-3.5 space-y-2.5">
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-extrabold uppercase tracking-wider text-stone-500 flex items-center gap-1.5">
+            <i data-lucide="calendar-range" class="w-3.5 h-3.5 text-amber-600"></i>
+            <span>Tapis Laporan Analisis Ikut Tarikh</span>
+          </span>
+          <span id="analisis-filter-badge" class="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">Semua Tarikh</span>
+        </div>
+
+        <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
+          <button type="button" onclick="setAnalisisDatePreset('all')" id="a-preset-all" class="px-2.5 py-1.5 rounded-xl text-[11px] font-bold bg-stone-900 text-white shrink-0">Semua Tarikh</button>
+          <button type="button" onclick="setAnalisisDatePreset('today')" id="a-preset-today" class="px-2.5 py-1.5 rounded-xl text-[11px] font-bold bg-stone-100 text-stone-600 shrink-0">Hari Ini</button>
+          <button type="button" onclick="setAnalisisDatePreset('week')" id="a-preset-week" class="px-2.5 py-1.5 rounded-xl text-[11px] font-bold bg-stone-100 text-stone-600 shrink-0">Minggu Ini</button>
+          <button type="button" onclick="setAnalisisDatePreset('month')" id="a-preset-month" class="px-2.5 py-1.5 rounded-xl text-[11px] font-bold bg-stone-100 text-stone-600 shrink-0">Bulan Ini</button>
+          <button type="button" onclick="setAnalisisDatePreset('custom')" id="a-preset-custom" class="px-2.5 py-1.5 rounded-xl text-[11px] font-bold bg-stone-100 text-stone-600 shrink-0">Pilih Julat</button>
+        </div>
+
+        <div id="analisis-custom-range" class="hidden grid grid-cols-2 gap-2 pt-1 border-t border-stone-100">
+          <div>
+            <label class="block text-[10px] font-bold text-stone-400 mb-0.5">Dari Tarikh</label>
+            <input type="date" id="analisis-date-from" onchange="renderAnalytics()" class="w-full px-2.5 py-1.5 text-xs rounded-xl border border-stone-200 font-mono-num bg-stone-50" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-stone-400 mb-0.5">Hingga Tarikh</label>
+            <input type="date" id="analisis-date-to" onchange="renderAnalytics()" class="w-full px-2.5 py-1.5 text-xs rounded-xl border border-stone-200 font-mono-num bg-stone-50" />
+          </div>
+        </div>
+
+        <!-- Filtered Summary Strip -->
+        <div class="grid grid-cols-3 gap-2 pt-2 border-t border-stone-100 text-center">
+          <div class="bg-stone-50 rounded-xl p-2">
+            <div class="text-[10px] font-bold text-stone-400">Order (Tapisan)</div>
+            <div id="an-filtered-count" class="text-xs sm:text-sm font-mono-num font-extrabold text-stone-900 mt-0.5">0</div>
+          </div>
+          <div class="bg-stone-50 rounded-xl p-2">
+            <div class="text-[10px] font-bold text-stone-400">Jualan (Tapisan)</div>
+            <div id="an-filtered-sales" class="text-xs sm:text-sm font-mono-num font-extrabold text-stone-900 mt-0.5">RM 0</div>
+          </div>
+          <div class="bg-emerald-50 rounded-xl p-2">
+            <div class="text-[10px] font-bold text-emerald-700">Untung (Tapisan)</div>
+            <div id="an-filtered-profit" class="text-xs sm:text-sm font-mono-num font-extrabold text-emerald-700 mt-0.5">RM 0</div>
+          </div>
+        </div>
+      </div>
+
       <div class="card-soft rounded-2xl p-4 space-y-3">
         <div class="flex items-center justify-between">
           <div>
             <h2 class="text-sm font-extrabold text-stone-900">Prestasi Jualan &amp; Untung Bersih</h2>
-            <p class="text-[11px] text-stone-500">Berdasarkan harga &amp; kos bahan resipi anda</p>
+            <p class="text-[11px] text-stone-500">Berdasarkan tempahan sebenar dalam julat tarikh dipilih</p>
           </div>
           <div class="flex bg-stone-100 p-0.5 rounded-xl text-[11px] font-bold">
-            <button onclick="setChartPeriod('daily')" id="btn-period-daily" class="px-2.5 py-1 rounded-lg bg-white text-stone-900 shadow-sm">Harian</button>
-            <button onclick="setChartPeriod('weekly')" id="btn-period-weekly" class="px-2.5 py-1 rounded-lg text-stone-500">Mingguan</button>
-            <button onclick="setChartPeriod('monthly')" id="btn-period-monthly" class="px-2.5 py-1 rounded-lg text-stone-500">Bulanan</button>
+            <button type="button" onclick="setChartPeriod('daily')" id="btn-period-daily" class="px-2.5 py-1 rounded-lg bg-white text-stone-900 shadow-sm">Harian</button>
+            <button type="button" onclick="setChartPeriod('monthly')" id="btn-period-monthly" class="px-2.5 py-1 rounded-lg text-stone-500">Bulanan</button>
           </div>
         </div>
         <div class="h-48">
@@ -589,14 +675,14 @@
         </div>
 
         <div class="card-soft rounded-2xl p-4">
-          <h3 class="text-sm font-extrabold text-stone-900 mb-2">Kos &amp; Margin Setiap Produk</h3>
+          <h3 class="text-sm font-extrabold text-stone-900 mb-2">Kos, Margin &amp; Unit Terjual</h3>
           <div id="product-margin-cards" class="space-y-2"></div>
         </div>
       </div>
     </section>
 
     <!-- FLOATING + ORDER BAHARU BUTTON -->
-    <button onclick="openNewOrderModal()" class="fixed bottom-20 right-4 z-30 bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs px-4 py-3.5 rounded-2xl shadow-xl flex items-center gap-2">
+    <button type="button" onclick="openOrderModal(null)" class="fixed bottom-20 right-4 z-30 bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs px-4 py-3.5 rounded-2xl shadow-xl flex items-center gap-2">
       <i data-lucide="plus" class="w-4 h-4 text-amber-400"></i>
       <span>Order Baharu</span>
     </button>
@@ -604,19 +690,19 @@
     <!-- BOTTOM NAVIGATION BAR -->
     <nav class="fixed bottom-0 inset-x-0 z-30 bg-white/95 backdrop-blur border-t border-stone-200">
       <div class="max-w-2xl mx-auto grid grid-cols-4 py-2 px-2">
-        <button onclick="switchDashTab('utama')" id="nav-utama" class="flex flex-col items-center gap-0.5 text-amber-600 font-bold">
+        <button type="button" onclick="switchDashTab('utama')" id="nav-utama" class="flex flex-col items-center gap-0.5 text-amber-600 font-bold">
           <i data-lucide="layout-grid" class="w-5 h-5"></i>
           <span class="text-[10px]">Utama</span>
         </button>
-        <button onclick="switchDashTab('kalendar')" id="nav-kalendar" class="flex flex-col items-center gap-0.5 text-stone-400 font-semibold">
+        <button type="button" onclick="switchDashTab('kalendar')" id="nav-kalendar" class="flex flex-col items-center gap-0.5 text-stone-400 font-semibold">
           <i data-lucide="calendar" class="w-5 h-5"></i>
           <span class="text-[10px]">Kalendar</span>
         </button>
-        <button onclick="switchDashTab('stok')" id="nav-stok" class="flex flex-col items-center gap-0.5 text-stone-400 font-semibold">
+        <button type="button" onclick="switchDashTab('stok')" id="nav-stok" class="flex flex-col items-center gap-0.5 text-stone-400 font-semibold">
           <i data-lucide="package" class="w-5 h-5"></i>
           <span class="text-[10px]">Stock Bahan</span>
         </button>
-        <button onclick="switchDashTab('analisis')" id="nav-analisis" class="flex flex-col items-center gap-0.5 text-stone-400 font-semibold">
+        <button type="button" onclick="switchDashTab('analisis')" id="nav-analisis" class="flex flex-col items-center gap-0.5 text-stone-400 font-semibold">
           <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
           <span class="text-[10px]">Analisis</span>
         </button>
@@ -625,25 +711,28 @@
   </div>
 
   <!-- ========================================================= -->
-  <!-- MODAL: TAMBAH ORDER BAHARU                                -->
+  <!-- MODAL: TAMBAH / EDIT ORDER (MULTI-ITEM & KUANTITI)        -->
   <!-- ========================================================= -->
   <div id="order-modal" class="fixed inset-0 z-50 hidden bg-stone-900/50 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl p-5 max-h-[90vh] overflow-y-auto space-y-4 animate-in">
+    <div class="bg-white w-full max-w-lg rounded-t-3xl sm:rounded-3xl p-5 max-h-[92vh] overflow-y-auto space-y-4 animate-in">
       <div class="flex items-center justify-between border-b border-stone-100 pb-3">
-        <h3 class="text-base font-extrabold text-stone-900">Rekod Tempahan Baharu</h3>
-        <button onclick="closeNewOrderModal()" class="p-1.5 rounded-xl bg-stone-100 text-stone-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+        <div>
+          <span id="ord-modal-badge" class="text-[10px] font-extrabold uppercase tracking-wider bg-amber-100 text-amber-800 px-2 py-0.5 rounded-md">Tempahan Baharu</span>
+          <h3 id="ord-modal-title" class="text-base font-extrabold text-stone-900 mt-0.5">Rekod Tempahan Pelanggan</h3>
+        </div>
+        <button type="button" onclick="closeOrderModal()" class="p-1.5 rounded-xl bg-stone-100 text-stone-600"><i data-lucide="x" class="w-4 h-4"></i></button>
       </div>
 
-      <div class="space-y-3">
-        <div>
-          <label class="block text-xs font-bold text-stone-700 mb-1">Nama Pelanggan *</label>
-          <input type="text" id="ord-customer" placeholder="Contoh: Puan Aisyah" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-stone-200" />
-        </div>
-
-        <div class="grid grid-cols-2 gap-2.5">
+      <div class="space-y-3.5">
+        <!-- Customer & Delivery Info -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-bold text-stone-700 mb-1">Nama Pelanggan *</label>
+            <input type="text" id="ord-customer" placeholder="Contoh: Puan Aisyah" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-stone-200 font-semibold" />
+          </div>
           <div>
             <label class="block text-xs font-bold text-stone-700 mb-1">Tarikh Delivery</label>
-            <input type="date" id="ord-date" value="2026-11-15" class="w-full px-3 py-2 text-xs rounded-xl border border-stone-200 font-mono-num" />
+            <input type="date" id="ord-date" class="w-full px-3 py-2 text-xs rounded-xl border border-stone-200 font-mono-num" />
           </div>
           <div>
             <label class="block text-xs font-bold text-stone-700 mb-1">Masa</label>
@@ -651,24 +740,59 @@
           </div>
         </div>
 
-        <div>
-          <label class="block text-xs font-bold text-stone-700 mb-1">Pilih Saiz / Produk</label>
-          <div id="ord-size-options" class="grid grid-cols-2 gap-2"></div>
-        </div>
-
-        <div>
-          <div class="flex items-center justify-between mb-1">
-            <label class="text-xs font-bold text-stone-700">Pilih Perisa</label>
-            <span id="ord-flavour-hint" class="text-[11px] font-semibold text-amber-700">Maksimum 2 perisa</span>
+        <!-- Product / Item Configurator (Multi-Item Builder - Feature #3) -->
+        <div class="rounded-2xl bg-stone-50 border border-stone-200 p-3.5 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-extrabold text-stone-900">Pilih Item &amp; Kuantiti</span>
+            <span class="text-[10px] font-semibold text-stone-500">Boleh tambah pelbagai jenis untuk 1 pelanggan</span>
           </div>
-          <div id="ord-flavour-options" class="flex flex-wrap gap-1.5"></div>
+
+          <div>
+            <label class="block text-[11px] font-bold text-stone-600 mb-1">Saiz / Produk</label>
+            <div id="ord-size-options" class="grid grid-cols-2 gap-2"></div>
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="text-[11px] font-bold text-stone-600">Pilih Perisa</label>
+              <span id="ord-flavour-hint" class="text-[10px] font-semibold text-amber-700">Maksimum 2 perisa</span>
+            </div>
+            <div id="ord-flavour-options" class="flex flex-wrap gap-1.5"></div>
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-bold text-stone-600 mb-1">Add-On / Topping</label>
+            <div id="ord-addon-options" class="flex flex-wrap gap-1.5"></div>
+          </div>
+
+          <!-- Quantity + Add Item Button -->
+          <div class="flex items-center justify-between gap-2 pt-2 border-t border-stone-200">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold text-stone-700">Kuantiti:</span>
+              <div class="flex items-center bg-white border border-stone-300 rounded-xl overflow-hidden">
+                <button type="button" onclick="changeBuilderQty(-1)" class="w-8 h-8 font-extrabold text-stone-700 hover:bg-stone-100">-</button>
+                <span id="ord-builder-qty" class="w-8 text-center text-xs font-mono-num font-extrabold">1</span>
+                <button type="button" onclick="changeBuilderQty(1)" class="w-8 h-8 font-extrabold text-stone-700 hover:bg-stone-100">+</button>
+              </div>
+            </div>
+
+            <button type="button" onclick="addItemToOrderCart()" class="bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold px-3.5 py-2.5 rounded-xl flex items-center gap-1.5 shadow-xs">
+              <i data-lucide="plus-circle" class="w-3.5 h-3.5 text-amber-400"></i>
+              <span>Tambah ke Senarai Item</span>
+            </button>
+          </div>
         </div>
 
-        <div>
-          <label class="block text-xs font-bold text-stone-700 mb-1">Add-On / Topping</label>
-          <div id="ord-addon-options" class="flex flex-wrap gap-1.5"></div>
+        <!-- Customer's Order Cart / Item List (Editable Quantities - Feature #1 & #3) -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-extrabold text-stone-900">Senarai Item Tempahan Pelanggan</span>
+            <span id="ord-cart-badge" class="text-[10px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">0 item</span>
+          </div>
+          <div id="ord-cart-list" class="space-y-2"></div>
         </div>
 
+        <!-- Payment & Status -->
         <div class="grid grid-cols-2 gap-2.5">
           <div>
             <label class="block text-xs font-bold text-stone-700 mb-1">Status Bayaran</label>
@@ -677,16 +801,30 @@
               <option value="Deposit">Deposit 50%</option>
             </select>
           </div>
-          <div class="bg-stone-900 text-white rounded-xl p-2.5 flex flex-col justify-center">
-            <span class="text-[10px] text-stone-400 uppercase font-bold">Jumlah Harga</span>
+          <div id="ord-status-box" class="hidden">
+            <label class="block text-xs font-bold text-stone-700 mb-1">Status Kerja</label>
+            <select id="ord-work-status" class="w-full px-3 py-2.5 text-xs font-bold rounded-xl border border-stone-200 bg-white">
+              <option value="Active">Aktif (Belum Siap)</option>
+              <option value="Completed">Selesai (Completed)</option>
+            </select>
+          </div>
+          <div id="ord-total-box" class="bg-stone-900 text-white rounded-xl p-2.5 flex flex-col justify-center">
+            <span class="text-[10px] text-stone-400 uppercase font-bold">Jumlah Keseluruhan</span>
             <span id="ord-total-display" class="text-base font-mono-num font-extrabold text-amber-400">RM 0.00</span>
           </div>
         </div>
       </div>
 
-      <button id="btn-save-order" onclick="saveNewOrder()" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-sm py-3 rounded-xl shadow-md">
-        Simpan Order, Sync &amp; Tolak Stok
-      </button>
+      <div class="space-y-2 pt-1">
+        <button type="button" id="btn-save-order" onclick="saveOrderFromModal()" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-sm py-3 rounded-xl shadow-md">
+          Simpan Order, Sync &amp; Tolak Stok
+        </button>
+
+        <button type="button" id="btn-delete-order-modal" onclick="deleteEditingOrder()" class="hidden w-full bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold text-xs py-2.5 rounded-xl flex items-center justify-center gap-1.5">
+          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          <span>Padam Tempahan Ini &amp; Pulangkan Stok</span>
+        </button>
+      </div>
     </div>
   </div>
 
@@ -694,6 +832,11 @@
     const STORAGE_KEY = 'cloud_command_center_config_v2';
     const ORDERS_KEY = 'cloud_command_center_orders_v2';
     const SESSION_UNLOCK_KEY = 'cloud_command_center_unlocked_v2';
+
+    function getTodayISO() {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
 
     function getDefaultConfig() {
       return {
@@ -746,13 +889,8 @@
             { ingId: 'ing_egg', qty: 5 },
             { ingId: 'ing_box8', qty: 1 }
           ],
-          'add_1': [
-            { ingId: 'ing_choc', qty: 45 }
-          ],
-          'add_2': [
-            { ingId: 'ing_sugar', qty: 40 },
-            { ingId: 'ing_butter', qty: 20 }
-          ],
+          'add_1': [{ ingId: 'ing_choc', qty: 45 }],
+          'add_2': [{ ingId: 'ing_sugar', qty: 40 }, { ingId: 'ing_butter', qty: 20 }],
           'add_3': []
         },
         flavourRules: [
@@ -767,12 +905,22 @@
         {
           id: 'ORD-101',
           customer: 'Puan Aisyah Kamil',
-          date: '2026-11-13',
+          date: '2026-11-16',
           time: '15:30',
           sizeId: 'size_8',
-          sizeName: 'Kek Marble 8"',
+          sizeName: '1x Kek Marble 8"',
           flavours: ['Belgian Chocolate', 'Classic Pure Butter'],
           addons: ['Chocolate Drizzle'],
+          items: [
+            {
+              sizeId: 'size_8',
+              sizeName: 'Kek Marble 8"',
+              flavours: ['Belgian Chocolate', 'Classic Pure Butter'],
+              addons: ['Chocolate Drizzle'],
+              qty: 1,
+              unitPrice: 83
+            }
+          ],
           total: 83,
           paidAmount: 83,
           paymentStatus: 'Paid',
@@ -781,12 +929,22 @@
         {
           id: 'ORD-102',
           customer: 'Encik Hafiz Zulkifli',
-          date: '2026-11-14',
+          date: '2026-11-17',
           time: '11:00',
           sizeId: 'size_6',
-          sizeName: 'Kek Marble 6"',
+          sizeName: '1x Kek Marble 6"',
           flavours: ['Pandan Gula Melaka'],
           addons: [],
+          items: [
+            {
+              sizeId: 'size_6',
+              sizeName: 'Kek Marble 6"',
+              flavours: ['Pandan Gula Melaka'],
+              addons: [],
+              qty: 1,
+              unitPrice: 45
+            }
+          ],
           total: 45,
           paidAmount: 22.5,
           paymentStatus: 'Deposit',
@@ -798,9 +956,19 @@
           date: '2026-11-11',
           time: '16:00',
           sizeId: 'size_8',
-          sizeName: 'Kek Marble 8"',
+          sizeName: '1x Kek Marble 8"',
           flavours: ['Red Velvet Cheese', 'Belgian Chocolate'],
           addons: ['Chocolate Drizzle'],
+          items: [
+            {
+              sizeId: 'size_8',
+              sizeName: 'Kek Marble 8"',
+              flavours: ['Red Velvet Cheese', 'Belgian Chocolate'],
+              addons: ['Chocolate Drizzle'],
+              qty: 1,
+              unitPrice: 83
+            }
+          ],
           total: 83,
           paidAmount: 83,
           paymentStatus: 'Paid',
@@ -813,16 +981,63 @@
     let orders = JSON.parse(localStorage.getItem(ORDERS_KEY) || 'null') || getDefaultOrders();
     let activeSetupStep = 1;
     let activeRecipeTarget = config.sizes[0]?.id || 'size_6';
-    let selectedCalDate = '2026-11-13';
-    let calYear = 2026;
-    let calMonth = 10; // November
+    let selectedCalDate = getTodayISO();
+    let calYear = new Date().getFullYear();
+    let calMonth = new Date().getMonth();
     let profitChartInstance = null;
     let chartPeriod = 'daily';
     let isSyncing = false;
 
+    // Date filter states (Features #2 & #4)
+    let utamaDatePreset = 'all';
+    let analisisDatePreset = 'all';
+
+    // Modal state for New / Edit Order (Features #1 & #3)
+    let editingOrderId = null;
     let modalSizeId = '';
     let modalFlavours = [];
     let modalAddons = [];
+    let modalBuilderQty = 1;
+    let modalCartItems = [];
+
+    function normalizeOrderItems(order) {
+      if (Array.isArray(order.items) && order.items.length > 0) {
+        return order.items.map(it => ({
+          sizeId: it.sizeId || order.sizeId || '',
+          sizeName: it.sizeName || order.sizeName || 'Produk',
+          flavours: Array.isArray(it.flavours) ? it.flavours : (order.flavours || []),
+          addons: Array.isArray(it.addons) ? it.addons : (order.addons || []),
+          qty: Math.max(1, Number(it.qty || 1)),
+          unitPrice: Number(it.unitPrice || 0)
+        }));
+      }
+      return [{
+        sizeId: order.sizeId || '',
+        sizeName: String(order.sizeName || 'Produk').replace(/^\d+x\s*/i, ''),
+        flavours: order.flavours || [],
+        addons: order.addons || [],
+        qty: 1,
+        unitPrice: Number(order.total || 0)
+      }];
+    }
+
+    function getOrderDisplaySummary(order) {
+      const items = normalizeOrderItems(order);
+      if (items.length === 1) {
+        const it = items[0];
+        const flv = (it.flavours || []).join(' + ');
+        const add = (it.addons && it.addons.length) ? ` (+ ${it.addons.join(', ')})` : '';
+        return `${it.qty}x ${it.sizeName}${flv ? ' — ' + flv : ''}${add}`;
+      }
+      return items.map(it => {
+        const flv = (it.flavours || []).join('+');
+        return `${it.qty}x ${it.sizeName}${flv ? ' (' + flv + ')' : ''}`;
+      }).join(' • ');
+    }
+
+    function getOrderTotalUnits(order) {
+      return normalizeOrderItems(order).reduce((sum, it) => sum + Number(it.qty || 1), 0);
+    }
 
     function showToast(msg, isError = false) {
       const el = document.getElementById('toast');
@@ -830,7 +1045,7 @@
       document.getElementById('toast-dot').className = 'w-2 h-2 rounded-full shrink-0 ' + (isError ? 'bg-rose-400' : 'bg-amber-400');
       el.classList.remove('hidden');
       clearTimeout(window._toastTimer);
-      window._toastTimer = setTimeout(() => el.classList.add('hidden'), 3000);
+      window._toastTimer = setTimeout(() => el.classList.add('hidden'), 3200);
     }
 
     function fmtMoney(val) {
@@ -852,20 +1067,158 @@
     }
 
     function calculateOrderCost(order) {
-      let cost = calculateRecipeCost(order.sizeId);
-      (order.addons || []).forEach(addName => {
-        const addObj = config.addons.find(a => a.name === addName);
-        if (addObj) cost += calculateRecipeCost(addObj.id);
-      });
-      (order.flavours || []).forEach(flvName => {
-        (config.flavourRules || []).forEach(rule => {
-          if (rule.flavourName === flvName) {
-            const ing = config.ingredients.find(i => i.id === rule.ingId);
-            cost += getUnitCost(ing) * Number(rule.qty || 0);
+      const items = normalizeOrderItems(order);
+      return items.reduce((totalCost, item) => {
+        const qty = Math.max(1, Number(item.qty || 1));
+        let unitCost = calculateRecipeCost(item.sizeId);
+        (item.addons || []).forEach(addName => {
+          const addObj = config.addons.find(a => a.name === addName);
+          if (addObj) unitCost += calculateRecipeCost(addObj.id);
+        });
+        (item.flavours || []).forEach(flvName => {
+          (config.flavourRules || []).forEach(rule => {
+            if (rule.flavourName === flvName) {
+              const ing = config.ingredients.find(i => i.id === rule.ingId);
+              unitCost += getUnitCost(ing) * Number(rule.qty || 0);
+            }
+          });
+        });
+        return totalCost + (unitCost * qty);
+      }, 0);
+    }
+
+    function getOrderIngredientUsageMap(order) {
+      const usageMap = {};
+      const items = normalizeOrderItems(order);
+      items.forEach(item => {
+        const qty = Math.max(1, Number(item.qty || 1));
+        (config.recipes[item.sizeId] || []).forEach(r => {
+          usageMap[r.ingId] = (usageMap[r.ingId] || 0) + (Number(r.qty || 0) * qty);
+        });
+        (item.addons || []).forEach(addName => {
+          const addObj = config.addons.find(a => a.name === addName);
+          if (addObj) {
+            (config.recipes[addObj.id] || []).forEach(r => {
+              usageMap[r.ingId] = (usageMap[r.ingId] || 0) + (Number(r.qty || 0) * qty);
+            });
           }
         });
+        (item.flavours || []).forEach(flvName => {
+          (config.flavourRules || []).forEach(rule => {
+            if (rule.flavourName === flvName) {
+              usageMap[rule.ingId] = (usageMap[rule.ingId] || 0) + (Number(rule.qty || 0) * qty);
+            }
+          });
+        });
       });
-      return cost;
+      return usageMap;
+    }
+
+    function applyStockDeltaForOrder(order, direction = -1) {
+      // direction = -1 to deduct stock, +1 to restore stock
+      const usageMap = getOrderIngredientUsageMap(order);
+      Object.entries(usageMap).forEach(([ingId, qty]) => {
+        const ing = config.ingredients.find(i => i.id === ingId);
+        if (ing) {
+          ing.stock = Math.max(0, Number(ing.stock) + (direction * qty));
+        }
+      });
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+    }
+
+    // =========================================================
+    // DATE FILTER HELPERS (FEATURES #2, #4, #5)
+    // =========================================================
+    function filterOrdersByDatePreset(allOrders, preset, fromId, toId) {
+      if (preset === 'all') return [...allOrders];
+      const todayStr = getTodayISO();
+      const now = new Date();
+
+      if (preset === 'today') {
+        return allOrders.filter(o => o.date === todayStr);
+      }
+      if (preset === 'week') {
+        const day = now.getDay(); // 0=Sun..6=Sat
+        const diffToMon = (day + 6) % 7;
+        const mon = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diffToMon);
+        const sun = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + 6);
+        const monStr = `${mon.getFullYear()}-${String(mon.getMonth() + 1).padStart(2, '0')}-${String(mon.getDate()).padStart(2, '0')}`;
+        const sunStr = `${sun.getFullYear()}-${String(sun.getMonth() + 1).padStart(2, '0')}-${String(sun.getDate()).padStart(2, '0')}`;
+        return allOrders.filter(o => o.date >= monStr && o.date <= sunStr);
+      }
+      if (preset === 'month') {
+        const ym = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        return allOrders.filter(o => String(o.date || '').startsWith(ym));
+      }
+      if (preset === 'custom') {
+        const fromVal = document.getElementById(fromId)?.value || '';
+        const toVal = document.getElementById(toId)?.value || '';
+        return allOrders.filter(o => {
+          if (fromVal && o.date < fromVal) return false;
+          if (toVal && o.date > toVal) return false;
+          return true;
+        });
+      }
+      return [...allOrders];
+    }
+
+    function getPresetLabel(preset, fromId, toId) {
+      if (preset === 'all') return 'Semua Tarikh';
+      if (preset === 'today') return `Hari Ini (${getTodayISO()})`;
+      if (preset === 'week') return 'Minggu Ini';
+      if (preset === 'month') return 'Bulan Ini';
+      if (preset === 'custom') {
+        const f = document.getElementById(fromId)?.value || '...';
+        const t = document.getElementById(toId)?.value || '...';
+        return `${f} → ${t}`;
+      }
+      return 'Semua Tarikh';
+    }
+
+    function setUtamaDatePreset(preset) {
+      utamaDatePreset = preset;
+      ['all', 'today', 'week', 'month', 'custom'].forEach(p => {
+        const btn = document.getElementById(`u-preset-${p}`);
+        btn.className = p === preset
+          ? 'px-2.5 py-1.5 rounded-xl text-[11px] font-bold bg-stone-900 text-white shrink-0'
+          : 'px-2.5 py-1.5 rounded-xl text-[11px] font-bold bg-stone-100 text-stone-600 shrink-0';
+      });
+      const customBox = document.getElementById('utama-custom-range');
+      if (preset === 'custom') {
+        customBox.classList.remove('hidden');
+        if (!document.getElementById('utama-date-from').value) document.getElementById('utama-date-from').value = getTodayISO();
+        if (!document.getElementById('utama-date-to').value) document.getElementById('utama-date-to').value = getTodayISO();
+      } else {
+        customBox.classList.add('hidden');
+      }
+      renderUtama();
+    }
+
+    function setAnalisisDatePreset(preset) {
+      analisisDatePreset = preset;
+      ['all', 'today', 'week', 'month', 'custom'].forEach(p => {
+        const btn = document.getElementById(`a-preset-${p}`);
+        btn.className = p === preset
+          ? 'px-2.5 py-1.5 rounded-xl text-[11px] font-bold bg-stone-900 text-white shrink-0'
+          : 'px-2.5 py-1.5 rounded-xl text-[11px] font-bold bg-stone-100 text-stone-600 shrink-0';
+      });
+      const customBox = document.getElementById('analisis-custom-range');
+      if (preset === 'custom') {
+        customBox.classList.remove('hidden');
+        if (!document.getElementById('analisis-date-from').value) document.getElementById('analisis-date-from').value = getTodayISO();
+        if (!document.getElementById('analisis-date-to').value) document.getElementById('analisis-date-to').value = getTodayISO();
+      } else {
+        customBox.classList.add('hidden');
+      }
+      renderAnalytics();
+    }
+
+    function updateAllTimeSummaryBanner() {
+      const totalOrdersCount = orders.length;
+      const totalUnitsCount = orders.reduce((s, o) => s + getOrderTotalUnits(o), 0);
+      const totalAllTimeSales = orders.reduce((s, o) => s + Number(o.total || 0), 0);
+      document.getElementById('alltime-orders-summary').textContent = `${totalOrdersCount} order (${totalUnitsCount} unit produk)`;
+      document.getElementById('alltime-sales-summary').textContent = fmtMoney(totalAllTimeSales);
     }
 
     // =========================================================
@@ -920,7 +1273,6 @@
       const btn = document.getElementById('btn-unlock-submit');
       const lbl = document.getElementById('btn-unlock-label');
 
-      // If Cloud Script URL is present, verify PIN & pull real-time data from Google Sheets
       if (targetUrl) {
         btn.disabled = true;
         lbl.textContent = 'Mengesahkan PIN & Sync...';
@@ -934,7 +1286,6 @@
             return;
           }
 
-          // Merge server state
           if (json.data && json.data.config) {
             config = Object.assign({}, config, json.data.config);
           }
@@ -956,7 +1307,6 @@
         } catch (err) {
           btn.disabled = false;
           lbl.textContent = 'Buka Kunci & Sync';
-          // Fallback to local PIN check if offline
           if (enteredPin === String(config.pin || '123456')) {
             sessionStorage.setItem(SESSION_UNLOCK_KEY, '1');
             switchToDashboard();
@@ -967,7 +1317,6 @@
           }
         }
       } else {
-        // Local mode PIN check
         if (enteredPin === String(config.pin || '123456')) {
           sessionStorage.setItem(SESSION_UNLOCK_KEY, '1');
           switchToDashboard();
@@ -1157,7 +1506,7 @@
               class="w-16 text-xs font-mono-num font-bold text-right focus:shadow-none" />
           </div>
           ${config.sizes.length > 1 ? `
-            <button onclick="removeProductSize(${idx})" class="p-2 text-rose-500 hover:bg-rose-50 rounded-lg">
+            <button type="button" onclick="removeProductSize(${idx})" class="p-2 text-rose-500 hover:bg-rose-50 rounded-lg">
               <i data-lucide="trash-2" class="w-4 h-4"></i>
             </button>
           ` : ''}
@@ -1187,7 +1536,7 @@
         <div class="flex items-center justify-between gap-2 bg-stone-50 border border-stone-200 px-3 py-2 rounded-xl">
           <input type="text" value="${f.name}" onchange="config.flavours[${idx}].name = this.value"
             class="flex-1 text-xs font-bold bg-transparent text-stone-800 focus:shadow-none" />
-          <button onclick="config.flavours.splice(${idx}, 1); renderStep2(); lucide.createIcons();" class="text-stone-400 hover:text-rose-600 p-1">
+          <button type="button" onclick="config.flavours.splice(${idx}, 1); renderStep2(); lucide.createIcons();" class="text-stone-400 hover:text-rose-600 p-1">
             <i data-lucide="x" class="w-3.5 h-3.5"></i>
           </button>
         </div>
@@ -1205,7 +1554,7 @@
               onchange="config.addons[${idx}].price = parseFloat(this.value) || 0"
               class="w-14 text-xs font-mono-num font-bold text-right focus:shadow-none" />
           </div>
-          <button onclick="config.addons.splice(${idx}, 1); renderStep2(); lucide.createIcons();" class="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg">
+          <button type="button" onclick="config.addons.splice(${idx}, 1); renderStep2(); lucide.createIcons();" class="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg">
             <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
           </button>
         </div>
@@ -1250,7 +1599,7 @@
                 <option ${ing.category==='Perisa & Topping'?'selected':''}>Perisa & Topping</option>
                 <option ${ing.category==='Pembungkusan'?'selected':''}>Pembungkusan</option>
               </select>
-              <button onclick="removeIngredient(${idx})" class="p-2 text-rose-500 hover:bg-rose-100 rounded-xl">
+              <button type="button" onclick="removeIngredient(${idx})" class="p-2 text-rose-500 hover:bg-rose-100 rounded-xl">
                 <i data-lucide="trash-2" class="w-4 h-4"></i>
               </button>
             </div>
@@ -1333,7 +1682,7 @@
 
       const tabsEl = document.getElementById('recipe-target-tabs');
       tabsEl.innerHTML = targets.map(t => `
-        <button onclick="activeRecipeTarget='${t.id}'; renderStep4(); lucide.createIcons();"
+        <button type="button" onclick="activeRecipeTarget='${t.id}'; renderStep4(); lucide.createIcons();"
           class="px-3 py-1.5 rounded-xl text-xs font-bold border transition ${t.id === activeRecipeTarget ? 'bg-amber-500 text-white border-amber-500 shadow-xs' : 'bg-white text-stone-700 border-stone-200 hover:bg-stone-50'}">
           ${t.label}
         </button>
@@ -1369,7 +1718,7 @@
                 <span class="text-[11px] font-bold text-stone-400 ml-1">${selectedIng ? selectedIng.unit : 'g'}</span>
               </div>
               <span class="text-[11px] font-mono-num font-bold text-stone-600 w-16 text-right">${fmtMoney(rowCost)}</span>
-              <button onclick="config.recipes['${activeRecipeTarget}'].splice(${rIdx}, 1); renderStep4(); lucide.createIcons();" class="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg">
+              <button type="button" onclick="config.recipes['${activeRecipeTarget}'].splice(${rIdx}, 1); renderStep4(); lucide.createIcons();" class="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg">
                 <i data-lucide="x" class="w-3.5 h-3.5"></i>
               </button>
             </div>
@@ -1397,7 +1746,7 @@
                 class="w-14 text-xs font-mono-num font-bold text-right focus:shadow-none" />
               <span class="text-[11px] font-bold text-stone-400 ml-1">${ing ? ing.unit : 'g'}</span>
             </div>
-            <button onclick="config.flavourRules.splice(${fIdx}, 1); renderStep4(); lucide.createIcons();" class="p-1.5 text-rose-500">
+            <button type="button" onclick="config.flavourRules.splice(${fIdx}, 1); renderStep4(); lucide.createIcons();" class="p-1.5 text-rose-500">
               <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
             </button>
           </div>
@@ -1560,44 +1909,53 @@
     }
 
     function renderDashboardAll() {
+      updateAllTimeSummaryBanner();
       renderUtama();
       renderCalendar();
       renderStockList();
       if (!document.getElementById('tab-analisis').classList.contains('hidden')) {
         renderAnalytics();
       }
+      if (window.lucide) lucide.createIcons();
     }
 
     function renderUtama() {
-      const activeOrders = orders
+      updateAllTimeSummaryBanner();
+
+      // Next Order (always next upcoming active order overall)
+      const allActiveOrders = orders
         .filter(o => o.status === 'Active')
         .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
 
       const nextCard = document.getElementById('next-order-container');
-      if (activeOrders.length > 0) {
-        const nxt = activeOrders[0];
+      if (allActiveOrders.length > 0) {
+        const nxt = allActiveOrders[0];
         const balance = Number(nxt.total || 0) - Number(nxt.paidAmount || 0);
         nextCard.innerHTML = `
           <div class="rounded-3xl bg-stone-900 text-white p-4 sm:p-5 shadow-md space-y-3">
-            <div class="flex items-center justify-between">
+            <div class="flex items-center justify-between gap-2">
               <span class="text-[10px] font-extrabold uppercase tracking-wider bg-amber-500 text-stone-950 px-2.5 py-0.5 rounded-full">Next Order</span>
-              <span class="text-xs font-mono-num text-amber-300 font-bold">${nxt.date} • ${nxt.time}</span>
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-mono-num text-amber-300 font-bold">${nxt.date} • ${nxt.time}</span>
+                <button type="button" onclick="openOrderModal('${nxt.id}')" class="text-[11px] font-bold bg-stone-800 hover:bg-stone-700 text-stone-200 px-2.5 py-1 rounded-lg flex items-center gap-1" title="Edit Order / Kuantiti">
+                  <i data-lucide="pencil" class="w-3 h-3 text-amber-400"></i> Edit
+                </button>
+              </div>
             </div>
             <div>
               <h2 class="text-lg font-extrabold">${nxt.customer}</h2>
-              <p class="text-xs text-stone-300 mt-0.5">${nxt.sizeName} — <span class="text-amber-300 font-semibold">${(nxt.flavours || []).join(' + ')}</span></p>
-              ${(nxt.addons && nxt.addons.length) ? `<p class="text-[11px] text-stone-400 mt-0.5">Add-On: ${nxt.addons.join(', ')}</p>` : ''}
+              <p class="text-xs text-stone-300 mt-0.5 leading-relaxed">${getOrderDisplaySummary(nxt)}</p>
             </div>
-            <div class="flex items-center justify-between pt-2 border-t border-stone-800 gap-2">
+            <div class="flex flex-wrap items-center justify-between pt-2 border-t border-stone-800 gap-2">
               <div>
                 <div class="text-[10px] text-stone-400">Status Bayaran</div>
                 <div class="text-xs font-mono-num font-bold ${balance > 0 ? 'text-rose-400' : 'text-emerald-400'}">
                   ${balance > 0 ? `Baki ${fmtMoney(balance)}` : `Lunas (${fmtMoney(nxt.total)})`}
                 </div>
               </div>
-              <div class="flex items-center gap-2">
-                ${balance > 0 ? `<button onclick="markOrderPaid('${nxt.id}')" class="text-[11px] font-bold bg-stone-800 hover:bg-stone-700 text-amber-300 px-3 py-2 rounded-xl">Sahkan Baki</button>` : ''}
-                <button onclick="markOrderDone('${nxt.id}')" class="text-[11px] font-bold bg-emerald-500 hover:bg-emerald-600 text-stone-950 px-3.5 py-2 rounded-xl">Tandakan Selesai</button>
+              <div class="flex items-center gap-1.5">
+                ${balance > 0 ? `<button type="button" onclick="markOrderPaid('${nxt.id}')" class="text-[11px] font-bold bg-stone-800 hover:bg-stone-700 text-amber-300 px-3 py-2 rounded-xl">Sahkan Baki</button>` : ''}
+                <button type="button" onclick="markOrderDone('${nxt.id}')" class="text-[11px] font-bold bg-emerald-500 hover:bg-emerald-600 text-stone-950 px-3.5 py-2 rounded-xl">Tandakan Selesai</button>
               </div>
             </div>
           </div>
@@ -1611,41 +1969,69 @@
         `;
       }
 
-      const grossSales = orders.reduce((s, o) => s + Number(o.total || 0), 0);
-      const totalCogs = orders.reduce((s, o) => s + calculateOrderCost(o), 0);
+      // Filtered KPIs & Order List (Feature #2)
+      const filteredOrders = filterOrdersByDatePreset(orders, utamaDatePreset, 'utama-date-from', 'utama-date-to');
+      document.getElementById('utama-filter-badge').textContent = getPresetLabel(utamaDatePreset, 'utama-date-from', 'utama-date-to');
+
+      const filteredActive = filteredOrders.filter(o => o.status === 'Active');
+      const filteredUnits = filteredOrders.reduce((s, o) => s + getOrderTotalUnits(o), 0);
+      const grossSales = filteredOrders.reduce((s, o) => s + Number(o.total || 0), 0);
+      const totalCogs = filteredOrders.reduce((s, o) => s + calculateOrderCost(o), 0);
       const netProfit = grossSales - totalCogs;
       const marginPct = grossSales > 0 ? Math.round((netProfit / grossSales) * 100) : 0;
-      const unpaidTotal = orders.reduce((s, o) => s + Math.max(0, Number(o.total || 0) - Number(o.paidAmount || 0)), 0);
-      const unpaidCount = orders.filter(o => (Number(o.total || 0) - Number(o.paidAmount || 0)) > 0).length;
+      const unpaidTotal = filteredOrders.reduce((s, o) => s + Math.max(0, Number(o.total || 0) - Number(o.paidAmount || 0)), 0);
+      const unpaidCount = filteredOrders.filter(o => (Number(o.total || 0) - Number(o.paidAmount || 0)) > 0).length;
 
-      document.getElementById('kpi-active-orders').textContent = activeOrders.length;
-      document.getElementById('kpi-total-cakes').textContent = `${orders.length} tempahan direkod`;
+      document.getElementById('kpi-active-orders').textContent = filteredActive.length;
+      document.getElementById('kpi-total-cakes').textContent = `${filteredOrders.length} order (${filteredUnits} unit)`;
       document.getElementById('kpi-unpaid').textContent = fmtMoney(unpaidTotal);
       document.getElementById('kpi-unpaid-count').textContent = `${unpaidCount} deposit menunggu`;
       document.getElementById('kpi-gross-sales').textContent = fmtMoney(grossSales);
       document.getElementById('kpi-net-profit').textContent = fmtMoney(netProfit);
       document.getElementById('kpi-margin-pct').textContent = `Margin ${marginPct}% (selepas kos bahan)`;
 
-      document.getElementById('orders-count-badge').textContent = `${orders.length} rekod`;
+      document.getElementById('orders-count-badge').textContent = `${filteredOrders.length} rekod`;
       const listEl = document.getElementById('orders-list');
-      listEl.innerHTML = [...orders].reverse().map(o => `
-        <div class="flex items-center justify-between gap-2 p-3 rounded-xl bg-stone-50 border border-stone-100">
-          <div class="min-w-0">
-            <div class="flex items-center gap-2">
-              <span class="text-xs font-extrabold text-stone-900 truncate">${o.customer}</span>
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${o.status === 'Completed' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-800'}">${o.status === 'Completed' ? 'Selesai' : 'Aktif'}</span>
+      if (!filteredOrders.length) {
+        listEl.innerHTML = `<div class="text-center py-6 text-xs text-stone-400">Tiada rekod tempahan ditemui bagi tarikh yang dipilih.</div>`;
+      } else {
+        listEl.innerHTML = [...filteredOrders].reverse().map(o => {
+          const bal = Number(o.total || 0) - Number(o.paidAmount || 0);
+          return `
+            <div class="p-3 rounded-xl bg-stone-50 border border-stone-200/80 space-y-2">
+              <div class="flex items-start justify-between gap-2">
+                <div class="min-w-0">
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="text-xs font-extrabold text-stone-900 truncate">${o.customer}</span>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${o.status === 'Completed' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-800'}">${o.status === 'Completed' ? 'Selesai' : 'Aktif'}</span>
+                  </div>
+                  <div class="text-[11px] text-stone-600 mt-0.5 leading-snug">${getOrderDisplaySummary(o)}</div>
+                  <div class="text-[10px] font-mono-num text-stone-400 mt-0.5">${o.date} (${o.time}) • ${o.id}</div>
+                </div>
+                <div class="text-right shrink-0">
+                  <div class="text-xs font-mono-num font-extrabold text-stone-900">${fmtMoney(o.total)}</div>
+                  <div class="text-[10px] font-bold ${bal > 0 ? 'text-rose-500' : 'text-emerald-600'}">
+                    ${bal > 0 ? `Baki ${fmtMoney(bal)}` : 'Lunas'}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quick Action Row: Edit Qty, Sahkan Baki, Selesai, Padam (Feature #1) -->
+              <div class="flex items-center justify-end gap-1.5 pt-1.5 border-t border-stone-200/70">
+                ${bal > 0 ? `<button type="button" onclick="markOrderPaid('${o.id}')" class="text-[10px] font-bold bg-amber-100 hover:bg-amber-200 text-amber-900 px-2.5 py-1 rounded-lg">Sahkan Baki</button>` : ''}
+                ${o.status === 'Active' ? `<button type="button" onclick="markOrderDone('${o.id}')" class="text-[10px] font-bold bg-emerald-100 hover:bg-emerald-200 text-emerald-800 px-2.5 py-1 rounded-lg">Selesai</button>` : ''}
+                <button type="button" onclick="openOrderModal('${o.id}')" class="text-[10px] font-bold bg-white hover:bg-stone-100 text-stone-700 border border-stone-200 px-2.5 py-1 rounded-lg flex items-center gap-1">
+                  <i data-lucide="pencil" class="w-3 h-3 text-amber-600"></i> Edit / Qty
+                </button>
+                <button type="button" onclick="confirmDeleteOrderById('${o.id}')" class="text-[10px] font-bold bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 p-1 rounded-lg" title="Padam Order">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
             </div>
-            <div class="text-[11px] text-stone-500 truncate mt-0.5">${o.sizeName} • ${(o.flavours || []).join(', ')}</div>
-            <div class="text-[10px] font-mono-num text-stone-400 mt-0.5">${o.date} (${o.time})</div>
-          </div>
-          <div class="text-right shrink-0">
-            <div class="text-xs font-mono-num font-extrabold text-stone-900">${fmtMoney(o.total)}</div>
-            <div class="text-[10px] font-bold ${(Number(o.total) - Number(o.paidAmount)) > 0 ? 'text-rose-500' : 'text-emerald-600'}">
-              ${(Number(o.total) - Number(o.paidAmount)) > 0 ? 'Deposit' : 'Lunas'}
-            </div>
-          </div>
-        </div>
-      `).join('');
+          `;
+        }).join('');
+      }
+      if (window.lucide) lucide.createIcons();
     }
 
     async function markOrderPaid(orderId) {
@@ -1704,7 +2090,7 @@
         const isSelected = dateStr === selectedCalDate;
 
         html += `
-          <button onclick="selectedCalDate='${dateStr}'; renderCalendar();"
+          <button type="button" onclick="selectedCalDate='${dateStr}'; renderCalendar();"
             class="h-12 rounded-xl flex flex-col items-center justify-center border transition ${isSelected ? 'bg-stone-900 text-white border-stone-900 font-extrabold' : 'bg-stone-50/70 hover:bg-amber-50 border-stone-100 text-stone-800 font-semibold'}">
             <span class="text-xs font-mono-num">${d}</span>
             <div class="flex gap-1 mt-1 h-1.5">
@@ -1726,11 +2112,12 @@
           <div class="p-3 rounded-xl bg-stone-50 border border-stone-200 flex items-center justify-between gap-2">
             <div class="min-w-0">
               <div class="text-xs font-bold text-stone-900 truncate">${o.time} — ${o.customer}</div>
-              <div class="text-[11px] text-stone-500 truncate">${o.sizeName} (${(o.flavours||[]).join(', ')})</div>
+              <div class="text-[11px] text-stone-500 truncate">${getOrderDisplaySummary(o)}</div>
             </div>
             <div class="flex items-center gap-1.5 shrink-0">
+              <button type="button" onclick="openOrderModal('${o.id}')" class="text-[10px] font-bold bg-white border border-stone-200 text-stone-700 px-2 py-1 rounded-lg">Edit</button>
               ${o.status === 'Active' ? `
-                <button onclick="markOrderDone('${o.id}')" class="text-[10px] font-bold bg-emerald-600 text-white px-2.5 py-1 rounded-lg">Selesai</button>
+                <button type="button" onclick="markOrderDone('${o.id}')" class="text-[10px] font-bold bg-emerald-600 text-white px-2.5 py-1 rounded-lg">Selesai</button>
               ` : `
                 <span class="text-[10px] font-bold px-2 py-1 rounded-lg bg-emerald-100 text-emerald-700">Selesai</span>
               `}
@@ -1738,6 +2125,7 @@
           </div>
         `).join('');
       }
+      if (window.lucide) lucide.createIcons();
     }
 
     // =========================================================
@@ -1757,9 +2145,9 @@
               <div class="text-[11px] text-stone-500 mt-0.5">${ing.category} • Kos: ${config.currency} ${getUnitCost(ing).toFixed(3)}/${ing.unit}</div>
             </div>
             <div class="flex items-center gap-2 shrink-0">
-              <button onclick="adjustStock(${idx}, -${ing.unit === 'g' || ing.unit === 'ml' ? 50 : 1})" class="w-7 h-7 rounded-lg bg-white border border-stone-200 font-bold text-stone-700 hover:bg-stone-100">-</button>
+              <button type="button" onclick="adjustStock(${idx}, -${ing.unit === 'g' || ing.unit === 'ml' ? 50 : 1})" class="w-7 h-7 rounded-lg bg-white border border-stone-200 font-bold text-stone-700 hover:bg-stone-100">-</button>
               <span class="text-xs font-mono-num font-extrabold w-16 text-center ${isLow ? 'text-rose-700' : 'text-stone-900'}">${Math.round(ing.stock)} ${ing.unit}</span>
-              <button onclick="adjustStock(${idx}, ${ing.unit === 'g' || ing.unit === 'ml' ? 100 : 5})" class="w-7 h-7 rounded-lg bg-stone-900 text-white font-bold hover:bg-stone-800">+</button>
+              <button type="button" onclick="adjustStock(${idx}, ${ing.unit === 'g' || ing.unit === 'ml' ? 100 : 5})" class="w-7 h-7 rounded-lg bg-stone-900 text-white font-bold hover:bg-stone-800">+</button>
             </div>
           </div>
         `;
@@ -1775,49 +2163,128 @@
       }
     }
 
-    function deductIngredientsForOrder(order) {
-      const deductMap = {};
-      (config.recipes[order.sizeId] || []).forEach(r => {
-        deductMap[r.ingId] = (deductMap[r.ingId] || 0) + Number(r.qty || 0);
-      });
-      (order.addons || []).forEach(addName => {
-        const addObj = config.addons.find(a => a.name === addName);
-        if (addObj) {
-          (config.recipes[addObj.id] || []).forEach(r => {
-            deductMap[r.ingId] = (deductMap[r.ingId] || 0) + Number(r.qty || 0);
-          });
-        }
-      });
-      (order.flavours || []).forEach(flvName => {
-        (config.flavourRules || []).forEach(rule => {
-          if (rule.flavourName === flvName) {
-            deductMap[rule.ingId] = (deductMap[rule.ingId] || 0) + Number(rule.qty || 0);
-          }
-        });
-      });
-
-      Object.entries(deductMap).forEach(([ingId, qty]) => {
-        const ing = config.ingredients.find(i => i.id === ingId);
-        if (ing) ing.stock = Math.max(0, Number(ing.stock) - qty);
-      });
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
-    }
-
     // =========================================================
-    // NEW ORDER MODAL
+    // NEW & EDIT ORDER MODAL (MULTI-ITEM, QTY, DELETE - FEATURES #1 & #3)
     // =========================================================
-    function openNewOrderModal() {
+    function openOrderModal(orderId = null) {
+      editingOrderId = orderId;
       modalSizeId = config.sizes[0]?.id || '';
       modalFlavours = config.flavours[0] ? [config.flavours[0].name] : [];
       modalAddons = [];
-      document.getElementById('ord-customer').value = '';
+      modalBuilderQty = 1;
+
+      const badge = document.getElementById('ord-modal-badge');
+      const title = document.getElementById('ord-modal-title');
+      const statusBox = document.getElementById('ord-status-box');
+      const totalBox = document.getElementById('ord-total-box');
+      const delBtn = document.getElementById('btn-delete-order-modal');
+      const saveBtn = document.getElementById('btn-save-order');
+
+      if (orderId) {
+        const existing = orders.find(o => o.id === orderId);
+        if (!existing) return;
+        badge.textContent = `Edit Order • ${existing.id}`;
+        badge.className = 'text-[10px] font-extrabold uppercase tracking-wider bg-stone-900 text-amber-400 px-2 py-0.5 rounded-md';
+        title.textContent = `Kemas Kini Tempahan ${existing.customer}`;
+        document.getElementById('ord-customer').value = existing.customer;
+        document.getElementById('ord-date').value = existing.date;
+        document.getElementById('ord-time').value = existing.time || '14:00';
+        document.getElementById('ord-payment').value = existing.paymentStatus || 'Paid';
+        document.getElementById('ord-work-status').value = existing.status || 'Active';
+
+        modalCartItems = normalizeOrderItems(existing).map(it => Object.assign({}, it));
+        statusBox.classList.remove('hidden');
+        totalBox.classList.add('col-span-2');
+        delBtn.classList.remove('hidden');
+        saveBtn.textContent = 'Simpan Perubahan & Selaraskan Stok';
+      } else {
+        badge.textContent = 'Tempahan Baharu';
+        badge.className = 'text-[10px] font-extrabold uppercase tracking-wider bg-amber-100 text-amber-800 px-2 py-0.5 rounded-md';
+        title.textContent = 'Rekod Tempahan Pelanggan';
+        document.getElementById('ord-customer').value = '';
+        document.getElementById('ord-date').value = getTodayISO();
+        document.getElementById('ord-time').value = '14:00';
+        document.getElementById('ord-payment').value = 'Paid';
+        document.getElementById('ord-work-status').value = 'Active';
+
+        modalCartItems = [];
+        statusBox.classList.add('hidden');
+        totalBox.classList.remove('col-span-2');
+        delBtn.classList.add('hidden');
+        saveBtn.textContent = 'Simpan Order, Sync & Tolak Stok';
+      }
+
       document.getElementById('ord-flavour-hint').textContent = `Maksimum ${config.maxFlavours} perisa`;
       renderOrderModalOptions();
       document.getElementById('order-modal').classList.remove('hidden');
+      if (window.lucide) lucide.createIcons();
     }
 
-    function closeNewOrderModal() {
+    function closeOrderModal() {
       document.getElementById('order-modal').classList.add('hidden');
+      editingOrderId = null;
+    }
+
+    function changeBuilderQty(delta) {
+      modalBuilderQty = Math.max(1, modalBuilderQty + delta);
+      document.getElementById('ord-builder-qty').textContent = modalBuilderQty;
+    }
+
+    function buildCurrentSelectionItem() {
+      const sizeObj = config.sizes.find(s => s.id === modalSizeId) || config.sizes[0];
+      if (!sizeObj) return null;
+      let unitPrice = Number(sizeObj.price || 0);
+      modalAddons.forEach(an => {
+        const ao = config.addons.find(a => a.name === an);
+        if (ao) unitPrice += Number(ao.price || 0);
+      });
+      return {
+        sizeId: sizeObj.id,
+        sizeName: sizeObj.name,
+        flavours: modalFlavours.length ? [...modalFlavours] : ['Standard'],
+        addons: [...modalAddons],
+        qty: modalBuilderQty,
+        unitPrice
+      };
+    }
+
+    function addItemToOrderCart() {
+      const newItem = buildCurrentSelectionItem();
+      if (!newItem) return;
+
+      // Merge if identical size + flavours + addons
+      const sig = `${newItem.sizeId}|${newItem.flavours.slice().sort().join(',')}|${newItem.addons.slice().sort().join(',')}`;
+      const match = modalCartItems.find(it => {
+        const s = `${it.sizeId}|${(it.flavours || []).slice().sort().join(',')}|${(it.addons || []).slice().sort().join(',')}`;
+        return s === sig;
+      });
+
+      if (match) {
+        match.qty += newItem.qty;
+      } else {
+        modalCartItems.push(newItem);
+      }
+
+      modalBuilderQty = 1;
+      document.getElementById('ord-builder-qty').textContent = '1';
+      renderOrderModalOptions();
+      showToast(`${newItem.qty}x ${newItem.sizeName} ditambah ke senarai!`);
+    }
+
+    function adjustCartItemQty(idx, delta) {
+      if (!modalCartItems[idx]) return;
+      const nextQty = modalCartItems[idx].qty + delta;
+      if (nextQty <= 0) {
+        modalCartItems.splice(idx, 1);
+      } else {
+        modalCartItems[idx].qty = nextQty;
+      }
+      renderOrderModalOptions();
+    }
+
+    function removeCartItem(idx) {
+      modalCartItems.splice(idx, 1);
+      renderOrderModalOptions();
     }
 
     function renderOrderModalOptions() {
@@ -1833,7 +2300,7 @@
         const selected = modalFlavours.includes(f.name);
         return `
           <button type="button" onclick="toggleModalFlavour('${f.name.replace(/'/g, "\\'")}')"
-            class="px-3 py-1.5 rounded-xl text-xs font-bold border transition ${selected ? 'bg-stone-900 text-white border-stone-900' : 'bg-stone-50 text-stone-700 border-stone-200'}">
+            class="px-3 py-1.5 rounded-xl text-xs font-bold border transition ${selected ? 'bg-stone-900 text-white border-stone-900' : 'bg-white text-stone-700 border-stone-200'}">
             ${f.name}
           </button>
         `;
@@ -1843,19 +2310,55 @@
         const selected = modalAddons.includes(a.name);
         return `
           <button type="button" onclick="toggleModalAddon('${a.name.replace(/'/g, "\\'")}')"
-            class="px-3 py-1.5 rounded-xl text-xs font-semibold border transition ${selected ? 'bg-amber-500 text-white border-amber-500' : 'bg-stone-50 text-stone-700 border-stone-200'}">
+            class="px-3 py-1.5 rounded-xl text-xs font-semibold border transition ${selected ? 'bg-amber-500 text-white border-amber-500' : 'bg-white text-stone-700 border-stone-200'}">
             ${a.name} (+${fmtMoney(a.price)})
           </button>
         `;
       }).join('');
 
-      const sizeObj = config.sizes.find(s => s.id === modalSizeId);
-      let total = sizeObj ? Number(sizeObj.price) : 0;
-      modalAddons.forEach(an => {
-        const ao = config.addons.find(a => a.name === an);
-        if (ao) total += Number(ao.price);
-      });
-      document.getElementById('ord-total-display').textContent = fmtMoney(total);
+      document.getElementById('ord-builder-qty').textContent = modalBuilderQty;
+
+      // Render Cart Items
+      const cartEl = document.getElementById('ord-cart-list');
+      const totalUnits = modalCartItems.reduce((s, it) => s + it.qty, 0);
+      document.getElementById('ord-cart-badge').textContent = `${totalUnits} unit`;
+
+      if (modalCartItems.length === 0) {
+        const previewItem = buildCurrentSelectionItem();
+        const previewTotal = previewItem ? previewItem.unitPrice * previewItem.qty : 0;
+        cartEl.innerHTML = `
+          <div class="p-3 rounded-xl border border-dashed border-stone-300 bg-stone-50/70 text-[11px] text-stone-500 flex items-center justify-between gap-2">
+            <span>Belum tekan "Tambah ke Senarai Item" — sistem akan guna pilihan semasa: <strong>${previewItem ? previewItem.qty + 'x ' + previewItem.sizeName : '-'}</strong></span>
+            <span class="font-mono-num font-bold text-stone-800 shrink-0">${fmtMoney(previewTotal)}</span>
+          </div>
+        `;
+        document.getElementById('ord-total-display').textContent = fmtMoney(previewTotal);
+      } else {
+        let grandTotal = 0;
+        cartEl.innerHTML = modalCartItems.map((it, idx) => {
+          const lineTotal = it.unitPrice * it.qty;
+          grandTotal += lineTotal;
+          return `
+            <div class="p-2.5 rounded-xl bg-amber-50/60 border border-amber-200 flex items-center justify-between gap-2">
+              <div class="min-w-0">
+                <div class="text-xs font-extrabold text-stone-900 truncate">${it.sizeName}</div>
+                <div class="text-[11px] text-stone-600 truncate">${(it.flavours || []).join(' + ')}${(it.addons && it.addons.length) ? ' • ' + it.addons.join(', ') : ''}</div>
+                <div class="text-[10px] font-mono-num font-bold text-amber-800 mt-0.5">${fmtMoney(it.unitPrice)} / unit = ${fmtMoney(lineTotal)}</div>
+              </div>
+              <div class="flex items-center gap-1.5 shrink-0">
+                <button type="button" onclick="adjustCartItemQty(${idx}, -1)" class="w-7 h-7 rounded-lg bg-white border border-stone-200 font-extrabold text-stone-700 hover:bg-stone-100">-</button>
+                <span class="w-6 text-center text-xs font-mono-num font-extrabold">${it.qty}</span>
+                <button type="button" onclick="adjustCartItemQty(${idx}, 1)" class="w-7 h-7 rounded-lg bg-stone-900 text-white font-extrabold hover:bg-stone-800">+</button>
+                <button type="button" onclick="removeCartItem(${idx})" class="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg ml-0.5">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+        document.getElementById('ord-total-display').textContent = fmtMoney(grandTotal);
+      }
+      if (window.lucide) lucide.createIcons();
     }
 
     function toggleModalFlavour(name) {
@@ -1880,72 +2383,167 @@
       renderOrderModalOptions();
     }
 
-    async function saveNewOrder() {
+    async function saveOrderFromModal() {
       const customer = document.getElementById('ord-customer').value.trim();
       if (!customer) {
         showToast('Sila masukkan nama pelanggan.', true);
         return;
       }
-      const sizeObj = config.sizes.find(s => s.id === modalSizeId) || config.sizes[0];
-      let total = sizeObj ? Number(sizeObj.price) : 0;
-      modalAddons.forEach(an => {
-        const ao = config.addons.find(a => a.name === an);
-        if (ao) total += Number(ao.price);
-      });
+
+      // If user didn't click "+ Tambah ke Senarai Item", use the current active selection automatically
+      let finalItems = [...modalCartItems];
+      if (finalItems.length === 0) {
+        const single = buildCurrentSelectionItem();
+        if (single) finalItems.push(single);
+      }
+
+      if (finalItems.length === 0) {
+        showToast('Sila pilih sekurang-kurangnya satu produk.', true);
+        return;
+      }
+
+      const total = finalItems.reduce((sum, it) => sum + (it.unitPrice * it.qty), 0);
       const payStatus = document.getElementById('ord-payment').value;
-      const newOrd = {
-        id: 'ORD-' + Math.floor(100 + Math.random() * 900),
-        customer,
-        date: document.getElementById('ord-date').value,
-        time: document.getElementById('ord-time').value,
-        sizeId: sizeObj.id,
-        sizeName: sizeObj.name,
-        flavours: modalFlavours.length ? [...modalFlavours] : ['Standard'],
-        addons: [...modalAddons],
-        total,
-        paidAmount: payStatus === 'Paid' ? total : total * 0.5,
-        paymentStatus: payStatus,
-        status: 'Active'
-      };
+      const workStatus = document.getElementById('ord-work-status').value || 'Active';
+
+      // Build backward-compatible summary columns for Google Sheets
+      const allFlavours = [...new Set(finalItems.flatMap(it => it.flavours || []))];
+      const allAddons = [...new Set(finalItems.flatMap(it => it.addons || []))];
+      const summarySizeName = finalItems.map(it => `${it.qty}x ${it.sizeName}`).join(', ');
 
       const btn = document.getElementById('btn-save-order');
       btn.disabled = true;
       btn.textContent = 'Menyimpan & Sync...';
 
-      orders.push(newOrd);
-      localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
-      deductIngredientsForOrder(newOrd);
-      closeNewOrderModal();
-      renderDashboardAll();
+      if (editingOrderId) {
+        const idx = orders.findIndex(o => o.id === editingOrderId);
+        if (idx !== -1) {
+          const oldOrder = orders[idx];
+          // 1) Restore stock from old order
+          applyStockDeltaForOrder(oldOrder, +1);
 
-      if (config.scriptUrl) {
-        const res = await pushCloudAction({
-          action: 'createOrder',
-          order: newOrd,
-          updatedIngredients: config.ingredients
-        });
-        if (res && res.ok) {
-          showToast(res.calendarCreated
-            ? 'Order disimpan, stok ditolak & reminder Calendar dicipta!'
-            : 'Order disimpan ke Google Sheets & stok ditolak!');
+          const updatedOrder = Object.assign({}, oldOrder, {
+            customer,
+            date: document.getElementById('ord-date').value,
+            time: document.getElementById('ord-time').value,
+            sizeId: finalItems[0].sizeId,
+            sizeName: summarySizeName,
+            flavours: allFlavours,
+            addons: allAddons,
+            items: finalItems,
+            total,
+            paidAmount: payStatus === 'Paid' ? total : total * 0.5,
+            paymentStatus: payStatus,
+            status: workStatus
+          });
+
+          // 2) Deduct stock for updated order
+          applyStockDeltaForOrder(updatedOrder, -1);
+
+          orders[idx] = updatedOrder;
+          localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+          closeOrderModal();
           renderDashboardAll();
-        } else {
-          showToast('Disimpan di peranti (gagal sync ke Cloud).', true);
+
+          if (config.scriptUrl) {
+            const res = await pushCloudAction({
+              action: 'editOrder',
+              order: updatedOrder,
+              updatedIngredients: config.ingredients
+            });
+            if (res && res.ok) {
+              showToast('Order dikemas kini & stok diselaraskan di Cloud!');
+              renderDashboardAll();
+            } else {
+              showToast('Dikemas kini di peranti (gagal sync ke Cloud).', true);
+            }
+          } else {
+            showToast('Order dikemas kini & stok bahan diselaraskan!');
+          }
         }
       } else {
-        showToast('Order disimpan & berat bahan ditolak daripada stok!');
+        const newOrd = {
+          id: 'ORD-' + Math.floor(100 + Math.random() * 900),
+          customer,
+          date: document.getElementById('ord-date').value,
+          time: document.getElementById('ord-time').value,
+          sizeId: finalItems[0].sizeId,
+          sizeName: summarySizeName,
+          flavours: allFlavours,
+          addons: allAddons,
+          items: finalItems,
+          total,
+          paidAmount: payStatus === 'Paid' ? total : total * 0.5,
+          paymentStatus: payStatus,
+          status: 'Active'
+        };
+
+        orders.push(newOrd);
+        localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+        applyStockDeltaForOrder(newOrd, -1);
+        closeOrderModal();
+        renderDashboardAll();
+
+        if (config.scriptUrl) {
+          const res = await pushCloudAction({
+            action: 'createOrder',
+            order: newOrd,
+            updatedIngredients: config.ingredients
+          });
+          if (res && res.ok) {
+            showToast(res.calendarCreated
+              ? 'Order disimpan, stok ditolak & reminder Calendar dicipta!'
+              : 'Order disimpan ke Google Sheets & stok ditolak!');
+            renderDashboardAll();
+          } else {
+            showToast('Disimpan di peranti (gagal sync ke Cloud).', true);
+          }
+        } else {
+          showToast('Order disimpan & berat bahan ditolak daripada stok!');
+        }
       }
 
       btn.disabled = false;
-      btn.textContent = 'Simpan Order, Sync & Tolak Stok';
+    }
+
+    async function deleteEditingOrder() {
+      if (!editingOrderId) return;
+      const targetId = editingOrderId;
+      closeOrderModal();
+      await confirmDeleteOrderById(targetId);
+    }
+
+    async function confirmDeleteOrderById(orderId) {
+      const idx = orders.findIndex(o => o.id === orderId);
+      if (idx === -1) return;
+      const target = orders[idx];
+      const ok = confirm(`Padam tempahan ${target.customer} (${getOrderDisplaySummary(target)})?\n\nStok bahan untuk tempahan ini akan dipulangkan semula secara automatik.`);
+      if (!ok) return;
+
+      // Restore ingredient stock
+      applyStockDeltaForOrder(target, +1);
+
+      orders.splice(idx, 1);
+      localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+      renderDashboardAll();
+      showToast(`Tempahan ${target.customer} dipadam & stok dipulangkan.`);
+
+      if (config.scriptUrl) {
+        await pushCloudAction({
+          action: 'deleteOrder',
+          orderId: target.id,
+          updatedIngredients: config.ingredients
+        });
+        renderDashboardAll();
+      }
     }
 
     // =========================================================
-    // ANALYTICS TAB
+    // ANALYTICS TAB (FILTERABLE BY DATE - FEATURE #4)
     // =========================================================
     function setChartPeriod(p) {
       chartPeriod = p;
-      ['daily', 'weekly', 'monthly'].forEach(k => {
+      ['daily', 'monthly'].forEach(k => {
         document.getElementById(`btn-period-${k}`).className = k === p
           ? 'px-2.5 py-1 rounded-lg bg-white text-stone-900 shadow-sm'
           : 'px-2.5 py-1 rounded-lg text-stone-500';
@@ -1954,30 +2552,59 @@
     }
 
     function renderAnalytics() {
+      const filteredOrders = filterOrdersByDatePreset(orders, analisisDatePreset, 'analisis-date-from', 'analisis-date-to');
+      document.getElementById('analisis-filter-badge').textContent = getPresetLabel(analisisDatePreset, 'analisis-date-from', 'analisis-date-to');
+
+      const fSales = filteredOrders.reduce((s, o) => s + Number(o.total || 0), 0);
+      const fCogs = filteredOrders.reduce((s, o) => s + calculateOrderCost(o), 0);
+      const fProfit = fSales - fCogs;
+      const fUnits = filteredOrders.reduce((s, o) => s + getOrderTotalUnits(o), 0);
+
+      document.getElementById('an-filtered-count').textContent = `${filteredOrders.length} (${fUnits} unit)`;
+      document.getElementById('an-filtered-sales').textContent = fmtMoney(fSales);
+      document.getElementById('an-filtered-profit').textContent = fmtMoney(fProfit);
+
+      // Top flavours (weighted by item quantity)
       const counts = {};
-      orders.forEach(o => (o.flavours || []).forEach(f => counts[f] = (counts[f] || 0) + 1));
+      filteredOrders.forEach(o => {
+        normalizeOrderItems(o).forEach(it => {
+          const qty = Math.max(1, Number(it.qty || 1));
+          (it.flavours || []).forEach(f => {
+            counts[f] = (counts[f] || 0) + qty;
+          });
+        });
+      });
       const sortedFlv = Object.entries(counts).sort((a, b) => b[1] - a[1]);
       const maxC = sortedFlv[0]?.[1] || 1;
       document.getElementById('top-flavours-bars').innerHTML = sortedFlv.length ? sortedFlv.map(([name, cnt]) => `
         <div>
           <div class="flex justify-between text-xs font-bold mb-1">
             <span>${name}</span>
-            <span class="font-mono-num text-amber-700">${cnt}x</span>
+            <span class="font-mono-num text-amber-700">${cnt} unit</span>
           </div>
           <div class="w-full h-2 bg-stone-100 rounded-full overflow-hidden">
             <div class="h-full bg-amber-500 rounded-full" style="width:${Math.round((cnt / maxC) * 100)}%"></div>
           </div>
         </div>
-      `).join('') : '<div class="text-xs text-stone-400">Belum ada data perisa.</div>';
+      `).join('') : '<div class="text-xs text-stone-400">Tiada data perisa dalam julat tarikh ini.</div>';
+
+      // Product margin & sold units in selected date range
+      const soldBySize = {};
+      filteredOrders.forEach(o => {
+        normalizeOrderItems(o).forEach(it => {
+          soldBySize[it.sizeId] = (soldBySize[it.sizeId] || 0) + Math.max(1, Number(it.qty || 1));
+        });
+      });
 
       document.getElementById('product-margin-cards').innerHTML = config.sizes.map(s => {
         const cogs = calculateRecipeCost(s.id);
         const profit = s.price - cogs;
         const margin = s.price > 0 ? Math.round((profit / s.price) * 100) : 0;
+        const soldQty = soldBySize[s.id] || 0;
         return `
           <div class="p-2.5 rounded-xl bg-stone-50 border border-stone-200 flex items-center justify-between">
             <div>
-              <div class="text-xs font-bold text-stone-900">${s.name}</div>
+              <div class="text-xs font-bold text-stone-900">${s.name} <span class="text-[10px] font-mono-num text-amber-700">(${soldQty} terjual)</span></div>
               <div class="text-[11px] text-stone-500">Jual ${fmtMoney(s.price)} • Kos ${fmtMoney(cogs)}</div>
             </div>
             <div class="text-right">
@@ -1988,22 +2615,25 @@
         `;
       }).join('');
 
+      // Real Dynamic Chart based on filteredOrders
       const ctx = document.getElementById('profitChart');
       if (!ctx || !window.Chart) return;
       if (profitChartInstance) profitChartInstance.destroy();
 
-      let labels, salesData;
-      if (chartPeriod === 'daily') {
-        labels = ['Isn', 'Sel', 'Rab', 'Kha', 'Jum', 'Sab', 'Aha'];
-        salesData = [120, 90, 166, 135, 210, 295, 180];
-      } else if (chartPeriod === 'weekly') {
-        labels = ['Minggu 1', 'Minggu 2', 'Minggu 3', 'Minggu 4'];
-        salesData = [580, 640, 720, 900];
-      } else {
-        labels = ['Jun', 'Jul', 'Ogo', 'Sep', 'Okt', 'Nov'];
-        salesData = [1450, 1680, 1920, 2150, 2490, 2840];
-      }
-      const profitData = salesData.map(v => Math.round(v * 0.62));
+      const grouped = {};
+      filteredOrders.forEach(o => {
+        const key = chartPeriod === 'monthly' ? String(o.date || '').slice(0, 7) : String(o.date || 'Tiada Tarikh');
+        if (!grouped[key]) grouped[key] = { sales: 0, profit: 0 };
+        const sVal = Number(o.total || 0);
+        const cVal = calculateOrderCost(o);
+        grouped[key].sales += sVal;
+        grouped[key].profit += Math.max(0, sVal - cVal);
+      });
+
+      const sortedKeys = Object.keys(grouped).sort();
+      const labels = sortedKeys.length ? sortedKeys : ['Tiada Data'];
+      const salesData = sortedKeys.length ? sortedKeys.map(k => Number(grouped[k].sales.toFixed(2))) : [0];
+      const profitData = sortedKeys.length ? sortedKeys.map(k => Number(grouped[k].profit.toFixed(2))) : [0];
 
       profitChartInstance = new Chart(ctx, {
         type: 'bar',
@@ -2023,14 +2653,12 @@
       });
     }
 
-    // Auto background sync when returning to the browser tab
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible' && sessionStorage.getItem(SESSION_UNLOCK_KEY) === '1' && config.scriptUrl) {
         syncFromCloud(true);
       }
     });
 
-    // Initialize on load
     window.addEventListener('DOMContentLoaded', () => {
       const isUnlocked = sessionStorage.getItem(SESSION_UNLOCK_KEY) === '1';
       if (config.isConfigured) {
