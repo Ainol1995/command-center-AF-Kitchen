@@ -59,12 +59,29 @@
       --ui-accent-dark: #92400e;
       --ui-accent-contrast: #1c1917;
       --ui-page-bg: #faf8f5;
+      --ui-card-bg: #ffffff;
+      --ui-panel-bg: #fafaf9;
+      --ui-text-color: #1c1917;
+      --ui-text-muted: #57534e;
+      --ui-border-color: #ede8e0;
       --ui-root-size: 16px;
       --ui-card-shadow: 0 2px 10px -2px rgba(28, 25, 23, 0.04);
     }
     html { font-size: var(--ui-root-size); }
     body { background-color: var(--ui-page-bg); }
-    .card-soft { box-shadow: var(--ui-card-shadow); }
+    .card-soft { background-color: var(--ui-card-bg); border-color: var(--ui-border-color); box-shadow: var(--ui-card-shadow); }
+    html[data-theme-custom="true"] body { color: var(--ui-text-color); }
+    html[data-theme-custom="true"] .card-soft,
+    html[data-theme-custom="true"] .bg-white { background-color: var(--ui-card-bg) !important; }
+    html[data-theme-custom="true"] .bg-stone-50,
+    html[data-theme-custom="true"] .bg-stone-100 { background-color: var(--ui-panel-bg) !important; }
+    html[data-theme-custom="true"] .text-stone-900,
+    html[data-theme-custom="true"] .text-stone-800 { color: var(--ui-text-color) !important; }
+    html[data-theme-custom="true"] .text-stone-700,
+    html[data-theme-custom="true"] .text-stone-600 { color: var(--ui-text-muted) !important; }
+    html[data-theme-custom="true"] .border-stone-100,
+    html[data-theme-custom="true"] .border-stone-200,
+    html[data-theme-custom="true"] .border-stone-300 { border-color: var(--ui-border-color) !important; }
     html[data-theme-accent-custom="true"] .bg-amber-500 { background-color: var(--ui-accent) !important; color: var(--ui-accent-contrast) !important; }
     html[data-theme-accent-custom="true"] .bg-amber-600 { background-color: var(--ui-accent-hover) !important; }
     html[data-theme-accent-custom="true"] .hover\:bg-amber-600:hover { background-color: var(--ui-accent-hover) !important; }
@@ -553,18 +570,23 @@
             <h2 class="text-sm font-extrabold text-stone-900 truncate">Senarai Tempahan</h2>
             <span id="orders-count-badge" class="text-[10px] font-bold bg-stone-100 text-stone-600 px-2 py-0.5 rounded-full shrink-0">5 Terkini</span>
           </div>
-          <button type="button" id="btn-toggle-all-orders" onclick="toggleOrdersFilterView()"
-            class="text-[11px] font-bold bg-stone-900 hover:bg-stone-800 text-white px-3 py-1.5 rounded-xl flex items-center gap-1.5 shrink-0 shadow-xs transition">
-            <i data-lucide="filter" class="w-3 h-3 text-amber-400"></i>
-            <span id="btn-toggle-all-orders-label">Filter &amp; Lihat Semua</span>
-          </button>
+          <div class="flex items-center gap-1.5 shrink-0">
+            <button type="button" id="btn-toggle-orders-filter" onclick="toggleOrdersFilterView()"
+              class="text-[10px] sm:text-[11px] font-bold bg-stone-900 hover:bg-stone-800 text-white px-2.5 py-1.5 rounded-xl flex items-center gap-1 shadow-xs transition">
+              <i data-lucide="filter" class="w-3 h-3 text-amber-400"></i><span id="btn-orders-filter-label">Filter 5 Terkini</span>
+            </button>
+            <button type="button" id="btn-toggle-all-orders" onclick="toggleOrdersShowAll()"
+              class="text-[10px] sm:text-[11px] font-bold bg-stone-100 hover:bg-stone-200 text-stone-700 px-2.5 py-1.5 rounded-xl flex items-center gap-1 shadow-xs transition">
+              <i data-lucide="list" class="w-3 h-3"></i><span id="btn-toggle-all-orders-label">Lihat Semua</span>
+            </button>
+          </div>
         </div>
 
         <!-- EXPANDABLE FULL ORDERS FILTER PANEL (STATUS + ONLINE/CASH + PICKUP/COD + TARIKH) -->
         <div id="orders-filter-panel" class="hidden p-3 rounded-2xl bg-stone-50 border border-stone-200 space-y-2.5 animate-in">
           <div class="flex items-center justify-between gap-2">
             <div class="min-w-0">
-              <span class="text-[11px] font-extrabold text-stone-700">Tapis Seluruh Rekod Tempahan</span>
+              <span id="orders-filter-title" class="text-[11px] font-extrabold text-stone-700">Tapis 5 Tempahan Terkini</span>
               <span class="ml-1.5 text-[9px] font-extrabold uppercase tracking-wide bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded-md">Padanan OR / ATAU</span>
             </div>
             <button type="button" onclick="resetOrdersListFilter()" class="text-[10px] font-bold text-amber-700 hover:underline shrink-0">Reset Tapisan</button>
@@ -750,47 +772,21 @@
     <!-- TAB 4: ANALISIS (BUSINESS INTELLIGENCE)                   -->
     <!-- ========================================================= -->
     <section id="tab-analisis" class="dash-tab hidden space-y-4 animate-in">
-      <div class="card-soft rounded-2xl p-3.5 space-y-2.5">
-        <div class="flex items-center justify-between">
-          <span class="text-[11px] font-extrabold uppercase tracking-wider text-stone-500 flex items-center gap-1.5">
-            <i data-lucide="calendar-range" class="w-3.5 h-3.5 text-amber-600"></i>
-            <span>Tapis Laporan Analisis Ikut Tarikh</span>
-          </span>
-          <span id="analisis-filter-badge" class="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">Semua Tarikh</span>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div class="card-soft rounded-2xl p-3.5 space-y-1.5">
+          <div class="text-[10px] font-bold uppercase text-stone-400">Bilangan Tempahan</div>
+          <div id="an-filtered-count" class="text-lg font-mono-num font-extrabold text-stone-900">0 (0 unit)</div>
+          <div id="an-range-controls-orderCount"></div>
         </div>
-
-        <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
-          <button type="button" onclick="setAnalisisDatePreset('all')" id="a-preset-all" class="px-2.5 py-1.5 rounded-xl text-[11px] font-bold bg-stone-900 text-white shrink-0">Semua Tarikh</button>
-          <button type="button" onclick="setAnalisisDatePreset('today')" id="a-preset-today" class="px-2.5 py-1.5 rounded-xl text-[11px] font-bold bg-stone-100 text-stone-600 shrink-0">Hari Ini</button>
-          <button type="button" onclick="setAnalisisDatePreset('week')" id="a-preset-week" class="px-2.5 py-1.5 rounded-xl text-[11px] font-bold bg-stone-100 text-stone-600 shrink-0">Minggu Ini</button>
-          <button type="button" onclick="setAnalisisDatePreset('month')" id="a-preset-month" class="px-2.5 py-1.5 rounded-xl text-[11px] font-bold bg-stone-100 text-stone-600 shrink-0">Bulan Ini</button>
-          <button type="button" onclick="setAnalisisDatePreset('custom')" id="a-preset-custom" class="px-2.5 py-1.5 rounded-xl text-[11px] font-bold bg-stone-100 text-stone-600 shrink-0">Pilih Julat</button>
+        <div class="card-soft rounded-2xl p-3.5 space-y-1.5">
+          <div class="text-[10px] font-bold uppercase text-stone-400">Jumlah Jualan</div>
+          <div id="an-filtered-sales" class="text-lg font-mono-num font-extrabold text-stone-900">RM 0.00</div>
+          <div id="an-range-controls-sales"></div>
         </div>
-
-        <div id="analisis-custom-range" class="hidden grid grid-cols-2 gap-2 pt-1 border-t border-stone-100">
-          <div>
-            <label class="block text-[10px] font-bold text-stone-400 mb-0.5">Dari Tarikh</label>
-            <input type="date" id="analisis-date-from" onchange="renderAnalytics()" class="w-full px-2.5 py-1.5 text-xs rounded-xl border border-stone-200 font-mono-num bg-stone-50" />
-          </div>
-          <div>
-            <label class="block text-[10px] font-bold text-stone-400 mb-0.5">Hingga Tarikh</label>
-            <input type="date" id="analisis-date-to" onchange="renderAnalytics()" class="w-full px-2.5 py-1.5 text-xs rounded-xl border border-stone-200 font-mono-num bg-stone-50" />
-          </div>
-        </div>
-
-        <div class="grid grid-cols-3 gap-2 pt-2 border-t border-stone-100 text-center">
-          <div class="bg-stone-50 rounded-xl p-2">
-            <div class="text-[10px] font-bold text-stone-400">Order (Tapisan)</div>
-            <div id="an-filtered-count" class="text-xs sm:text-sm font-mono-num font-extrabold text-stone-900 mt-0.5">0</div>
-          </div>
-          <div class="bg-stone-50 rounded-xl p-2">
-            <div class="text-[10px] font-bold text-stone-400">Jualan (Tapisan)</div>
-            <div id="an-filtered-sales" class="text-xs sm:text-sm font-mono-num font-extrabold text-stone-900 mt-0.5">RM 0</div>
-          </div>
-          <div class="bg-emerald-50 rounded-xl p-2">
-            <div class="text-[10px] font-bold text-emerald-700">Untung (Tapisan)</div>
-            <div id="an-filtered-profit" class="text-xs sm:text-sm font-mono-num font-extrabold text-emerald-700 mt-0.5">RM 0</div>
-          </div>
+        <div class="card-soft rounded-2xl p-3.5 space-y-1.5">
+          <div class="text-[10px] font-bold uppercase text-emerald-700">Untung Bersih</div>
+          <div id="an-filtered-profit" class="text-lg font-mono-num font-extrabold text-emerald-700">RM 0.00</div>
+          <div id="an-range-controls-profit"></div>
         </div>
       </div>
 
@@ -803,6 +799,7 @@
           </span>
           <span class="text-[10px] text-stone-400 font-semibold">Auto-Analisis</span>
         </div>
+        <div id="an-range-controls-insights" class="mb-2"></div>
         <div id="smart-business-insights" class="space-y-2 text-xs text-stone-200 leading-relaxed"></div>
       </div>
 
@@ -810,12 +807,14 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div class="card-soft rounded-2xl p-3.5 space-y-1">
           <div class="text-[10px] font-bold uppercase text-stone-400">Purata Nilai Order (AOV)</div>
+          <div id="an-range-controls-aov"></div>
           <div id="an-aov-val" class="text-lg font-mono-num font-extrabold text-stone-900">RM 0.00</div>
           <div id="an-avg-profit-val" class="text-[11px] font-semibold text-emerald-700">Purata untung RM 0.00 / order</div>
         </div>
 
         <div class="card-soft rounded-2xl p-3.5 space-y-1">
           <div class="text-[10px] font-bold uppercase text-stone-400">Margin Bersih &amp; Kos Bahan</div>
+          <div id="an-range-controls-margin"></div>
           <div id="an-margin-val" class="text-lg font-mono-num font-extrabold text-emerald-700">0%</div>
           <div id="an-cogs-val" class="text-[11px] font-semibold text-stone-500">Kos bahan RM 0.00 • Diskaun RM 0.00</div>
         </div>
@@ -825,6 +824,7 @@
             <span class="text-[10px] font-bold uppercase text-stone-400">Online vs Cash</span>
             <span id="an-pay-ratio" class="text-[10px] font-mono-num font-bold text-stone-600">0% / 0%</span>
           </div>
+          <div id="an-range-controls-payment" class="mb-1"></div>
           <div class="flex items-center justify-between text-xs font-mono-num font-extrabold">
             <span id="an-online-sales" class="text-emerald-700">Online: RM 0</span>
             <span id="an-cash-sales" class="text-amber-700">Cash: RM 0</span>
@@ -840,6 +840,7 @@
             <span class="text-[10px] font-bold uppercase text-stone-400">Pickup vs COD</span>
             <span id="an-cod-fees-total" class="text-[10px] font-mono-num font-bold text-sky-700">Caj COD: RM 0</span>
           </div>
+          <div id="an-range-controls-delivery" class="mb-1"></div>
           <div class="flex items-center justify-between text-xs font-mono-num font-extrabold">
             <span id="an-pickup-count" class="text-stone-800">Pickup: 0 order</span>
             <span id="an-cod-count" class="text-sky-700">COD: 0 order</span>
@@ -862,6 +863,7 @@
             <button type="button" onclick="setChartPeriod('monthly')" id="btn-period-monthly" class="px-2.5 py-1 rounded-lg text-stone-500">Bulanan</button>
           </div>
         </div>
+        <div id="an-range-controls-salesChart"></div>
         <div class="h-48">
           <canvas id="profitChart"></canvas>
         </div>
@@ -872,6 +874,7 @@
           <h2 class="text-sm font-extrabold text-stone-900">Hari Paling Sibuk (Isnin – Ahad)</h2>
           <p class="text-[11px] text-stone-500">Bantu anda rancang jadual baking &amp; restock bahan sebelum hari puncak</p>
         </div>
+        <div id="an-range-controls-weekdays"></div>
         <div class="h-40">
           <canvas id="weekdayChart"></canvas>
         </div>
@@ -880,11 +883,13 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div class="card-soft rounded-2xl p-4">
           <h3 class="text-sm font-extrabold text-stone-900 mb-2">Perisa Paling Laris</h3>
+          <div id="an-range-controls-flavours"></div>
           <div id="top-flavours-bars" class="space-y-2.5"></div>
         </div>
 
         <div class="card-soft rounded-2xl p-4">
           <h3 class="text-sm font-extrabold text-stone-900 mb-2">Kos, Margin &amp; Unit Terjual</h3>
+          <div id="an-range-controls-productMargins"></div>
           <div id="product-margin-cards" class="space-y-2"></div>
         </div>
       </div>
@@ -920,32 +925,71 @@
   </div>
 
   <!-- ========================================================= -->
+  <!-- ========================================================= -->
   <!-- MODAL: APPEARANCE / THEME SETTINGS                        -->
   <!-- ========================================================= -->
   <div id="appearance-modal" class="fixed inset-0 z-[60] hidden bg-stone-900/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl p-5 max-h-[90vh] overflow-y-auto space-y-4 animate-in">
+    <div class="bg-white w-full max-w-xl rounded-t-3xl sm:rounded-3xl p-5 max-h-[92vh] overflow-y-auto space-y-4 animate-in">
       <div class="flex items-center justify-between border-b border-stone-100 pb-3">
         <div>
           <span class="text-[10px] font-extrabold uppercase tracking-wider bg-amber-100 text-amber-800 px-2 py-0.5 rounded-md">Personalisasi</span>
           <h3 class="text-base font-extrabold text-stone-900 mt-1">Tetapan Tema & Paparan</h3>
-          <p class="text-[11px] text-stone-500 mt-0.5">Ubah penampilan tanpa mengubah data tempahan atau inventori.</p>
+          <p class="text-[11px] text-stone-500 mt-0.5">Pilih warna sendiri daripada colour palette. Semua perubahan dipratonton serta-merta.</p>
         </div>
         <button type="button" onclick="closeAppearanceSettings(false)" class="p-1.5 rounded-xl bg-stone-100 text-stone-600"><i data-lucide="x" class="w-4 h-4"></i></button>
       </div>
 
       <div class="space-y-3.5">
-        <div class="rounded-2xl bg-stone-50 border border-stone-200 p-3.5 space-y-2.5">
-          <div class="flex items-center justify-between">
-            <div><div class="text-xs font-extrabold text-stone-800">Warna utama butang</div><div class="text-[10px] text-stone-500">Warna butang tindakan dan elemen aksen</div></div>
-            <input id="appearance-accent" type="color" value="#f59e0b" oninput="previewAppearanceSettings()" class="w-10 h-9 p-0.5 bg-white border border-stone-200 rounded-lg cursor-pointer" />
+        <div class="rounded-2xl bg-stone-50 border border-stone-200 p-3.5 space-y-3">
+          <div>
+            <div class="text-xs font-extrabold text-stone-800">Colour palette</div>
+            <div class="text-[10px] text-stone-500">Tekan bulatan warna atau buka pemilih warna untuk memilih mana-mana kod warna.</div>
           </div>
-          <div class="flex flex-wrap gap-2">
-            <button type="button" onclick="setAppearanceAccent('#f59e0b')" class="w-7 h-7 rounded-full border-2 border-white ring-1 ring-stone-300" style="background:#f59e0b" title="Amber"></button>
-            <button type="button" onclick="setAppearanceAccent('#2563eb')" class="w-7 h-7 rounded-full border-2 border-white ring-1 ring-stone-300" style="background:#2563eb" title="Biru"></button>
-            <button type="button" onclick="setAppearanceAccent('#0f766e')" class="w-7 h-7 rounded-full border-2 border-white ring-1 ring-stone-300" style="background:#0f766e" title="Teal"></button>
-            <button type="button" onclick="setAppearanceAccent('#16a34a')" class="w-7 h-7 rounded-full border-2 border-white ring-1 ring-stone-300" style="background:#16a34a" title="Hijau"></button>
-            <button type="button" onclick="setAppearanceAccent('#7c3aed')" class="w-7 h-7 rounded-full border-2 border-white ring-1 ring-stone-300" style="background:#7c3aed" title="Ungu"></button>
-            <button type="button" onclick="setAppearanceAccent('#e11d48')" class="w-7 h-7 rounded-full border-2 border-white ring-1 ring-stone-300" style="background:#e11d48" title="Merah jambu"></button>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="space-y-2">
+              <div class="flex items-center justify-between gap-2">
+                <div><div class="text-[11px] font-extrabold text-stone-700">Warna utama / button</div><div class="text-[10px] text-stone-500">Butang tindakan dan aksen</div></div>
+                <input id="appearance-accent" type="color" value="#f59e0b" oninput="previewAppearanceSettings()" class="w-11 h-9 p-0.5 bg-white border border-stone-200 rounded-lg cursor-pointer" />
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <button type="button" onclick="setAppearanceColor('accent','#f59e0b')" class="w-6 h-6 rounded-full ring-1 ring-stone-300 border-2 border-white" style="background:#f59e0b" title="Amber"></button>
+                <button type="button" onclick="setAppearanceColor('accent','#2563eb')" class="w-6 h-6 rounded-full ring-1 ring-stone-300 border-2 border-white" style="background:#2563eb" title="Biru"></button>
+                <button type="button" onclick="setAppearanceColor('accent','#0f766e')" class="w-6 h-6 rounded-full ring-1 ring-stone-300 border-2 border-white" style="background:#0f766e" title="Teal"></button>
+                <button type="button" onclick="setAppearanceColor('accent','#16a34a')" class="w-6 h-6 rounded-full ring-1 ring-stone-300 border-2 border-white" style="background:#16a34a" title="Hijau"></button>
+                <button type="button" onclick="setAppearanceColor('accent','#7c3aed')" class="w-6 h-6 rounded-full ring-1 ring-stone-300 border-2 border-white" style="background:#7c3aed" title="Ungu"></button>
+                <button type="button" onclick="setAppearanceColor('accent','#e11d48')" class="w-6 h-6 rounded-full ring-1 ring-stone-300 border-2 border-white" style="background:#e11d48" title="Merah jambu"></button>
+                <button type="button" onclick="setAppearanceColor('accent','#0f172a')" class="w-6 h-6 rounded-full ring-1 ring-stone-300 border-2 border-white" style="background:#0f172a" title="Navy"></button>
+                <button type="button" onclick="setAppearanceColor('accent','#a16207')" class="w-6 h-6 rounded-full ring-1 ring-stone-300 border-2 border-white" style="background:#a16207" title="Coklat"></button>
+              </div>
+            </div>
+            <div class="space-y-2">
+              <div class="flex items-center justify-between gap-2">
+                <div><div class="text-[11px] font-extrabold text-stone-700">Background aplikasi</div><div class="text-[10px] text-stone-500">Latar belakang halaman</div></div>
+                <input id="appearance-bg" type="color" value="#faf8f5" oninput="previewAppearanceSettings()" class="w-11 h-9 p-0.5 bg-white border border-stone-200 rounded-lg cursor-pointer" />
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <button type="button" onclick="setAppearanceColor('background','#faf8f5')" class="w-6 h-6 rounded-full ring-1 ring-stone-300 border-2 border-white" style="background:#faf8f5" title="Warm cream"></button>
+                <button type="button" onclick="setAppearanceColor('background','#f8fafc')" class="w-6 h-6 rounded-full ring-1 ring-stone-300 border-2 border-white" style="background:#f8fafc" title="Soft grey"></button>
+                <button type="button" onclick="setAppearanceColor('background','#f0fdf4')" class="w-6 h-6 rounded-full ring-1 ring-stone-300 border-2 border-white" style="background:#f0fdf4" title="Mint"></button>
+                <button type="button" onclick="setAppearanceColor('background','#f5f3ff')" class="w-6 h-6 rounded-full ring-1 ring-stone-300 border-2 border-white" style="background:#f5f3ff" title="Lavender"></button>
+                <button type="button" onclick="setAppearanceColor('background','#fff7ed')" class="w-6 h-6 rounded-full ring-1 ring-stone-300 border-2 border-white" style="background:#fff7ed" title="Peach"></button>
+                <button type="button" onclick="setAppearanceColor('background','#eff6ff')" class="w-6 h-6 rounded-full ring-1 ring-stone-300 border-2 border-white" style="background:#eff6ff" title="Ice blue"></button>
+                <button type="button" onclick="setAppearanceColor('background','#fdf2f8')" class="w-6 h-6 rounded-full ring-1 ring-stone-300 border-2 border-white" style="background:#fdf2f8" title="Rose"></button>
+                <button type="button" onclick="setAppearanceColor('background','#f5f5f4')" class="w-6 h-6 rounded-full ring-1 ring-stone-300 border-2 border-white" style="background:#f5f5f4" title="Stone"></button>
+              </div>
+            </div>
+            <label class="space-y-1">
+              <span class="block text-[11px] font-extrabold text-stone-700">Warna tulisan</span>
+              <input id="appearance-text" type="color" value="#1c1917" oninput="previewAppearanceSettings()" class="w-full h-9 p-1 bg-white border border-stone-200 rounded-lg cursor-pointer" />
+            </label>
+            <label class="space-y-1">
+              <span class="block text-[11px] font-extrabold text-stone-700">Warna permukaan kad</span>
+              <input id="appearance-card" type="color" value="#ffffff" oninput="previewAppearanceSettings()" class="w-full h-9 p-1 bg-white border border-stone-200 rounded-lg cursor-pointer" />
+            </label>
+            <label class="space-y-1 sm:col-span-2">
+              <span class="block text-[11px] font-extrabold text-stone-700">Warna border / garisan</span>
+              <input id="appearance-border" type="color" value="#ede8e0" oninput="previewAppearanceSettings()" class="w-full h-9 p-1 bg-white border border-stone-200 rounded-lg cursor-pointer" />
+            </label>
           </div>
         </div>
 
@@ -962,38 +1006,24 @@
             </select>
           </label>
           <label class="space-y-1">
-            <span class="block text-xs font-extrabold text-stone-700">Warna latar aplikasi</span>
-            <select id="appearance-bg" onchange="previewAppearanceSettings()" class="w-full px-3 py-2.5 text-xs rounded-xl border border-stone-200 bg-white">
-              <option value="#faf8f5">Warm Cream (asal)</option>
-              <option value="#f8fafc">Soft Grey</option>
-              <option value="#f2f8f5">Soft Mint</option>
-              <option value="#f7f5fb">Soft Lavender</option>
-              <option value="#fffaf2">Vanilla</option>
-            </select>
-          </label>
-          <label class="space-y-1">
             <span class="block text-xs font-extrabold text-stone-700">Saiz tulisan</span>
             <select id="appearance-size" onchange="previewAppearanceSettings()" class="w-full px-3 py-2.5 text-xs rounded-xl border border-stone-200 bg-white">
-              <option value="15px">Kecil</option>
-              <option value="16px">Normal</option>
-              <option value="17px">Besar</option>
+              <option value="15px">Kecil</option><option value="16px">Normal</option><option value="17px">Besar</option><option value="18px">Sangat besar</option>
             </select>
           </label>
-          <label class="space-y-1">
+          <label class="space-y-1 sm:col-span-2">
             <span class="block text-xs font-extrabold text-stone-700">Bayang kad</span>
             <select id="appearance-shadow" onchange="previewAppearanceSettings()" class="w-full px-3 py-2.5 text-xs rounded-xl border border-stone-200 bg-white">
-              <option value="soft">Lembut</option>
-              <option value="strong">Lebih jelas</option>
-              <option value="none">Tanpa bayang</option>
+              <option value="soft">Lembut</option><option value="strong">Lebih jelas</option><option value="none">Tanpa bayang</option>
             </select>
           </label>
         </div>
 
-        <div class="rounded-xl border border-stone-200 p-3 space-y-2">
-          <div class="text-[10px] font-bold uppercase tracking-wide text-stone-400">Pratonton</div>
+        <div class="rounded-xl border border-stone-200 p-3 space-y-2" style="background:var(--ui-card-bg)">
+          <div class="text-[10px] font-bold uppercase tracking-wide text-stone-400">Pratonton langsung</div>
           <div class="flex items-center justify-between gap-3">
-            <div class="min-w-0"><div class="text-xs font-extrabold text-stone-800">Contoh butang utama</div><div class="text-[10px] text-stone-500">Tema akan digunakan pada paparan aplikasi.</div></div>
-            <span class="px-3 py-2 rounded-xl text-[10px] font-extrabold" style="background:var(--ui-accent);color:var(--ui-accent-contrast)">Simpan</span>
+            <div class="min-w-0"><div class="text-xs font-extrabold" style="color:var(--ui-text-color)">Contoh paparan kad</div><div class="text-[10px]" style="color:var(--ui-text-muted)">Warna, font dan latar akan berubah serta-merta.</div></div>
+            <span class="px-3 py-2 rounded-xl text-[10px] font-extrabold" style="background:var(--ui-accent);color:var(--ui-accent-contrast)">Contoh button</span>
           </div>
         </div>
       </div>
@@ -1006,7 +1036,6 @@
     </div>
   </div>
 
-  <!-- ========================================================= -->
   <!-- MODAL 1: TAMBAH / EDIT ORDER                              -->
   <!-- ========================================================= -->
   <div id="order-modal" class="fixed inset-0 z-50 hidden bg-stone-900/50 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
@@ -1300,6 +1329,9 @@
         accent: '#f59e0b',
         font: "'Plus Jakarta Sans', sans-serif",
         background: '#faf8f5',
+        textColor: '#1c1917',
+        cardColor: '#ffffff',
+        borderColor: '#ede8e0',
         fontSize: '16px',
         shadow: 'soft'
       };
@@ -1418,13 +1450,13 @@
     };
 
     let ordersListExpanded = false;
+    let ordersFilterPanelOpen = false;
     let nextOrderIndex = 0;
     let ordersListFilter = {
       preset: 'all', from: '', to: '', status: 'all', payMethod: 'all', delivery: 'all', search: '', sort: 'upcoming'
     };
 
     let stockFilter = { category: 'all', search: '', sort: 'low' };
-    let analisisDatePreset = 'all';
 
     let editingOrderId = null;
     let modalSizeId = '';
@@ -1577,51 +1609,83 @@
       return luminance > 0.48 ? '#1c1917' : '#ffffff';
     }
 
+    function blendThemeColors(foreground, background, amount) {
+      const a = String(foreground || '#1c1917').replace('#', '');
+      const b = String(background || '#faf8f5').replace('#', '');
+      if (!/^[0-9a-f]{6}$/i.test(a) || !/^[0-9a-f]{6}$/i.test(b)) return foreground;
+      const vals = [0, 2, 4].map(i => Math.round(
+        parseInt(a.slice(i, i + 2), 16) * (1 - amount) + parseInt(b.slice(i, i + 2), 16) * amount
+      ));
+      return '#' + vals.map(v => v.toString(16).padStart(2, '0')).join('');
+    }
+
     function applyAppearanceSettings(settings = config.appearance || getDefaultAppearance()) {
       const appearance = Object.assign({}, getDefaultAppearance(), settings || {});
       const root = document.documentElement;
       const accent = appearance.accent || '#f59e0b';
-      const darkMix = (hex) => {
-        const raw = hex.replace('#', '');
-        if (!/^[0-9a-f]{6}$/i.test(raw)) return '#92400e';
-        const rgb = [0, 2, 4].map(i => parseInt(raw.slice(i, i + 2), 16));
-        return '#' + rgb.map(v => Math.round(v * 0.62).toString(16).padStart(2, '0')).join('');
-      };
+      const background = appearance.background || '#faf8f5';
+      const textColor = appearance.textColor || '#1c1917';
+      const cardColor = appearance.cardColor || '#ffffff';
+      const borderColor = appearance.borderColor || '#ede8e0';
+      const darkMix = (hex) => blendThemeColors(hex, '#000000', 0.30);
+      const accentDark = darkMix(accent);
+      const panelBg = blendThemeColors(cardColor, background, 0.48);
+      const mutedText = blendThemeColors(textColor, background, 0.28);
       root.style.setProperty('--ui-accent', accent);
       root.style.setProperty('--ui-accent-hover', darkMix(accent));
-      root.style.setProperty('--ui-accent-soft', accent.toLowerCase() === '#f59e0b' ? '#fffbeb' : `${accent}18`);
-      if (accent.toLowerCase() === '#f59e0b') root.removeAttribute('data-theme-accent-custom');
-      else root.setAttribute('data-theme-accent-custom', 'true');
-      root.style.setProperty('--ui-accent-dark', darkMix(accent));
+      root.style.setProperty('--ui-accent-soft', blendThemeColors(accent, '#ffffff', 0.88));
+      root.style.setProperty('--ui-accent-dark', accentDark);
       root.style.setProperty('--ui-accent-contrast', getThemeContrast(accent));
-      root.style.setProperty('--ui-page-bg', appearance.background || '#faf8f5');
+      root.style.setProperty('--ui-page-bg', background);
+      root.style.setProperty('--ui-card-bg', cardColor);
+      root.style.setProperty('--ui-panel-bg', panelBg);
+      root.style.setProperty('--ui-text-color', textColor);
+      root.style.setProperty('--ui-text-muted', mutedText);
+      root.style.setProperty('--ui-border-color', borderColor);
       root.style.setProperty('--ui-root-size', appearance.fontSize || '16px');
       root.style.setProperty('--ui-card-shadow', appearance.shadow === 'none'
         ? 'none'
         : (appearance.shadow === 'strong' ? '0 5px 18px -4px rgba(28, 25, 23, 0.13)' : '0 2px 10px -2px rgba(28, 25, 23, 0.04)'));
       document.body.style.fontFamily = appearance.font || "'Plus Jakarta Sans', sans-serif";
-      document.body.style.backgroundColor = appearance.background || '#faf8f5';
+      document.body.style.backgroundColor = background;
+      document.body.style.color = textColor;
+      const isCustom = accent.toLowerCase() !== '#f59e0b' || background.toLowerCase() !== '#faf8f5' ||
+        textColor.toLowerCase() !== '#1c1917' || cardColor.toLowerCase() !== '#ffffff' || borderColor.toLowerCase() !== '#ede8e0';
+      if (isCustom) root.setAttribute('data-theme-custom', 'true');
+      else root.removeAttribute('data-theme-custom');
+      if (accent.toLowerCase() === '#f59e0b') root.removeAttribute('data-theme-accent-custom');
+      else root.setAttribute('data-theme-accent-custom', 'true');
       const themeMeta = document.querySelector('meta[name="theme-color"]');
-      if (themeMeta) themeMeta.setAttribute('content', accent.toLowerCase() === '#f59e0b' ? '#1c1917' : accent);
+      if (themeMeta) themeMeta.setAttribute('content', accent);
     }
 
     function readAppearanceForm() {
       return {
         accent: document.getElementById('appearance-accent').value || '#f59e0b',
         font: document.getElementById('appearance-font').value,
-        background: document.getElementById('appearance-bg').value,
+        background: document.getElementById('appearance-bg').value || '#faf8f5',
+        textColor: document.getElementById('appearance-text').value || '#1c1917',
+        cardColor: document.getElementById('appearance-card').value || '#ffffff',
+        borderColor: document.getElementById('appearance-border').value || '#ede8e0',
         fontSize: document.getElementById('appearance-size').value,
         shadow: document.getElementById('appearance-shadow').value
       };
     }
 
-    function openAppearanceSettings() {
-      const appearance = Object.assign({}, getDefaultAppearance(), config.appearance || {});
+    function populateAppearanceForm(appearance) {
       document.getElementById('appearance-accent').value = appearance.accent;
       document.getElementById('appearance-font').value = appearance.font;
       document.getElementById('appearance-bg').value = appearance.background;
+      document.getElementById('appearance-text').value = appearance.textColor;
+      document.getElementById('appearance-card').value = appearance.cardColor;
+      document.getElementById('appearance-border').value = appearance.borderColor;
       document.getElementById('appearance-size').value = appearance.fontSize;
       document.getElementById('appearance-shadow').value = appearance.shadow;
+    }
+
+    function openAppearanceSettings() {
+      const appearance = Object.assign({}, getDefaultAppearance(), config.appearance || {});
+      populateAppearanceForm(appearance);
       document.getElementById('appearance-modal').classList.remove('hidden');
       if (window.lucide) lucide.createIcons();
     }
@@ -1630,18 +1694,18 @@
       applyAppearanceSettings(readAppearanceForm());
     }
 
-    function setAppearanceAccent(color) {
-      document.getElementById('appearance-accent').value = color;
+    function setAppearanceColor(target, color) {
+      const ids = { accent: 'appearance-accent', background: 'appearance-bg', text: 'appearance-text', card: 'appearance-card', border: 'appearance-border' };
+      const field = document.getElementById(ids[target]);
+      if (!field) return;
+      field.value = color;
       previewAppearanceSettings();
     }
 
+    function setAppearanceAccent(color) { setAppearanceColor('accent', color); }
+
     function resetAppearanceSettings() {
-      const defaults = getDefaultAppearance();
-      document.getElementById('appearance-accent').value = defaults.accent;
-      document.getElementById('appearance-font').value = defaults.font;
-      document.getElementById('appearance-bg').value = defaults.background;
-      document.getElementById('appearance-size').value = defaults.fontSize;
-      document.getElementById('appearance-shadow').value = defaults.shadow;
+      populateAppearanceForm(getDefaultAppearance());
       previewAppearanceSettings();
     }
 
@@ -1728,20 +1792,33 @@
     }
 
     function toggleOrdersFilterView() {
-      ordersListExpanded = !ordersListExpanded;
+      ordersFilterPanelOpen = !ordersFilterPanelOpen;
       const panel = document.getElementById('orders-filter-panel');
-      const btn = document.getElementById('btn-toggle-all-orders');
-      const lbl = document.getElementById('btn-toggle-all-orders-label');
+      const btn = document.getElementById('btn-toggle-orders-filter');
+      const label = document.getElementById('btn-orders-filter-label');
+      panel.classList.toggle('hidden', !ordersFilterPanelOpen);
+      btn.className = ordersFilterPanelOpen
+        ? 'text-[10px] sm:text-[11px] font-bold bg-amber-500 hover:bg-amber-600 text-stone-950 px-2.5 py-1.5 rounded-xl flex items-center gap-1 shadow-xs transition'
+        : 'text-[10px] sm:text-[11px] font-bold bg-stone-900 hover:bg-stone-800 text-white px-2.5 py-1.5 rounded-xl flex items-center gap-1 shadow-xs transition';
+      label.textContent = ordersFilterPanelOpen ? 'Tutup Filter' : (ordersListExpanded ? 'Filter Semua' : 'Filter 5 Terkini');
+      document.getElementById('orders-filter-title').textContent = ordersListExpanded
+        ? 'Tapis Semua Rekod Tempahan'
+        : 'Tapis 5 Tempahan Terkini';
+      renderOrdersSection();
+    }
 
-      if (ordersListExpanded) {
-        panel.classList.remove('hidden');
-        btn.className = 'text-[11px] font-bold bg-amber-500 hover:bg-amber-600 text-stone-950 px-3 py-1.5 rounded-xl flex items-center gap-1.5 shrink-0 shadow-xs transition';
-        lbl.textContent = 'Tutup Filter (5 Terkini)';
-      } else {
-        panel.classList.add('hidden');
-        btn.className = 'text-[11px] font-bold bg-stone-900 hover:bg-stone-800 text-white px-3 py-1.5 rounded-xl flex items-center gap-1.5 shrink-0 shadow-xs transition';
-        lbl.textContent = 'Filter & Lihat Semua';
-      }
+    function toggleOrdersShowAll() {
+      ordersListExpanded = !ordersListExpanded;
+      const label = document.getElementById('btn-toggle-all-orders-label');
+      const btn = document.getElementById('btn-toggle-all-orders');
+      label.textContent = ordersListExpanded ? 'Lihat 5 Terkini' : 'Lihat Semua';
+      btn.className = ordersListExpanded
+        ? 'text-[10px] sm:text-[11px] font-bold bg-amber-100 hover:bg-amber-200 text-amber-900 px-2.5 py-1.5 rounded-xl flex items-center gap-1 shadow-xs transition'
+        : 'text-[10px] sm:text-[11px] font-bold bg-stone-100 hover:bg-stone-200 text-stone-700 px-2.5 py-1.5 rounded-xl flex items-center gap-1 shadow-xs transition';
+      const title = document.getElementById('orders-filter-title');
+      if (title) title.textContent = ordersListExpanded ? 'Tapis Semua Rekod Tempahan' : 'Tapis 5 Tempahan Terkini';
+      const filterLabel = document.getElementById('btn-orders-filter-label');
+      if (filterLabel && !ordersFilterPanelOpen) filterLabel.textContent = ordersListExpanded ? 'Filter Semua' : 'Filter 5 Terkini';
       renderOrdersSection();
     }
 
@@ -1825,25 +1902,6 @@
       setOrdersListPayMethod('all');
       setOrdersListDelivery('all');
       setOrdersListDatePreset('all');
-    }
-
-    function setAnalisisDatePreset(preset) {
-      analisisDatePreset = preset;
-      ['all', 'today', 'week', 'month', 'custom'].forEach(p => {
-        const btn = document.getElementById(`a-preset-${p}`);
-        btn.className = p === preset
-          ? 'px-2.5 py-1.5 rounded-xl text-[11px] font-bold bg-stone-900 text-white shrink-0'
-          : 'px-2.5 py-1.5 rounded-xl text-[11px] font-bold bg-stone-100 text-stone-600 shrink-0';
-      });
-      const customBox = document.getElementById('analisis-custom-range');
-      if (preset === 'custom') {
-        customBox.classList.remove('hidden');
-        if (!document.getElementById('analisis-date-from').value) document.getElementById('analisis-date-from').value = getTodayISO();
-        if (!document.getElementById('analisis-date-to').value) document.getElementById('analisis-date-to').value = getTodayISO();
-      } else {
-        customBox.classList.add('hidden');
-      }
-      renderAnalytics();
     }
 
     // =========================================================
@@ -2545,89 +2603,84 @@
     }
 
     function getSortedActiveOrders() {
+      const today = getTodayISO();
       return orders
-        .filter(o => o.status === 'Active')
-        .sort((a, b) => `${a.date || ''}T${a.time || '00:00'}`.localeCompare(`${b.date || ''}T${b.time || '00:00'}`));
+        .filter(o => o.status === 'Active' && String(o.date || '') >= today)
+        .sort((a, b) => getOrderDateTimeKey(a).localeCompare(getOrderDateTimeKey(b)));
     }
 
     function moveNextOrder(direction) {
+      // Kept as a safe compatibility hook for older bookmarks/buttons.
       const activeOrders = getSortedActiveOrders();
       if (!activeOrders.length) return;
       nextOrderIndex = Math.min(activeOrders.length - 1, Math.max(0, nextOrderIndex + direction));
-      renderNextOrderCard();
+      const target = document.getElementById(`next-order-${nextOrderIndex}`);
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
     function renderNextOrderCard() {
       const allActiveOrders = getSortedActiveOrders();
       const nextCard = document.getElementById('next-order-container');
+      nextOrderIndex = 0;
 
       if (allActiveOrders.length > 0) {
-        if (nextOrderIndex >= allActiveOrders.length) nextOrderIndex = allActiveOrders.length - 1;
-        if (nextOrderIndex < 0) nextOrderIndex = 0;
-        const nxt = allActiveOrders[nextOrderIndex];
-        const balance = Number(nxt.total || 0) - Number(nxt.paidAmount || 0);
-        const delM = nxt.deliveryMethod || 'Pickup';
-        const payM = nxt.paymentMethod || 'Online';
-        const prevDisabled = nextOrderIndex === 0;
-        const nextDisabled = nextOrderIndex === allActiveOrders.length - 1;
-
         nextCard.innerHTML = `
-          <div class="rounded-3xl bg-stone-900 text-white p-4 sm:p-5 shadow-md space-y-3">
-            <div class="flex items-center justify-between gap-2">
-              <div class="flex items-center gap-1.5 flex-wrap">
-                <span class="text-[10px] font-extrabold uppercase tracking-wider bg-amber-500 text-stone-950 px-2.5 py-0.5 rounded-full">Next Order</span>
-                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${delM === 'COD' ? 'bg-sky-500/20 text-sky-300 border border-sky-400/30' : 'bg-stone-800 text-stone-300'}">${delM === 'COD' ? 'COD' : 'Self Pickup'}</span>
-                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">${payM}</span>
-              </div>
-              <div class="flex items-center gap-2 shrink-0">
-                <span class="text-xs font-mono-num text-amber-300 font-bold">${nxt.date} • ${nxt.time}</span>
-                <button type="button" onclick="openOrderModal('${nxt.id}')" class="text-[11px] font-bold bg-stone-800 hover:bg-stone-700 text-stone-200 px-2.5 py-1 rounded-lg flex items-center gap-1" title="Edit Order / Notes">
-                  <i data-lucide="pencil" class="w-3 h-3 text-amber-400"></i> Edit
-                </button>
-              </div>
-            </div>
-            <div class="flex items-center justify-between -mt-1">
-              <span class="text-[10px] text-stone-400">Tempahan aktif ${nextOrderIndex + 1} daripada ${allActiveOrders.length}</span>
-              <div class="flex items-center gap-1.5">
-                <button type="button" onclick="moveNextOrder(-1)" ${prevDisabled ? 'disabled' : ''} aria-label="Tempahan sebelumnya" title="Tempahan sebelumnya" class="w-7 h-7 rounded-lg border border-stone-700 flex items-center justify-center ${prevDisabled ? 'opacity-30 cursor-not-allowed' : 'hover:bg-stone-700'}">
-                  <i data-lucide="chevron-left" class="w-4 h-4"></i>
-                </button>
-                <button type="button" onclick="moveNextOrder(1)" ${nextDisabled ? 'disabled' : ''} aria-label="Tempahan seterusnya" title="Tempahan seterusnya" class="w-7 h-7 rounded-lg border border-stone-700 flex items-center justify-center ${nextDisabled ? 'opacity-30 cursor-not-allowed' : 'hover:bg-stone-700'}">
-                  <i data-lucide="chevron-right" class="w-4 h-4"></i>
-                </button>
-              </div>
-            </div>
+          <div class="flex items-center justify-between gap-2 px-1 mb-2">
             <div>
-              <h2 class="text-lg font-extrabold">${nxt.customer}</h2>
-              <p class="text-xs text-stone-300 mt-0.5 leading-relaxed">${getOrderDisplaySummary(nxt)}</p>
-              ${nxt.codAddress && delM === 'COD' ? `<div class="text-[11px] text-sky-300 mt-1 flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3"></i> ${nxt.codAddress}</div>` : ''}
-              ${nxt.notes ? `
-                <div class="mt-2 px-3 py-1.5 rounded-xl bg-amber-500/15 border border-amber-400/30 text-[11px] text-amber-200 flex items-start gap-1.5">
-                  <i data-lucide="message-square" class="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5"></i>
-                  <span><strong>Note:</strong> ${nxt.notes}</span>
-                </div>
-              ` : ''}
+              <h2 class="text-sm font-extrabold text-stone-900">Next Orders</h2>
+              <p class="text-[10px] text-stone-500">Semua tempahan belum selesai bermula hari ini dan seterusnya</p>
             </div>
-            <div class="flex flex-wrap items-center justify-between pt-2 border-t border-stone-800 gap-2">
-              <div>
-                <div class="text-[10px] text-stone-400">Status Bayaran (${payM})</div>
-                <div class="text-xs font-mono-num font-bold ${balance > 0 ? 'text-rose-400' : 'text-emerald-400'}">
-                  ${balance > 0 ? `Baki ${fmtMoney(balance)}` : `Lunas (${fmtMoney(nxt.total)})`}
-                </div>
-              </div>
-              <div class="flex items-center gap-1.5">
-                ${balance > 0 ? `<button type="button" onclick="markOrderPaid('${nxt.id}')" class="text-[11px] font-bold bg-stone-800 hover:bg-stone-700 text-amber-300 px-3 py-2 rounded-xl">Sahkan Baki</button>` : ''}
-                <button type="button" onclick="markOrderDone('${nxt.id}')" class="text-[11px] font-bold bg-emerald-500 hover:bg-emerald-600 text-stone-950 px-3.5 py-2 rounded-xl">Tandakan Selesai</button>
-              </div>
-            </div>
+            <span class="text-[10px] font-extrabold bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full">${allActiveOrders.length} belum selesai</span>
+          </div>
+          <div class="space-y-2.5">
+            ${allActiveOrders.map((nxt, index) => {
+              const balance = Number(nxt.total || 0) - Number(nxt.paidAmount || 0);
+              const delM = nxt.deliveryMethod || 'Pickup';
+              const payM = nxt.paymentMethod || 'Online';
+              const dateLabel = nxt.date === getTodayISO() ? 'HARI INI' : 'AKAN DATANG';
+              return `
+                <article id="next-order-${index}" class="rounded-3xl bg-stone-900 text-white p-4 sm:p-5 shadow-md space-y-3">
+                  <div class="flex items-start justify-between gap-2">
+                    <div class="flex items-center gap-1.5 flex-wrap min-w-0">
+                      <span class="text-[10px] font-extrabold uppercase tracking-wider bg-amber-500 text-stone-950 px-2.5 py-0.5 rounded-full">${index === 0 ? 'Next Order' : `Order #${index + 1}`}</span>
+                      <span class="text-[9px] font-extrabold px-2 py-0.5 rounded-full ${dateLabel === 'HARI INI' ? 'bg-rose-500/20 text-rose-200 border border-rose-400/30' : 'bg-sky-500/20 text-sky-200 border border-sky-400/30'}">${dateLabel}</span>
+                      <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${delM === 'COD' ? 'bg-sky-500/20 text-sky-300 border border-sky-400/30' : 'bg-stone-800 text-stone-300'}">${delM === 'COD' ? 'COD' : 'Self Pickup'}</span>
+                      <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">${payM}</span>
+                    </div>
+                    <button type="button" onclick="openOrderModal('${nxt.id}')" class="text-[10px] font-bold bg-stone-800 hover:bg-stone-700 text-stone-200 px-2.5 py-1.5 rounded-lg flex items-center gap-1 shrink-0" title="Edit Order / Notes">
+                      <i data-lucide="pencil" class="w-3 h-3 text-amber-400"></i> Edit
+                    </button>
+                  </div>
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="text-[10px] text-stone-400">${index + 1} daripada ${allActiveOrders.length} tempahan</span>
+                    <span class="text-xs font-mono-num text-amber-300 font-extrabold">${nxt.date} • ${nxt.time}</span>
+                  </div>
+                  <div>
+                    <h3 class="text-base font-extrabold">${nxt.customer}</h3>
+                    <p class="text-xs text-stone-300 mt-0.5 leading-relaxed">${getOrderDisplaySummary(nxt)}</p>
+                    ${nxt.codAddress && delM === 'COD' ? `<div class="text-[11px] text-sky-300 mt-1 flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3"></i> ${nxt.codAddress}</div>` : ''}
+                    ${nxt.notes ? `<div class="mt-2 px-3 py-1.5 rounded-xl bg-amber-500/15 border border-amber-400/30 text-[11px] text-amber-200 flex items-start gap-1.5"><i data-lucide="message-square" class="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5"></i><span><strong>Nota:</strong> ${nxt.notes}</span></div>` : ''}
+                  </div>
+                  <div class="flex flex-wrap items-center justify-between pt-2 border-t border-stone-800 gap-2">
+                    <div>
+                      <div class="text-[10px] text-stone-400">Status Bayaran (${payM})</div>
+                      <div class="text-xs font-mono-num font-bold ${balance > 0 ? 'text-rose-400' : 'text-emerald-400'}">${balance > 0 ? `Baki ${fmtMoney(balance)}` : `Lunas (${fmtMoney(nxt.total)})`}</div>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                      ${balance > 0 ? `<button type="button" onclick="markOrderPaid('${nxt.id}')" class="text-[10px] font-bold bg-stone-800 hover:bg-stone-700 text-amber-300 px-3 py-2 rounded-xl">Sahkan Baki</button>` : ''}
+                      <button type="button" onclick="markOrderDone('${nxt.id}')" class="text-[10px] font-bold bg-emerald-500 hover:bg-emerald-600 text-stone-950 px-3.5 py-2 rounded-xl">Tandakan Selesai</button>
+                    </div>
+                  </div>
+                </article>
+              `;
+            }).join('')}
           </div>
         `;
       } else {
-        nextOrderIndex = 0;
         nextCard.innerHTML = `
           <div class="card-soft rounded-2xl p-5 text-center space-y-1">
-            <div class="text-sm font-bold text-stone-800">Tiada Tempahan Aktif Buat Masa Ini</div>
-            <p class="text-xs text-stone-500">Tekan butang <strong>+ Order Baharu</strong> untuk merekod tempahan pelanggan.</p>
+            <div class="text-sm font-bold text-stone-800">Tiada Tempahan Belum Selesai Bermula Hari Ini</div>
+            <p class="text-xs text-stone-500">Semua tempahan hari ini dan akan datang telah selesai, atau belum ada tempahan baharu.</p>
           </div>
         `;
       }
@@ -2691,47 +2744,47 @@
       const footerEl = document.getElementById('orders-list-footer');
       const badgeEl = document.getElementById('orders-count-badge');
 
-      let displayOrders = [];
-      if (!ordersListExpanded) {
-        displayOrders = [...orders].reverse().slice(0, 5);
-        badgeEl.textContent = `${Math.min(5, orders.length)} / ${orders.length} Terkini`;
-      } else {
-        // Every active filter group is an alternative (OR). Search text narrows the matches afterwards.
-        const criteria = [];
-        if ((ordersListFilter.preset || 'all') !== 'all') {
-          criteria.push(o => filterOrdersBySpec([o], ordersListFilter).length > 0);
-        }
-        if (ordersListFilter.status !== 'all') {
-          criteria.push(o => {
-            if (ordersListFilter.status === 'Active') return o.status === 'Active';
-            if (ordersListFilter.status === 'Completed') return o.status === 'Completed';
-            if (ordersListFilter.status === 'Deposit') return (Number(o.total || 0) - Number(o.paidAmount || 0)) > 0;
-            if (ordersListFilter.status === 'Paid') return (Number(o.total || 0) - Number(o.paidAmount || 0)) <= 0;
-            return false;
-          });
-        }
-        if (ordersListFilter.payMethod !== 'all') {
-          criteria.push(o => (o.paymentMethod || 'Online') === ordersListFilter.payMethod);
-        }
-        if (ordersListFilter.delivery !== 'all') {
-          criteria.push(o => (o.deliveryMethod || 'Pickup') === ordersListFilter.delivery);
-        }
-
-        let filtered = criteria.length ? orders.filter(o => criteria.some(matches => matches(o))) : [...orders];
-        const q = (ordersListFilter.search || '').trim().toLowerCase();
-        if (q) {
-          filtered = filtered.filter(o =>
-            String(o.customer || '').toLowerCase().includes(q) ||
-            String(o.id || '').toLowerCase().includes(q) ||
-            String(o.notes || '').toLowerCase().includes(q) ||
-            String(o.codAddress || '').toLowerCase().includes(q) ||
-            getOrderDisplaySummary(o).toLowerCase().includes(q)
-          );
-        }
-
-        displayOrders = sortOrderRecords(filtered, ordersListFilter.sort || 'upcoming');
-        badgeEl.textContent = `${displayOrders.length} daripada ${orders.length} rekod`;
+      // The filter is available for both the default five recent orders and the full order history.
+      const baseOrders = ordersListExpanded ? [...orders] : [...orders].reverse().slice(0, 5);
+      const criteria = [];
+      if ((ordersListFilter.preset || 'all') !== 'all') {
+        criteria.push(o => filterOrdersBySpec([o], ordersListFilter).length > 0);
       }
+      if (ordersListFilter.status !== 'all') {
+        criteria.push(o => {
+          if (ordersListFilter.status === 'Active') return o.status === 'Active';
+          if (ordersListFilter.status === 'Completed') return o.status === 'Completed';
+          if (ordersListFilter.status === 'Deposit') return (Number(o.total || 0) - Number(o.paidAmount || 0)) > 0;
+          if (ordersListFilter.status === 'Paid') return (Number(o.total || 0) - Number(o.paidAmount || 0)) <= 0;
+          return false;
+        });
+      }
+      if (ordersListFilter.payMethod !== 'all') {
+        criteria.push(o => (o.paymentMethod || 'Online') === ordersListFilter.payMethod);
+      }
+      if (ordersListFilter.delivery !== 'all') {
+        criteria.push(o => (o.deliveryMethod || 'Pickup') === ordersListFilter.delivery);
+      }
+
+      // Different filter groups are alternatives (OR). Search is an additional text constraint.
+      let filtered = criteria.length ? baseOrders.filter(o => criteria.some(matches => matches(o))) : baseOrders;
+      const q = (ordersListFilter.search || '').trim().toLowerCase();
+      if (q) {
+        filtered = filtered.filter(o =>
+          String(o.customer || '').toLowerCase().includes(q) ||
+          String(o.id || '').toLowerCase().includes(q) ||
+          String(o.notes || '').toLowerCase().includes(q) ||
+          String(o.codAddress || '').toLowerCase().includes(q) ||
+          getOrderDisplaySummary(o).toLowerCase().includes(q)
+        );
+      }
+      const hasUserFilter = criteria.length > 0 || Boolean(q);
+      let displayOrders = (!ordersListExpanded && !hasUserFilter)
+        ? [...filtered]
+        : sortOrderRecords(filtered, ordersListFilter.sort || 'upcoming');
+      badgeEl.textContent = ordersListExpanded
+        ? `${displayOrders.length} daripada ${orders.length} rekod`
+        : `${displayOrders.length} daripada ${Math.min(5, orders.length)} terkini`;
 
       if (!displayOrders.length) {
         listEl.innerHTML = `<div class="text-center py-6 text-xs text-stone-400">Tiada rekod tempahan ditemui.</div>`;
@@ -2781,10 +2834,18 @@
 
       if (!ordersListExpanded && orders.length > 5) {
         footerEl.innerHTML = `
-          <button type="button" onclick="toggleOrdersFilterView()"
+          <button type="button" onclick="toggleOrdersShowAll()"
             class="w-full py-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold flex items-center justify-center gap-1.5 transition">
-            <span>Lihat semua ${orders.length} tempahan &amp; buka tapisan</span>
+            <span>Lihat semua ${orders.length} tempahan</span>
             <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+          </button>
+        `;
+      } else if (ordersListExpanded && orders.length > 5) {
+        footerEl.innerHTML = `
+          <button type="button" onclick="toggleOrdersShowAll()"
+            class="w-full py-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold flex items-center justify-center gap-1.5 transition">
+            <span>Kembali kepada 5 tempahan terkini</span>
+            <i data-lucide="chevron-up" class="w-3.5 h-3.5"></i>
           </button>
         `;
       } else {
@@ -3621,52 +3682,123 @@
       renderAnalytics();
     }
 
+    const ANALYTICS_RANGE_KEYS = [
+      'orderCount', 'sales', 'profit', 'insights', 'aov', 'margin',
+      'payment', 'delivery', 'salesChart', 'weekdays', 'flavours', 'productMargins'
+    ];
+
+    function analyticsRangeMarkup(key) {
+      return `
+        <div class="rounded-lg bg-stone-50/80 border border-stone-200 p-2 space-y-1.5">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-[9px] font-bold uppercase tracking-wide text-stone-400">Julat tarikh sendiri</span>
+            <button type="button" onclick="resetAnalyticsRange('${key}')" class="text-[9px] font-extrabold text-amber-700 hover:underline">Semua</button>
+          </div>
+          <div class="grid grid-cols-2 gap-1.5">
+            <label class="min-w-0 text-[9px] font-semibold text-stone-500">Dari
+              <input type="date" id="an-range-${key}-from" onchange="renderAnalytics()" class="w-full min-w-0 px-1.5 py-1 text-[10px] rounded-md border border-stone-200 bg-white font-mono-num" />
+            </label>
+            <label class="min-w-0 text-[9px] font-semibold text-stone-500">Hingga
+              <input type="date" id="an-range-${key}-to" onchange="renderAnalytics()" class="w-full min-w-0 px-1.5 py-1 text-[10px] rounded-md border border-stone-200 bg-white font-mono-num" />
+            </label>
+          </div>
+        </div>
+      `;
+    }
+
+    function initAnalyticsRangeControls() {
+      ANALYTICS_RANGE_KEYS.forEach(key => {
+        const host = document.getElementById(`an-range-controls-${key}`);
+        if (host && host.dataset.initialized !== 'true') {
+          host.innerHTML = analyticsRangeMarkup(key);
+          host.dataset.initialized = 'true';
+        }
+      });
+    }
+
+    function resetAnalyticsRange(key) {
+      const from = document.getElementById(`an-range-${key}-from`);
+      const to = document.getElementById(`an-range-${key}-to`);
+      if (from) from.value = '';
+      if (to) to.value = '';
+      renderAnalytics();
+    }
+
+    function getAnalyticsOrders(key) {
+      const from = document.getElementById(`an-range-${key}-from`)?.value || '';
+      const to = document.getElementById(`an-range-${key}-to`)?.value || '';
+      let start = from;
+      let end = to;
+      if (start && end && start > end) [start, end] = [end, start];
+      if (!start && !end) return [...orders];
+      return orders.filter(order => {
+        const date = String(order.date || '');
+        if (!date) return false;
+        if (start && date < start) return false;
+        if (end && date > end) return false;
+        return true;
+      });
+    }
+
     function renderAnalytics() {
-      const aSpec = {
-        preset: analisisDatePreset,
-        from: document.getElementById('analisis-date-from')?.value || '',
-        to: document.getElementById('analisis-date-to')?.value || ''
-      };
-      const filteredOrders = filterOrdersBySpec(orders, aSpec);
-      document.getElementById('analisis-filter-badge').textContent = getSpecShortLabel(aSpec);
+      initAnalyticsRangeControls();
 
-      const fCount = filteredOrders.length;
-      const fSales = filteredOrders.reduce((s, o) => s + Number(o.total || 0), 0);
-      const fCogs = filteredOrders.reduce((s, o) => s + calculateOrderCost(o), 0);
-      const fProfit = fSales - fCogs;
-      const fUnits = filteredOrders.reduce((s, o) => s + getOrderTotalUnits(o), 0);
-      const fDiscounts = filteredOrders.reduce((s, o) => s + Number(o.discountAmount || 0), 0);
+      // Each displayed metric, insight and chart uses its own independent date range.
+      const orderCountOrders = getAnalyticsOrders('orderCount');
+      const salesOrders = getAnalyticsOrders('sales');
+      const profitOrders = getAnalyticsOrders('profit');
+      const insightOrders = getAnalyticsOrders('insights');
+      const aovOrders = getAnalyticsOrders('aov');
+      const marginOrders = getAnalyticsOrders('margin');
+      const paymentOrders = getAnalyticsOrders('payment');
+      const deliveryOrders = getAnalyticsOrders('delivery');
+      const chartOrders = getAnalyticsOrders('salesChart');
+      const weekdayOrders = getAnalyticsOrders('weekdays');
+      const flavourOrders = getAnalyticsOrders('flavours');
+      const productOrders = getAnalyticsOrders('productMargins');
 
-      document.getElementById('an-filtered-count').textContent = `${fCount} (${fUnits} unit)`;
-      document.getElementById('an-filtered-sales').textContent = fmtMoney(fSales);
-      document.getElementById('an-filtered-profit').textContent = fmtMoney(fProfit);
+      const orderUnits = orderCountOrders.reduce((sum, order) => sum + getOrderTotalUnits(order), 0);
+      document.getElementById('an-filtered-count').textContent = `${orderCountOrders.length} (${orderUnits} unit)`;
 
-      const aov = fCount > 0 ? fSales / fCount : 0;
-      const avgProfitPerOrder = fCount > 0 ? fProfit / fCount : 0;
-      const marginPct = fSales > 0 ? Math.round((fProfit / fSales) * 100) : 0;
+      const salesTotal = salesOrders.reduce((sum, order) => sum + Number(order.total || 0), 0);
+      document.getElementById('an-filtered-sales').textContent = fmtMoney(salesTotal);
 
+      const profitSales = profitOrders.reduce((sum, order) => sum + Number(order.total || 0), 0);
+      const profitCogs = profitOrders.reduce((sum, order) => sum + calculateOrderCost(order), 0);
+      document.getElementById('an-filtered-profit').textContent = fmtMoney(profitSales - profitCogs);
+
+      const aovSales = aovOrders.reduce((sum, order) => sum + Number(order.total || 0), 0);
+      const aovProfit = aovSales - aovOrders.reduce((sum, order) => sum + calculateOrderCost(order), 0);
+      const aov = aovOrders.length ? aovSales / aovOrders.length : 0;
+      const avgProfitPerOrder = aovOrders.length ? aovProfit / aovOrders.length : 0;
       document.getElementById('an-aov-val').textContent = fmtMoney(aov);
       document.getElementById('an-avg-profit-val').textContent = `Purata untung ${fmtMoney(avgProfitPerOrder)} / order`;
+
+      const marginSales = marginOrders.reduce((sum, order) => sum + Number(order.total || 0), 0);
+      const marginCogs = marginOrders.reduce((sum, order) => sum + calculateOrderCost(order), 0);
+      const marginDiscounts = marginOrders.reduce((sum, order) => sum + Number(order.discountAmount || 0), 0);
+      const marginProfit = marginSales - marginCogs;
+      const marginPct = marginSales > 0 ? Math.round((marginProfit / marginSales) * 100) : 0;
       document.getElementById('an-margin-val').textContent = `${marginPct}%`;
-      document.getElementById('an-cogs-val').textContent = `Kos ${fmtMoney(fCogs)} • Diskaun ${fmtMoney(fDiscounts)}`;
+      document.getElementById('an-cogs-val').textContent = `Kos ${fmtMoney(marginCogs)} • Diskaun ${fmtMoney(marginDiscounts)}`;
 
-      const onlineSales = filteredOrders.filter(o => (o.paymentMethod || 'Online') === 'Online').reduce((s, o) => s + Number(o.total || 0), 0);
-      const cashSales = filteredOrders.filter(o => o.paymentMethod === 'Cash').reduce((s, o) => s + Number(o.total || 0), 0);
-      const onlinePct = fSales > 0 ? Math.round((onlineSales / fSales) * 100) : 50;
-      const cashPct = fSales > 0 ? 100 - onlinePct : 50;
-
+      const paymentSales = paymentOrders.reduce((sum, order) => sum + Number(order.total || 0), 0);
+      const onlineSales = paymentOrders.filter(order => (order.paymentMethod || 'Online') === 'Online').reduce((sum, order) => sum + Number(order.total || 0), 0);
+      const cashSales = paymentOrders.filter(order => order.paymentMethod === 'Cash').reduce((sum, order) => sum + Number(order.total || 0), 0);
+      const onlinePct = paymentSales > 0 ? Math.round((onlineSales / paymentSales) * 100) : 50;
+      const cashPct = paymentSales > 0 ? 100 - onlinePct : 50;
       document.getElementById('an-pay-ratio').textContent = `${onlinePct}% / ${cashPct}%`;
       document.getElementById('an-online-sales').textContent = `Online: ${fmtMoney(onlineSales)}`;
       document.getElementById('an-cash-sales').textContent = `Cash: ${fmtMoney(cashSales)}`;
       document.getElementById('an-pay-bar-online').style.width = `${onlinePct}%`;
       document.getElementById('an-pay-bar-cash').style.width = `${cashPct}%`;
 
-      const codOrders = filteredOrders.filter(o => o.deliveryMethod === 'COD');
-      const pickupOrders = filteredOrders.filter(o => (o.deliveryMethod || 'Pickup') !== 'COD');
-      const codFeesTotal = codOrders.reduce((s, o) => s + Number(o.codCharge || 0), 0);
-      const pickupPct = fCount > 0 ? Math.round((pickupOrders.length / fCount) * 100) : 50;
-      const codPct = fCount > 0 ? 100 - pickupPct : 50;
-
+      const codOrders = deliveryOrders.filter(order => order.deliveryMethod === 'COD');
+      const pickupOrders = deliveryOrders.filter(order => (order.deliveryMethod || 'Pickup') !== 'COD');
+      const deliveryCount = deliveryOrders.length;
+      const codFeesTotal = codOrders.reduce((sum, order) => sum + Number(order.codCharge || 0), 0);
+      const pickupPct = deliveryCount > 0 ? Math.round((pickupOrders.length / deliveryCount) * 100) : 50;
+      const codPct = deliveryCount > 0 ? 100 - pickupPct : 50;
       document.getElementById('an-cod-fees-total').textContent = `Caj COD: ${fmtMoney(codFeesTotal)}`;
       document.getElementById('an-pickup-count').textContent = `Pickup: ${pickupOrders.length}`;
       document.getElementById('an-cod-count').textContent = `COD: ${codOrders.length}`;
@@ -3675,63 +3807,62 @@
 
       const dayLabels = ['Isnin', 'Selasa', 'Rabu', 'Khamis', 'Jumaat', 'Sabtu', 'Ahad'];
       const weekdayStats = Array.from({ length: 7 }, () => ({ count: 0, sales: 0 }));
-      filteredOrders.forEach(o => {
-        if (!o.date) return;
-        const parts = o.date.split('-').map(Number);
+      weekdayOrders.forEach(order => {
+        if (!order.date) return;
+        const parts = order.date.split('-').map(Number);
         if (parts.length === 3) {
-          const dt = new Date(parts[0], parts[1] - 1, parts[2]);
-          const idx = (dt.getDay() + 6) % 7;
-          weekdayStats[idx].count += 1;
-          weekdayStats[idx].sales += Number(o.total || 0);
+          const date = new Date(parts[0], parts[1] - 1, parts[2]);
+          const index = (date.getDay() + 6) % 7;
+          weekdayStats[index].count += 1;
+          weekdayStats[index].sales += Number(order.total || 0);
         }
       });
 
       const counts = {};
       let totalFlavourPicks = 0;
-      filteredOrders.forEach(o => {
-        normalizeOrderItems(o).forEach(it => {
-          const qty = Math.max(1, Number(it.qty || 1));
-          (it.flavours || []).forEach(f => {
-            counts[f] = (counts[f] || 0) + qty;
+      flavourOrders.forEach(order => {
+        normalizeOrderItems(order).forEach(item => {
+          const qty = Math.max(1, Number(item.qty || 1));
+          (item.flavours || []).forEach(flavour => {
+            counts[flavour] = (counts[flavour] || 0) + qty;
             totalFlavourPicks += qty;
           });
         });
       });
       const sortedFlv = Object.entries(counts).sort((a, b) => b[1] - a[1]);
       const maxC = sortedFlv[0]?.[1] || 1;
-      document.getElementById('top-flavours-bars').innerHTML = sortedFlv.length ? sortedFlv.map(([name, cnt]) => {
-        const sharePct = totalFlavourPicks > 0 ? Math.round((cnt / totalFlavourPicks) * 100) : 0;
+      document.getElementById('top-flavours-bars').innerHTML = sortedFlv.length ? sortedFlv.map(([name, count]) => {
+        const sharePct = totalFlavourPicks > 0 ? Math.round((count / totalFlavourPicks) * 100) : 0;
         return `
           <div>
             <div class="flex justify-between text-xs font-bold mb-1">
               <span>${name}</span>
-              <span class="font-mono-num text-amber-700">${cnt} unit (${sharePct}%)</span>
+              <span class="font-mono-num text-amber-700">${count} unit (${sharePct}%)</span>
             </div>
             <div class="w-full h-2 bg-stone-100 rounded-full overflow-hidden">
-              <div class="h-full bg-amber-500 rounded-full" style="width:${Math.round((cnt / maxC) * 100)}%"></div>
+              <div class="h-full bg-amber-500 rounded-full" style="width:${Math.round((count / maxC) * 100)}%"></div>
             </div>
           </div>
         `;
       }).join('') : '<div class="text-xs text-stone-400">Tiada data perisa dalam julat tarikh ini.</div>';
 
       const soldBySize = {};
-      filteredOrders.forEach(o => {
-        normalizeOrderItems(o).forEach(it => {
-          soldBySize[it.sizeId] = (soldBySize[it.sizeId] || 0) + Math.max(1, Number(it.qty || 1));
+      productOrders.forEach(order => {
+        normalizeOrderItems(order).forEach(item => {
+          soldBySize[item.sizeId] = (soldBySize[item.sizeId] || 0) + Math.max(1, Number(item.qty || 1));
         });
       });
-
-      document.getElementById('product-margin-cards').innerHTML = config.sizes.map(s => {
-        const cogs = calculateRecipeCost(s.id);
-        const profit = s.price - cogs;
-        const margin = s.price > 0 ? Math.round((profit / s.price) * 100) : 0;
-        const soldQty = soldBySize[s.id] || 0;
+      document.getElementById('product-margin-cards').innerHTML = config.sizes.map(size => {
+        const cogs = calculateRecipeCost(size.id);
+        const profit = size.price - cogs;
+        const margin = size.price > 0 ? Math.round((profit / size.price) * 100) : 0;
+        const soldQty = soldBySize[size.id] || 0;
         const totalSizeProfit = profit * soldQty;
         return `
           <div class="p-2.5 rounded-xl bg-stone-50 border border-stone-200 flex items-center justify-between">
             <div>
-              <div class="text-xs font-bold text-stone-900">${s.name} <span class="text-[10px] font-mono-num text-amber-700">(${soldQty} terjual)</span></div>
-              <div class="text-[11px] text-stone-500">Jual ${fmtMoney(s.price)} • Kos ${fmtMoney(cogs)}</div>
+              <div class="text-xs font-bold text-stone-900">${size.name} <span class="text-[10px] font-mono-num text-amber-700">(${soldQty} terjual)</span></div>
+              <div class="text-[11px] text-stone-500">Jual ${fmtMoney(size.price)} • Kos ${fmtMoney(cogs)}</div>
             </div>
             <div class="text-right">
               <div class="text-xs font-mono-num font-extrabold text-emerald-700">+${fmtMoney(profit)}/unit</div>
@@ -3741,57 +3872,70 @@
         `;
       }).join('');
 
+      const insightSales = insightOrders.reduce((sum, order) => sum + Number(order.total || 0), 0);
+      const insightCogs = insightOrders.reduce((sum, order) => sum + calculateOrderCost(order), 0);
+      const insightProfit = insightSales - insightCogs;
+      const insightMargin = insightSales > 0 ? Math.round((insightProfit / insightSales) * 100) : 0;
+      const insightAov = insightOrders.length ? insightSales / insightOrders.length : 0;
+      const insightFlavours = {};
+      const insightWeekday = Array.from({ length: 7 }, () => ({ count: 0, sales: 0 }));
+      insightOrders.forEach(order => {
+        normalizeOrderItems(order).forEach(item => (item.flavours || []).forEach(flavour => {
+          insightFlavours[flavour] = (insightFlavours[flavour] || 0) + Math.max(1, Number(item.qty || 1));
+        }));
+        if (order.date) {
+          const parts = order.date.split('-').map(Number);
+          if (parts.length === 3) {
+            const date = new Date(parts[0], parts[1] - 1, parts[2]);
+            const index = (date.getDay() + 6) % 7;
+            insightWeekday[index].count += 1;
+            insightWeekday[index].sales += Number(order.total || 0);
+          }
+        }
+      });
+      const insightSortedFlavours = Object.entries(insightFlavours).sort((a, b) => b[1] - a[1]);
       const insights = [];
-      if (fCount === 0) {
-        insights.push('• Tiada rekod tempahan dalam julat tarikh ini. Cuba pilih <strong>Semua Tarikh</strong> untuk melihat analisis penuh bisnes anda.');
+      if (!insightOrders.length) {
+        insights.push('• Tiada rekod tempahan dalam julat tarikh yang dipilih untuk insight.');
       } else {
-        if (sortedFlv.length > 0) {
-          insights.push(`• <strong>Perisa Juara:</strong> <em>${sortedFlv[0][0]}</em> paling tinggi permintaan (${sortedFlv[0][1]} unit). Pastikan stok bahan perisa ini sentiasa mencukupi sebelum hujung minggu.`);
+        if (insightSortedFlavours.length) {
+          insights.push(`• <strong>Perisa Juara:</strong> <em>${insightSortedFlavours[0][0]}</em> paling tinggi permintaan (${insightSortedFlavours[0][1]} unit). Pastikan stok bahan perisa ini mencukupi.`);
         }
-        const busiestIdx = weekdayStats.reduce((bestI, cur, idx, arr) => cur.count > arr[bestI].count ? idx : bestI, 0);
-        if (weekdayStats[busiestIdx].count > 0) {
-          insights.push(`• <strong>Hari Puncak:</strong> Tempahan paling tinggi pada hari <strong>${dayLabels[busiestIdx]}</strong> (${weekdayStats[busiestIdx].count} order • ${fmtMoney(weekdayStats[busiestIdx].sales)}). Cadangan: Sediakan adunan asas &amp; kotak sehari lebih awal.`);
+        const busiestIndex = insightWeekday.reduce((best, current, index, array) => current.count > array[best].count ? index : best, 0);
+        if (insightWeekday[busiestIndex].count > 0) {
+          insights.push(`• <strong>Hari Puncak:</strong> Tempahan paling tinggi pada hari <strong>${dayLabels[busiestIndex]}</strong> (${insightWeekday[busiestIndex].count} order • ${fmtMoney(insightWeekday[busiestIndex].sales)}).`);
         }
-        if (marginPct < 40) {
-          insights.push(`• <strong>Amaran Margin (${marginPct}%):</strong> Margin bersih agak ketat. Semak semula kos bahan mentah atau hadkan pemberian diskaun berlebihan.`);
-        } else {
-          insights.push(`• <strong>Kesihatan Margin Baik (${marginPct}%):</strong> Purata setiap order menjana <strong>${fmtMoney(avgProfitPerOrder)}</strong> untung bersih. Anda boleh tawarkan <em>Add-On</em> untuk naikkan lagi AOV (${fmtMoney(aov)}).`);
-        }
+        insights.push(insightMargin < 40
+          ? `• <strong>Amaran Margin (${insightMargin}%):</strong> Semak kos bahan mentah atau diskaun yang diberikan.`
+          : `• <strong>Kesihatan Margin:</strong> Margin bersih ${insightMargin}% dengan purata nilai order ${fmtMoney(insightAov)}.`);
       }
-      const lowStockCount = config.ingredients.filter(i => Number(i.stock || 0) <= Number(i.lowAlert || 0)).length;
-      if (lowStockCount > 0) {
-        insights.push(`• <strong>Tindakan Inventori:</strong> Terdapat <strong>${lowStockCount} barang</strong> berada pada paras stok rendah. Semak tab <em>Stock Bahan</em> untuk restock.`);
-      }
+      const lowStockCount = config.ingredients.filter(item => Number(item.stock || 0) <= Number(item.lowAlert || 0)).length;
+      if (lowStockCount > 0) insights.push(`• <strong>Tindakan Inventori:</strong> ${lowStockCount} barang berada pada paras stok rendah. Semak tab <em>Stock Bahan</em>.`);
       document.getElementById('smart-business-insights').innerHTML = insights.map(line => `<div>${line}</div>`).join('');
 
+      // Sales/profit chart has its own date range.
       const ctx = document.getElementById('profitChart');
       if (ctx && window.Chart) {
         if (profitChartInstance) profitChartInstance.destroy();
-
         const grouped = {};
-        filteredOrders.forEach(o => {
-          const key = chartPeriod === 'monthly' ? String(o.date || '').slice(0, 7) : String(o.date || 'Tiada Tarikh');
+        chartOrders.forEach(order => {
+          const key = chartPeriod === 'monthly' ? String(order.date || '').slice(0, 7) : String(order.date || 'Tiada Tarikh');
           if (!grouped[key]) grouped[key] = { sales: 0, profit: 0 };
-          const sVal = Number(o.total || 0);
-          const cVal = calculateOrderCost(o);
-          grouped[key].sales += sVal;
-          grouped[key].profit += Math.max(0, sVal - cVal);
+          const salesValue = Number(order.total || 0);
+          const cogsValue = calculateOrderCost(order);
+          grouped[key].sales += salesValue;
+          grouped[key].profit += salesValue - cogsValue;
         });
-
         const sortedKeys = Object.keys(grouped).sort();
         const labels = sortedKeys.length ? sortedKeys : ['Tiada Data'];
-        const salesData = sortedKeys.length ? sortedKeys.map(k => Number(grouped[k].sales.toFixed(2))) : [0];
-        const profitData = sortedKeys.length ? sortedKeys.map(k => Number(grouped[k].profit.toFixed(2))) : [0];
-
+        const salesData = sortedKeys.length ? sortedKeys.map(key => Number(grouped[key].sales.toFixed(2))) : [0];
+        const profitData = sortedKeys.length ? sortedKeys.map(key => Number(grouped[key].profit.toFixed(2))) : [0];
         profitChartInstance = new Chart(ctx, {
           type: 'bar',
-          data: {
-            labels,
-            datasets: [
-              { label: 'Jualan Kasar', data: salesData, backgroundColor: '#1c1917', borderRadius: 6 },
-              { label: 'Untung Bersih', data: profitData, backgroundColor: '#10b981', borderRadius: 6 }
-            ]
-          },
+          data: { labels, datasets: [
+            { label: 'Jualan Kasar', data: salesData, backgroundColor: '#1c1917', borderRadius: 6 },
+            { label: 'Untung Bersih', data: profitData, backgroundColor: '#10b981', borderRadius: 6 }
+          ] },
           options: {
             responsive: true, maintainAspectRatio: false,
             plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } } },
@@ -3800,6 +3944,7 @@
         });
       }
 
+      // Weekday activity chart has its own date range.
       const wCtx = document.getElementById('weekdayChart');
       if (wCtx && window.Chart) {
         if (weekdayChartInstance) weekdayChartInstance.destroy();
@@ -3807,7 +3952,7 @@
           type: 'bar',
           data: {
             labels: ['Isn', 'Sel', 'Rab', 'Kha', 'Jum', 'Sab', 'Aha'],
-            datasets: [{ label: 'Bilangan Order', data: weekdayStats.map(w => w.count), backgroundColor: '#f59e0b', borderRadius: 6 }]
+            datasets: [{ label: 'Bilangan Order', data: weekdayStats.map(day => day.count), backgroundColor: '#f59e0b', borderRadius: 6 }]
           },
           options: {
             responsive: true, maintainAspectRatio: false,
