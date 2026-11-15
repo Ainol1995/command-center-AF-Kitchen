@@ -6,7 +6,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="theme-color" content="#1c1917" />
-  <title>Cloud Command Center — Setup & Operasi Bisnes</title>
+  <title>AF Kitchen Command Center — Enhanced v3</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -568,12 +568,12 @@
         <div class="flex items-center justify-between gap-2">
           <div class="flex items-center gap-2 min-w-0">
             <h2 class="text-sm font-extrabold text-stone-900 truncate">Senarai Tempahan</h2>
-            <span id="orders-count-badge" class="text-[10px] font-bold bg-stone-100 text-stone-600 px-2 py-0.5 rounded-full shrink-0">5 Terkini</span>
+            <span id="orders-count-badge" class="text-[10px] font-bold bg-stone-100 text-stone-600 px-2 py-0.5 rounded-full shrink-0">5 Terdekat</span>
           </div>
           <div class="flex items-center gap-1.5 shrink-0">
             <button type="button" id="btn-toggle-orders-filter" onclick="toggleOrdersFilterView()"
               class="text-[10px] sm:text-[11px] font-bold bg-stone-900 hover:bg-stone-800 text-white px-2.5 py-1.5 rounded-xl flex items-center gap-1 shadow-xs transition">
-              <i data-lucide="filter" class="w-3 h-3 text-amber-400"></i><span id="btn-orders-filter-label">Filter 5 Terkini</span>
+              <i data-lucide="filter" class="w-3 h-3 text-amber-400"></i><span id="btn-orders-filter-label">Filter 5 Terdekat</span>
             </button>
             <button type="button" id="btn-toggle-all-orders" onclick="toggleOrdersShowAll()"
               class="text-[10px] sm:text-[11px] font-bold bg-stone-100 hover:bg-stone-200 text-stone-700 px-2.5 py-1.5 rounded-xl flex items-center gap-1 shadow-xs transition">
@@ -586,7 +586,7 @@
         <div id="orders-filter-panel" class="hidden p-3 rounded-2xl bg-stone-50 border border-stone-200 space-y-2.5 animate-in">
           <div class="flex items-center justify-between gap-2">
             <div class="min-w-0">
-              <span id="orders-filter-title" class="text-[11px] font-extrabold text-stone-700">Tapis 5 Tempahan Terkini</span>
+              <span id="orders-filter-title" class="text-[11px] font-extrabold text-stone-700">Tapis 5 Tempahan Terdekat</span>
               <span class="ml-1.5 text-[9px] font-extrabold uppercase tracking-wide bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded-md">Padanan OR / ATAU</span>
             </div>
             <button type="button" onclick="resetOrdersListFilter()" class="text-[10px] font-bold text-amber-700 hover:underline shrink-0">Reset Tapisan</button>
@@ -856,7 +856,7 @@
         <div class="flex items-center justify-between">
           <div>
             <h2 class="text-sm font-extrabold text-stone-900">Prestasi Jualan &amp; Untung Bersih</h2>
-            <p class="text-[11px] text-stone-500">Berdasarkan tempahan sebenar dalam julat tarikh dipilih</p>
+            <p class="text-[11px] text-stone-500">Pilih Hari Ini, Minggu Ini, Bulan Ini atau julat tarikh sendiri</p>
           </div>
           <div class="flex bg-stone-100 p-0.5 rounded-xl text-[11px] font-bold">
             <button type="button" onclick="setChartPeriod('daily')" id="btn-period-daily" class="px-2.5 py-1 rounded-lg bg-white text-stone-900 shadow-sm">Harian</button>
@@ -872,7 +872,7 @@
       <div class="card-soft rounded-2xl p-4 space-y-3">
         <div>
           <h2 class="text-sm font-extrabold text-stone-900">Hari Paling Sibuk (Isnin – Ahad)</h2>
-          <p class="text-[11px] text-stone-500">Bantu anda rancang jadual baking &amp; restock bahan sebelum hari puncak</p>
+          <p class="text-[11px] text-stone-500">Penapis tarikh berasingan seperti kad Jualan Kasar di tab Utama</p>
         </div>
         <div id="an-range-controls-weekdays"></div>
         <div class="h-40">
@@ -1324,6 +1324,37 @@
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     }
 
+    function isOrderCompleted(order) {
+      return String(order?.status || '').trim().toLowerCase() === 'completed';
+    }
+
+    // Fail-safe: every order remains open until the user explicitly marks it Completed.
+    // Missing/unknown status must never hide a dated order from the dashboard.
+    function normalizeOrderStatuses(persist = true) {
+      if (!Array.isArray(orders)) return false;
+      let changed = false;
+      orders.forEach(order => {
+        if (!order || typeof order !== 'object') return;
+        if (isOrderCompleted(order)) {
+          if (order.status !== 'Completed') { order.status = 'Completed'; changed = true; }
+        } else if (order.status !== 'Active') {
+          order.status = 'Active';
+          changed = true;
+        }
+      });
+      if (changed && persist) localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+      return changed;
+    }
+
+    function getOrderDateState(order) {
+      const date = String(order?.date || '').trim();
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return 'undated';
+      const today = getTodayISO();
+      if (date < today) return 'overdue';
+      if (date === today) return 'today';
+      return 'upcoming';
+    }
+
     function getDefaultAppearance() {
       return {
         accent: '#f59e0b',
@@ -1432,6 +1463,7 @@
     let config = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null') || getDefaultConfig();
     config.appearance = Object.assign({}, getDefaultAppearance(), config.appearance || {});
     let orders = JSON.parse(localStorage.getItem(ORDERS_KEY) || 'null') || getDefaultOrders();
+    normalizeOrderStatuses();
     let activeSetupStep = 1;
     let activeRecipeTarget = config.sizes[0]?.id || 'size_6';
     let selectedCalDate = getTodayISO();
@@ -1747,11 +1779,14 @@
         return allOrders.filter(o => String(o.date || '').startsWith(ym));
       }
       if (preset === 'custom') {
-        const fromVal = spec.from || '';
-        const toVal = spec.to || '';
+        let fromVal = spec.from || '';
+        let toVal = spec.to || '';
+        if (fromVal && toVal && fromVal > toVal) [fromVal, toVal] = [toVal, fromVal];
         return allOrders.filter(o => {
-          if (fromVal && o.date < fromVal) return false;
-          if (toVal && o.date > toVal) return false;
+          const date = String(o.date || '');
+          if (!date) return false;
+          if (fromVal && date < fromVal) return false;
+          if (toVal && date > toVal) return false;
           return true;
         });
       }
@@ -1800,10 +1835,10 @@
       btn.className = ordersFilterPanelOpen
         ? 'text-[10px] sm:text-[11px] font-bold bg-amber-500 hover:bg-amber-600 text-stone-950 px-2.5 py-1.5 rounded-xl flex items-center gap-1 shadow-xs transition'
         : 'text-[10px] sm:text-[11px] font-bold bg-stone-900 hover:bg-stone-800 text-white px-2.5 py-1.5 rounded-xl flex items-center gap-1 shadow-xs transition';
-      label.textContent = ordersFilterPanelOpen ? 'Tutup Filter' : (ordersListExpanded ? 'Filter Semua' : 'Filter 5 Terkini');
+      label.textContent = ordersFilterPanelOpen ? 'Tutup Filter' : (ordersListExpanded ? 'Filter Semua' : 'Filter 5 Terdekat');
       document.getElementById('orders-filter-title').textContent = ordersListExpanded
         ? 'Tapis Semua Rekod Tempahan'
-        : 'Tapis 5 Tempahan Terkini';
+        : 'Tapis 5 Tempahan Terdekat';
       renderOrdersSection();
     }
 
@@ -1811,14 +1846,14 @@
       ordersListExpanded = !ordersListExpanded;
       const label = document.getElementById('btn-toggle-all-orders-label');
       const btn = document.getElementById('btn-toggle-all-orders');
-      label.textContent = ordersListExpanded ? 'Lihat 5 Terkini' : 'Lihat Semua';
+      label.textContent = ordersListExpanded ? 'Lihat 5 Terdekat' : 'Lihat Semua';
       btn.className = ordersListExpanded
         ? 'text-[10px] sm:text-[11px] font-bold bg-amber-100 hover:bg-amber-200 text-amber-900 px-2.5 py-1.5 rounded-xl flex items-center gap-1 shadow-xs transition'
         : 'text-[10px] sm:text-[11px] font-bold bg-stone-100 hover:bg-stone-200 text-stone-700 px-2.5 py-1.5 rounded-xl flex items-center gap-1 shadow-xs transition';
       const title = document.getElementById('orders-filter-title');
-      if (title) title.textContent = ordersListExpanded ? 'Tapis Semua Rekod Tempahan' : 'Tapis 5 Tempahan Terkini';
+      if (title) title.textContent = ordersListExpanded ? 'Tapis Semua Rekod Tempahan' : 'Tapis 5 Tempahan Terdekat';
       const filterLabel = document.getElementById('btn-orders-filter-label');
-      if (filterLabel && !ordersFilterPanelOpen) filterLabel.textContent = ordersListExpanded ? 'Filter Semua' : 'Filter 5 Terkini';
+      if (filterLabel && !ordersFilterPanelOpen) filterLabel.textContent = ordersListExpanded ? 'Filter Semua' : 'Filter 5 Terdekat';
       renderOrdersSection();
     }
 
@@ -1969,6 +2004,7 @@
           applyAppearanceSettings(config.appearance);
           if (json.data && Array.isArray(json.data.orders)) {
             orders = json.data.orders;
+            normalizeOrderStatuses(false);
             localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
           }
           config.scriptUrl = targetUrl;
@@ -2049,6 +2085,7 @@
           }
           if (Array.isArray(json.data.orders)) {
             orders = json.data.orders;
+            normalizeOrderStatuses(false);
             localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
           }
           document.getElementById('dash-biz-title').textContent = config.bizName || 'Command Center';
@@ -2093,6 +2130,7 @@
           }
           if (Array.isArray(json.data.orders)) {
             orders = json.data.orders;
+            normalizeOrderStatuses(false);
             localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
           }
           updateSyncHeaderBadge(true);
@@ -2562,6 +2600,7 @@
     }
 
     function renderDashboardAll() {
+      normalizeOrderStatuses();
       renderUtama();
       renderCalendar();
       renderStockList();
@@ -2602,88 +2641,130 @@
       return html;
     }
 
+    function getOpenOrderGroups() {
+      normalizeOrderStatuses();
+      // OR/fail-safe rule: an order is included unless it is explicitly Completed.
+      // The date determines its position; a blank status or incomplete details do not exclude it.
+      const openOrders = orders.filter(order => order && !isOrderCompleted(order));
+      const grouped = new Map();
+      openOrders.forEach(order => {
+        const date = /^\d{4}-\d{2}-\d{2}$/.test(String(order.date || '')) ? String(order.date) : 'undated';
+        if (!grouped.has(date)) grouped.set(date, []);
+        grouped.get(date).push(order);
+      });
+
+      return Array.from(grouped.entries())
+        .sort(([dateA], [dateB]) => {
+          if (dateA === 'undated') return 1;
+          if (dateB === 'undated') return -1;
+          return dateA.localeCompare(dateB);
+        })
+        .map(([date, dateOrders]) => ({
+          date,
+          orders: dateOrders.sort((a, b) => {
+            const timeA = String(a.time || '00:00');
+            const timeB = String(b.time || '00:00');
+            return timeA.localeCompare(timeB) || String(a.customer || '').localeCompare(String(b.customer || ''));
+          })
+        }));
+    }
+
     function getSortedActiveOrders() {
-      const today = getTodayISO();
-      return orders
-        .filter(o => o.status === 'Active' && String(o.date || '') >= today)
-        .sort((a, b) => getOrderDateTimeKey(a).localeCompare(getOrderDateTimeKey(b)));
+      return getOpenOrderGroups().flatMap(group => group.orders);
     }
 
     function moveNextOrder(direction) {
-      // Kept as a safe compatibility hook for older bookmarks/buttons.
-      const activeOrders = getSortedActiveOrders();
-      if (!activeOrders.length) return;
-      nextOrderIndex = Math.min(activeOrders.length - 1, Math.max(0, nextOrderIndex + direction));
-      const target = document.getElementById(`next-order-${nextOrderIndex}`);
-      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      const groups = getOpenOrderGroups();
+      if (!groups.length) return;
+      nextOrderIndex = Math.min(groups.length - 1, Math.max(0, nextOrderIndex + direction));
+      renderNextOrderCard();
     }
 
     function renderNextOrderCard() {
-      const allActiveOrders = getSortedActiveOrders();
+      const groups = getOpenOrderGroups();
       const nextCard = document.getElementById('next-order-container');
-      nextOrderIndex = 0;
-
-      if (allActiveOrders.length > 0) {
+      if (!nextCard) return;
+      if (!groups.length) {
+        nextOrderIndex = 0;
         nextCard.innerHTML = `
-          <div class="flex items-center justify-between gap-2 px-1 mb-2">
-            <div>
+          <div class="card-soft rounded-2xl p-4 text-center space-y-1">
+            <div class="text-sm font-bold text-stone-800">Tiada tempahan belum selesai</div>
+            <p class="text-xs text-stone-500">Semua tempahan telah ditandakan selesai.</p>
+          </div>`;
+        return;
+      }
+
+      nextOrderIndex = Math.min(Math.max(0, nextOrderIndex), groups.length - 1);
+      const group = groups[nextOrderIndex];
+      const today = getTodayISO();
+      const groupState = group.date === 'undated' ? 'undated' : (group.date < today ? 'overdue' : (group.date === today ? 'today' : 'upcoming'));
+      const groupTitle = groupState === 'undated' ? 'Tarikh belum ditetapkan'
+        : groupState === 'overdue' ? `Lewat • ${group.date}`
+        : groupState === 'today' ? `Hari ini • ${group.date}` : `Akan datang • ${group.date}`;
+      const groupTone = groupState === 'overdue' ? 'bg-rose-100 text-rose-800'
+        : groupState === 'undated' ? 'bg-amber-100 text-amber-800'
+        : groupState === 'today' ? 'bg-amber-100 text-amber-800' : 'bg-sky-100 text-sky-800';
+      const overdueCount = groups.reduce((sum, item) => sum + (item.date !== 'undated' && item.date < today ? item.orders.length : 0), 0);
+      const openCount = groups.reduce((sum, item) => sum + item.orders.length, 0);
+
+      nextCard.innerHTML = `
+        <div class="card-soft rounded-2xl p-3 space-y-2.5 ${groupState === 'overdue' ? 'border-rose-200' : ''}">
+          <div class="flex items-center justify-between gap-2">
+            <div class="min-w-0">
               <h2 class="text-sm font-extrabold text-stone-900">Next Orders</h2>
-              <p class="text-[10px] text-stone-500">Semua tempahan belum selesai bermula hari ini dan seterusnya</p>
+              <p class="text-[10px] text-stone-500">${openCount} belum selesai${overdueCount ? ` • ${overdueCount} lewat` : ''}</p>
             </div>
-            <span class="text-[10px] font-extrabold bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full">${allActiveOrders.length} belum selesai</span>
+            <div class="flex items-center gap-1 shrink-0">
+              <button type="button" onclick="moveNextOrder(-1)" ${nextOrderIndex === 0 ? 'disabled' : ''}
+                class="w-7 h-7 rounded-lg border border-stone-200 bg-white text-stone-700 font-bold disabled:opacity-30 disabled:cursor-not-allowed" aria-label="Kumpulan tarikh sebelumnya">&lt;</button>
+              <span class="text-[10px] font-mono-num font-bold text-stone-500 min-w-[34px] text-center">${nextOrderIndex + 1}/${groups.length}</span>
+              <button type="button" onclick="moveNextOrder(1)" ${nextOrderIndex >= groups.length - 1 ? 'disabled' : ''}
+                class="w-7 h-7 rounded-lg border border-stone-200 bg-white text-stone-700 font-bold disabled:opacity-30 disabled:cursor-not-allowed" aria-label="Kumpulan tarikh seterusnya">&gt;</button>
+            </div>
           </div>
-          <div class="space-y-2.5">
-            ${allActiveOrders.map((nxt, index) => {
-              const balance = Number(nxt.total || 0) - Number(nxt.paidAmount || 0);
-              const delM = nxt.deliveryMethod || 'Pickup';
-              const payM = nxt.paymentMethod || 'Online';
-              const dateLabel = nxt.date === getTodayISO() ? 'HARI INI' : 'AKAN DATANG';
+          <div class="flex items-center justify-between gap-2 border-t border-stone-100 pt-2">
+            <span class="text-xs font-extrabold text-stone-800">${groupTitle}</span>
+            <span class="text-[10px] font-bold px-2 py-1 rounded-full ${groupTone}">${group.orders.length} tempahan</span>
+          </div>
+          <div class="space-y-2">
+            ${group.orders.map(order => {
+              const state = getOrderDateState(order);
+              const overdue = state === 'overdue';
+              const undated = state === 'undated';
+              const balance = Number(order.total || 0) - Number(order.paidAmount || 0);
+              const customer = String(order.customer || '').trim() || 'Nama pelanggan belum diisi';
+              const summary = getOrderDisplaySummary(order) || 'Butiran produk belum lengkap — sila semak tempahan';
+              const time = String(order.time || 'Masa belum ditetapkan');
+              const orderId = String(order.id || 'ID belum ditetapkan');
+              const rowTone = overdue ? 'bg-rose-50 border-rose-300' : (undated ? 'bg-amber-50 border-amber-200' : 'bg-stone-50 border-stone-200');
+              const stateLabel = overdue ? 'LEWAT • BELUM SELESAI' : (undated ? 'TARIKH PERLU DIISI' : (state === 'today' ? 'AKTIF • HARI INI' : 'AKTIF • AKAN DATANG'));
+              const stateBadge = overdue ? 'bg-rose-100 text-rose-800' : (undated ? 'bg-amber-100 text-amber-800' : (state === 'today' ? 'bg-amber-100 text-amber-800' : 'bg-sky-100 text-sky-800'));
               return `
-                <article id="next-order-${index}" class="rounded-3xl bg-stone-900 text-white p-4 sm:p-5 shadow-md space-y-3">
+                <article class="rounded-xl border ${rowTone} p-3 space-y-2">
                   <div class="flex items-start justify-between gap-2">
-                    <div class="flex items-center gap-1.5 flex-wrap min-w-0">
-                      <span class="text-[10px] font-extrabold uppercase tracking-wider bg-amber-500 text-stone-950 px-2.5 py-0.5 rounded-full">${index === 0 ? 'Next Order' : `Order #${index + 1}`}</span>
-                      <span class="text-[9px] font-extrabold px-2 py-0.5 rounded-full ${dateLabel === 'HARI INI' ? 'bg-rose-500/20 text-rose-200 border border-rose-400/30' : 'bg-sky-500/20 text-sky-200 border border-sky-400/30'}">${dateLabel}</span>
-                      <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${delM === 'COD' ? 'bg-sky-500/20 text-sky-300 border border-sky-400/30' : 'bg-stone-800 text-stone-300'}">${delM === 'COD' ? 'COD' : 'Self Pickup'}</span>
-                      <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">${payM}</span>
+                    <div class="min-w-0 flex-1">
+                      <div class="flex items-center gap-1.5 flex-wrap">
+                        <h3 class="text-xs font-extrabold text-stone-900">${customer}</h3>
+                        <span class="text-[9px] font-extrabold px-2 py-0.5 rounded-full ${stateBadge}">${stateLabel}</span>
+                      </div>
+                      <p class="text-[11px] text-stone-600 mt-0.5 leading-snug">${summary}</p>
+                      <div class="text-[10px] text-stone-500 mt-1">${group.date === 'undated' ? 'Tarikh belum ditetapkan' : group.date} • ${time} • ${orderId}</div>
+                      ${order.notes ? `<div class="text-[10px] text-amber-900 mt-1">Nota: ${order.notes}</div>` : ''}
                     </div>
-                    <button type="button" onclick="openOrderModal('${nxt.id}')" class="text-[10px] font-bold bg-stone-800 hover:bg-stone-700 text-stone-200 px-2.5 py-1.5 rounded-lg flex items-center gap-1 shrink-0" title="Edit Order / Notes">
-                      <i data-lucide="pencil" class="w-3 h-3 text-amber-400"></i> Edit
-                    </button>
-                  </div>
-                  <div class="flex items-center justify-between gap-2">
-                    <span class="text-[10px] text-stone-400">${index + 1} daripada ${allActiveOrders.length} tempahan</span>
-                    <span class="text-xs font-mono-num text-amber-300 font-extrabold">${nxt.date} • ${nxt.time}</span>
-                  </div>
-                  <div>
-                    <h3 class="text-base font-extrabold">${nxt.customer}</h3>
-                    <p class="text-xs text-stone-300 mt-0.5 leading-relaxed">${getOrderDisplaySummary(nxt)}</p>
-                    ${nxt.codAddress && delM === 'COD' ? `<div class="text-[11px] text-sky-300 mt-1 flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3"></i> ${nxt.codAddress}</div>` : ''}
-                    ${nxt.notes ? `<div class="mt-2 px-3 py-1.5 rounded-xl bg-amber-500/15 border border-amber-400/30 text-[11px] text-amber-200 flex items-start gap-1.5"><i data-lucide="message-square" class="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5"></i><span><strong>Nota:</strong> ${nxt.notes}</span></div>` : ''}
-                  </div>
-                  <div class="flex flex-wrap items-center justify-between pt-2 border-t border-stone-800 gap-2">
-                    <div>
-                      <div class="text-[10px] text-stone-400">Status Bayaran (${payM})</div>
-                      <div class="text-xs font-mono-num font-bold ${balance > 0 ? 'text-rose-400' : 'text-emerald-400'}">${balance > 0 ? `Baki ${fmtMoney(balance)}` : `Lunas (${fmtMoney(nxt.total)})`}</div>
-                    </div>
-                    <div class="flex items-center gap-1.5">
-                      ${balance > 0 ? `<button type="button" onclick="markOrderPaid('${nxt.id}')" class="text-[10px] font-bold bg-stone-800 hover:bg-stone-700 text-amber-300 px-3 py-2 rounded-xl">Sahkan Baki</button>` : ''}
-                      <button type="button" onclick="markOrderDone('${nxt.id}')" class="text-[10px] font-bold bg-emerald-500 hover:bg-emerald-600 text-stone-950 px-3.5 py-2 rounded-xl">Tandakan Selesai</button>
+                    <div class="text-right shrink-0">
+                      <div class="text-xs font-mono-num font-extrabold text-stone-900">${fmtMoney(order.total || 0)}</div>
+                      <div class="text-[10px] font-bold ${balance > 0 ? 'text-rose-600' : 'text-emerald-700'}">${balance > 0 ? `Baki ${fmtMoney(balance)}` : 'Lunas'}</div>
                     </div>
                   </div>
-                </article>
-              `;
+                  <div class="flex justify-end gap-1.5 border-t border-black/5 pt-2">
+                    ${order.id ? `<button type="button" onclick="openOrderModal('${order.id}')" class="text-[10px] font-bold bg-white border border-stone-200 text-stone-700 px-2.5 py-1.5 rounded-lg">Edit</button>` : ''}
+                    ${balance > 0 && order.id ? `<button type="button" onclick="markOrderPaid('${order.id}')" class="text-[10px] font-bold bg-white border border-amber-200 text-amber-800 px-2.5 py-1.5 rounded-lg">Sahkan Baki</button>` : ''}
+                    ${order.id ? `<button type="button" onclick="markOrderDone('${order.id}')" class="text-[10px] font-bold ${overdue ? 'bg-rose-600 hover:bg-rose-700 text-white' : 'bg-emerald-600 hover:bg-emerald-700 text-white'} px-3 py-1.5 rounded-lg">Selesai</button>` : ''}
+                  </div>
+                </article>`;
             }).join('')}
           </div>
-        `;
-      } else {
-        nextCard.innerHTML = `
-          <div class="card-soft rounded-2xl p-5 text-center space-y-1">
-            <div class="text-sm font-bold text-stone-800">Tiada Tempahan Belum Selesai Bermula Hari Ini</div>
-            <p class="text-xs text-stone-500">Semua tempahan hari ini dan akan datang telah selesai, atau belum ada tempahan baharu.</p>
-          </div>
-        `;
-      }
+        </div>`;
       if (window.lucide) lucide.createIcons();
     }
 
@@ -2720,23 +2801,29 @@
 
     function sortOrderRecords(orderRecords, sortMode) {
       const result = [...orderRecords];
+      const today = getTodayISO();
+      const dated = result.filter(order => /^\d{4}-\d{2}-\d{2}$/.test(String(order.date || '')));
+      const undated = result.filter(order => !/^\d{4}-\d{2}-\d{2}$/.test(String(order.date || '')));
       if (sortMode === 'newest') {
-        return result.sort((a, b) => getOrderDateTimeKey(b).localeCompare(getOrderDateTimeKey(a)));
+        return [
+          ...dated.sort((a, b) => getOrderDateTimeKey(b).localeCompare(getOrderDateTimeKey(a))),
+          ...undated
+        ];
       }
       if (sortMode === 'oldest') {
-        return result.sort((a, b) => getOrderDateTimeKey(a).localeCompare(getOrderDateTimeKey(b)));
+        return [
+          ...dated.sort((a, b) => getOrderDateTimeKey(a).localeCompare(getOrderDateTimeKey(b))),
+          ...undated
+        ];
       }
 
-      // Upcoming mode: nearest future pickup/COD first, then past records (most recent past first).
-      const today = getTodayISO();
-      const now = new Date();
-      const nowTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-      const nowKey = `${today}T${nowTime}`;
-      const upcoming = result.filter(o => getOrderDateTimeKey(o) >= nowKey)
+      // Default priority: all orders dated today/future first (even if today's time has passed),
+      // then overdue records, and finally records with no valid date.
+      const upcoming = dated.filter(order => String(order.date) >= today)
         .sort((a, b) => getOrderDateTimeKey(a).localeCompare(getOrderDateTimeKey(b)));
-      const past = result.filter(o => getOrderDateTimeKey(o) < nowKey)
+      const past = dated.filter(order => String(order.date) < today)
         .sort((a, b) => getOrderDateTimeKey(b).localeCompare(getOrderDateTimeKey(a)));
-      return [...upcoming, ...past];
+      return [...upcoming, ...past, ...undated];
     }
 
     function renderOrdersSection() {
@@ -2745,7 +2832,8 @@
       const badgeEl = document.getElementById('orders-count-badge');
 
       // The filter is available for both the default five recent orders and the full order history.
-      const baseOrders = ordersListExpanded ? [...orders] : [...orders].reverse().slice(0, 5);
+      const prioritizedOrders = sortOrderRecords(orders, 'upcoming');
+      const baseOrders = ordersListExpanded ? prioritizedOrders : prioritizedOrders.slice(0, 5);
       const criteria = [];
       if ((ordersListFilter.preset || 'all') !== 'all') {
         criteria.push(o => filterOrdersBySpec([o], ordersListFilter).length > 0);
@@ -2778,26 +2866,34 @@
           getOrderDisplaySummary(o).toLowerCase().includes(q)
         );
       }
-      const hasUserFilter = criteria.length > 0 || Boolean(q);
-      let displayOrders = (!ordersListExpanded && !hasUserFilter)
-        ? [...filtered]
-        : sortOrderRecords(filtered, ordersListFilter.sort || 'upcoming');
+      let displayOrders = sortOrderRecords(filtered, ordersListFilter.sort || 'upcoming');
       badgeEl.textContent = ordersListExpanded
         ? `${displayOrders.length} daripada ${orders.length} rekod`
-        : `${displayOrders.length} daripada ${Math.min(5, orders.length)} terkini`;
+        : `${displayOrders.length} daripada ${Math.min(5, orders.length)} terdekat`;
 
       if (!displayOrders.length) {
         listEl.innerHTML = `<div class="text-center py-6 text-xs text-stone-400">Tiada rekod tempahan ditemui.</div>`;
       } else {
         listEl.innerHTML = displayOrders.map(o => {
           const bal = Number(o.total || 0) - Number(o.paidAmount || 0);
+          const dateState = getOrderDateState(o);
+          const overdue = dateState === 'overdue' && !isOrderCompleted(o);
+          const statusLabel = isOrderCompleted(o) ? 'Selesai'
+            : overdue ? 'LEWAT • BELUM SELESAI'
+            : dateState === 'undated' ? 'Tarikh belum ditetapkan'
+            : dateState === 'today' ? 'Aktif • Hari Ini' : 'Aktif • Akan Datang';
+          const statusTone = isOrderCompleted(o) ? 'bg-emerald-100 text-emerald-700'
+            : overdue ? 'bg-rose-100 text-rose-800'
+            : dateState === 'undated' ? 'bg-amber-100 text-amber-800'
+            : dateState === 'today' ? 'bg-amber-100 text-amber-800' : 'bg-sky-100 text-sky-800';
+          const rowTone = overdue ? 'bg-rose-50 border-rose-300' : dateState === 'undated' && !isOrderCompleted(o) ? 'bg-amber-50 border-amber-200' : 'bg-stone-50 border-stone-200/80';
           return `
-            <div class="p-3 rounded-xl bg-stone-50 border border-stone-200/80 space-y-2">
+            <div class="p-3 rounded-xl ${rowTone} border space-y-2">
               <div class="flex items-start justify-between gap-2">
                 <div class="min-w-0">
                   <div class="flex items-center gap-1.5 flex-wrap">
-                    <span class="text-xs font-extrabold text-stone-900 truncate">${o.customer}</span>
-                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${o.status === 'Completed' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-800'}">${o.status === 'Completed' ? 'Selesai' : 'Aktif'}</span>
+                    <span class="text-xs font-extrabold text-stone-900 truncate">${o.customer || 'Nama pelanggan belum diisi'}</span>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${statusTone}">${statusLabel}</span>
                   </div>
                   <div class="text-[11px] text-stone-600 mt-0.5 leading-snug">${getOrderDisplaySummary(o)}</div>
                   ${getOrderMetaBadgesHtml(o)}
@@ -2807,7 +2903,7 @@
                       <span>${o.notes}</span>
                     </div>
                   ` : ''}
-                  <div class="text-[10px] font-mono-num text-stone-400 mt-1">${o.date} (${o.time}) • ${o.id}</div>
+                  <div class="text-[10px] font-mono-num ${overdue ? 'text-rose-700 font-bold' : 'text-stone-400'} mt-1">${o.date || 'Tarikh belum ditetapkan'} (${o.time || 'Masa belum ditetapkan'}) • ${o.id || 'Tiada ID'}</div>
                 </div>
                 <div class="text-right shrink-0">
                   <div class="text-xs font-mono-num font-extrabold text-stone-900">${fmtMoney(o.total)}</div>
@@ -2819,7 +2915,7 @@
 
               <div class="flex items-center justify-end gap-1.5 pt-1.5 border-t border-stone-200/70">
                 ${bal > 0 ? `<button type="button" onclick="markOrderPaid('${o.id}')" class="text-[10px] font-bold bg-amber-100 hover:bg-amber-200 text-amber-900 px-2.5 py-1 rounded-lg">Sahkan Baki</button>` : ''}
-                ${o.status === 'Active' ? `<button type="button" onclick="markOrderDone('${o.id}')" class="text-[10px] font-bold bg-emerald-100 hover:bg-emerald-200 text-emerald-800 px-2.5 py-1 rounded-lg">Selesai</button>` : ''}
+                ${!isOrderCompleted(o) && o.id ? `<button type="button" onclick="markOrderDone('${o.id}')" class="text-[10px] font-bold ${overdue ? 'bg-rose-600 hover:bg-rose-700 text-white' : 'bg-emerald-100 hover:bg-emerald-200 text-emerald-800'} px-2.5 py-1 rounded-lg">Selesai</button>` : ''}
                 <button type="button" onclick="openOrderModal('${o.id}')" class="text-[10px] font-bold bg-white hover:bg-stone-100 text-stone-700 border border-stone-200 px-2.5 py-1 rounded-lg flex items-center gap-1">
                   <i data-lucide="pencil" class="w-3 h-3 text-amber-600"></i> Edit / Note
                 </button>
@@ -2844,7 +2940,7 @@
         footerEl.innerHTML = `
           <button type="button" onclick="toggleOrdersShowAll()"
             class="w-full py-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold flex items-center justify-center gap-1.5 transition">
-            <span>Kembali kepada 5 tempahan terkini</span>
+            <span>Kembali kepada 5 tempahan terdekat</span>
             <i data-lucide="chevron-up" class="w-3.5 h-3.5"></i>
           </button>
         `;
@@ -3686,20 +3782,30 @@
       'orderCount', 'sales', 'profit', 'insights', 'aov', 'margin',
       'payment', 'delivery', 'salesChart', 'weekdays', 'flavours', 'productMargins'
     ];
+    const analyticsFilters = {};
+    ANALYTICS_RANGE_KEYS.forEach(key => {
+      const today = getTodayISO();
+      analyticsFilters[key] = { preset: 'today', from: today, to: today };
+    });
 
     function analyticsRangeMarkup(key) {
+      const filter = analyticsFilters[key];
       return `
-        <div class="rounded-lg bg-stone-50/80 border border-stone-200 p-2 space-y-1.5">
-          <div class="flex items-center justify-between gap-2">
-            <span class="text-[9px] font-bold uppercase tracking-wide text-stone-400">Julat tarikh sendiri</span>
-            <button type="button" onclick="resetAnalyticsRange('${key}')" class="text-[9px] font-extrabold text-amber-700 hover:underline">Semua</button>
-          </div>
-          <div class="grid grid-cols-2 gap-1.5">
+        <div class="space-y-1.5">
+          <select id="an-range-${key}-preset" onchange="onAnalyticsPresetChange('${key}', this.value)"
+            class="w-full text-[10px] font-bold bg-stone-100 text-stone-700 border border-stone-200 rounded-lg px-2 py-1.5">
+            <option value="today" ${filter.preset === 'today' ? 'selected' : ''}>Hari Ini</option>
+            <option value="week" ${filter.preset === 'week' ? 'selected' : ''}>Minggu Ini</option>
+            <option value="month" ${filter.preset === 'month' ? 'selected' : ''}>Bulan Ini</option>
+            <option value="custom" ${filter.preset === 'custom' ? 'selected' : ''}>Pilih Range</option>
+            <option value="all" ${filter.preset === 'all' ? 'selected' : ''}>Semua Tarikh</option>
+          </select>
+          <div id="an-range-${key}-custom" class="${filter.preset === 'custom' ? '' : 'hidden'} grid grid-cols-2 gap-1.5">
             <label class="min-w-0 text-[9px] font-semibold text-stone-500">Dari
-              <input type="date" id="an-range-${key}-from" onchange="renderAnalytics()" class="w-full min-w-0 px-1.5 py-1 text-[10px] rounded-md border border-stone-200 bg-white font-mono-num" />
+              <input type="date" id="an-range-${key}-from" value="${filter.from || ''}" onchange="onAnalyticsCustomDateChange('${key}')" class="w-full min-w-0 px-1.5 py-1 text-[10px] rounded-md border border-stone-200 bg-white font-mono-num" />
             </label>
             <label class="min-w-0 text-[9px] font-semibold text-stone-500">Hingga
-              <input type="date" id="an-range-${key}-to" onchange="renderAnalytics()" class="w-full min-w-0 px-1.5 py-1 text-[10px] rounded-md border border-stone-200 bg-white font-mono-num" />
+              <input type="date" id="an-range-${key}-to" value="${filter.to || ''}" onchange="onAnalyticsCustomDateChange('${key}')" class="w-full min-w-0 px-1.5 py-1 text-[10px] rounded-md border border-stone-200 bg-white font-mono-num" />
             </label>
           </div>
         </div>
@@ -3716,28 +3822,45 @@
       });
     }
 
-    function resetAnalyticsRange(key) {
+    function onAnalyticsPresetChange(key, preset) {
+      const filter = analyticsFilters[key];
+      if (!filter) return;
+      filter.preset = preset;
+      if (preset === 'custom') {
+        if (!filter.from) filter.from = getTodayISO();
+        if (!filter.to) filter.to = getTodayISO();
+      }
+      const customBox = document.getElementById(`an-range-${key}-custom`);
+      if (customBox) customBox.classList.toggle('hidden', preset !== 'custom');
       const from = document.getElementById(`an-range-${key}-from`);
       const to = document.getElementById(`an-range-${key}-to`);
-      if (from) from.value = '';
-      if (to) to.value = '';
+      if (from) from.value = filter.from || '';
+      if (to) to.value = filter.to || '';
+      renderAnalytics();
+    }
+
+    function onAnalyticsCustomDateChange(key) {
+      const filter = analyticsFilters[key];
+      if (!filter) return;
+      filter.preset = 'custom';
+      filter.from = document.getElementById(`an-range-${key}-from`)?.value || '';
+      filter.to = document.getElementById(`an-range-${key}-to`)?.value || '';
+      renderAnalytics();
+    }
+
+    function resetAnalyticsRange(key) {
+      const today = getTodayISO();
+      analyticsFilters[key] = { preset: 'today', from: today, to: today };
+      const host = document.getElementById(`an-range-controls-${key}`);
+      if (host) {
+        host.dataset.initialized = 'false';
+        host.innerHTML = '';
+      }
       renderAnalytics();
     }
 
     function getAnalyticsOrders(key) {
-      const from = document.getElementById(`an-range-${key}-from`)?.value || '';
-      const to = document.getElementById(`an-range-${key}-to`)?.value || '';
-      let start = from;
-      let end = to;
-      if (start && end && start > end) [start, end] = [end, start];
-      if (!start && !end) return [...orders];
-      return orders.filter(order => {
-        const date = String(order.date || '');
-        if (!date) return false;
-        if (start && date < start) return false;
-        if (end && date > end) return false;
-        return true;
-      });
+      return filterOrdersBySpec(orders, analyticsFilters[key] || { preset: 'today' });
     }
 
     function renderAnalytics() {
