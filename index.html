@@ -6,7 +6,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="theme-color" content="#1c1917" />
-  <title>AF Kitchen Command Center — English UI v7.0</title>
+  <title>AF Kitchen Command Center — English UI v9.0</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -68,7 +68,30 @@
       --ui-card-shadow: 0 2px 10px -2px rgba(28, 25, 23, 0.04);
     }
     html { font-size: var(--ui-root-size); }
-    body { background-color: var(--ui-page-bg); }
+    body {
+      background-color: var(--ui-page-bg);
+      background-image: none !important;
+      isolation: isolate;
+    }
+    /* A fixed, independent background layer is more reliable than body background-attachment: fixed on iOS Safari. */
+    #theme-background-layer {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background-color: var(--ui-page-bg);
+      background-repeat: repeat;
+      background-position: 0 0;
+      filter: brightness(var(--ui-bg-brightness, 1));
+      transform: translateZ(0);
+    }
+    .theme-range {
+      display: block;
+      width: 100%;
+      min-height: 30px;
+      accent-color: var(--ui-accent);
+      touch-action: pan-y;
+    }
     .card-soft { background-color: var(--ui-card-bg); border-color: var(--ui-border-color); box-shadow: var(--ui-card-shadow); }
     html[data-theme-custom="true"] body { color: var(--ui-text-color); }
     html[data-theme-custom="true"] .card-soft,
@@ -95,6 +118,7 @@
   </style>
 </head>
 <body class="min-h-screen pb-24">
+  <div id="theme-background-layer" aria-hidden="true"></div>
 
   <!-- TOAST NOTIFICATION -->
   <div id="toast" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 hidden max-w-[92vw]">
@@ -439,7 +463,7 @@
         <h1 id="dash-biz-title" class="text-lg font-extrabold text-stone-900 tracking-tight truncate">Dapur Marble Kak Nina</h1>
       </div>
       <div class="flex items-center gap-1.5 shrink-0">
-        <button type="button" id="btn-manual-sync" onclick="syncFromCloud(false)" title="Sync now with Google Sheets"
+        <button type="button" id="btn-manual-sync" onclick="syncFromCloud(false, false)" title="Check for updates from Google Sheets"
           class="hidden text-xs font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-2.5 py-2 rounded-xl items-center gap-1">
           <i id="sync-spin-icon" data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
           <span class="hidden sm:inline">Sync</span>
@@ -1077,6 +1101,30 @@
           </div>
         </div>
 
+        <div class="rounded-2xl bg-stone-50 border border-stone-200 p-3.5 space-y-3">
+          <div>
+            <div class="text-xs font-extrabold text-stone-800">Background Visibility</div>
+            <div class="text-[10px] text-stone-500">Fine-tune the background so the pattern remains visible on a phone without reducing readability.</div>
+          </div>
+          <label class="block space-y-1">
+            <span class="flex items-center justify-between gap-2 text-[11px] font-extrabold text-stone-700">
+              <span>Background brightness</span>
+              <output id="appearance-brightness-value" class="font-mono-num text-amber-700">100%</output>
+            </span>
+            <input id="appearance-brightness" class="theme-range" type="range" min="85" max="115" step="1" value="100" oninput="previewAppearanceSettings()" />
+            <span class="flex justify-between text-[9px] text-stone-400"><span>Dimmer</span><span>Brighter</span></span>
+          </label>
+          <label class="block space-y-1">
+            <span class="flex items-center justify-between gap-2 text-[11px] font-extrabold text-stone-700">
+              <span>Pattern intensity</span>
+              <output id="appearance-pattern-intensity-value" class="font-mono-num text-amber-700">60%</output>
+            </span>
+            <input id="appearance-pattern-intensity" class="theme-range" type="range" min="0" max="100" step="5" value="60" oninput="previewAppearanceSettings()" />
+            <span class="flex justify-between text-[9px] text-stone-400"><span>Very subtle</span><span>More visible</span></span>
+          </label>
+          <p class="text-[10px] leading-relaxed text-stone-500">These controls only affect the page background. Card colours and text contrast remain unchanged.</p>
+        </div>
+
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <label class="space-y-1">
             <span class="block text-xs font-extrabold text-stone-700">Font Family</span>
@@ -1411,6 +1459,8 @@
     const SESSION_UNLOCK_KEY = 'cloud_command_center_unlocked_v2';
     const PUBLISHED_CONFIG_KEY = 'cloud_command_center_published_config_v1';
     const CONFIG_DRAFT_KEY = 'cloud_command_center_config_draft_v1';
+    const CLOUD_SYNC_META_KEY = 'af_kitchen_cloud_sync_meta_v1';
+    const AUTO_SYNC_INTERVAL_MS = 15000;
 
     function getTodayISO() {
       const d = new Date();
@@ -1458,7 +1508,9 @@
         borderColor: '#ede8e0',
         fontSize: '16px',
         shadow: 'soft',
-        backgroundPattern: 'none'
+        backgroundPattern: 'none',
+        backgroundBrightness: 100,
+        patternIntensity: 60
       };
     }
 
@@ -1567,6 +1619,8 @@
     let weekdayChartInstance = null;
     let chartPeriod = 'daily';
     let isSyncing = false;
+    let pendingCloudActionCount = 0;
+    let autoSyncTimer = null;
     let hasConfigDraft = localStorage.getItem(CONFIG_DRAFT_KEY) === '1';
     let publishedConfig = null;
     try { publishedConfig = JSON.parse(localStorage.getItem(PUBLISHED_CONFIG_KEY) || 'null'); } catch (e) { publishedConfig = null; }
@@ -1733,6 +1787,13 @@
       return usageMap;
     }
 
+    function getOrderStockDeltas(order, direction = -1) {
+      return Object.entries(getOrderIngredientUsageMap(order)).map(([id, qty]) => ({
+        id: String(id),
+        delta: Number(qty || 0) * Number(direction || 0)
+      })).filter(change => Number.isFinite(change.delta) && change.delta !== 0);
+    }
+
     function applyStockDeltaForOrder(order, direction = -1) {
       const usageMap = getOrderIngredientUsageMap(order);
       Object.entries(usageMap).forEach(([ingId, qty]) => {
@@ -1831,8 +1892,11 @@
       return merged;
     }
 
-    function syncOperationalStockToCloud() {
+    function syncOperationalStockToCloud(stockChanges = null) {
       if (!config.scriptUrl) return Promise.resolve(null);
+      if (stockChanges && (Array.isArray(stockChanges.stockDeltas) || Array.isArray(stockChanges.stockSnapshots))) {
+        return pushCloudAction(Object.assign({ action: 'updateStock' }, stockChanges));
+      }
       const ingredients = getCloudSafeIngredientsForOperationalSync();
       if (!Array.isArray(ingredients)) return Promise.resolve(null);
       return pushCloudAction({ action: 'updateStock', ingredients });
@@ -1885,11 +1949,12 @@
       let sourceConfig = publishedConfig;
       if (config.scriptUrl && config.pin) {
         try {
-          const response = await fetch(`${config.scriptUrl}?pin=${encodeURIComponent(config.pin)}`);
+          const response = await fetch(`${config.scriptUrl}?pin=${encodeURIComponent(config.pin)}`, { cache: 'no-store' });
           const json = await response.json();
           if (json.ok && json.data?.config) {
             sourceConfig = json.data.config;
             rememberPublishedConfig(sourceConfig);
+            rememberCloudSync(json.version, json.serverTime);
           }
         } catch (e) { /* Use the most recently cached published snapshot when offline. */ }
       }
@@ -1941,15 +2006,20 @@
       return `rgba(${r},${g},${b},${alpha})`;
     }
 
-    function getAppearancePatternImage(pattern, accent) {
+    function getAppearancePatternImage(pattern, accent, intensity = 60) {
+      const level = Math.max(0, Math.min(100, Number(intensity) || 0)) / 100;
+      if (pattern === 'none' || level <= 0) return 'none';
       if (pattern === 'fine-lines') {
-        return `repeating-linear-gradient(135deg, transparent 0 17px, ${colorToRgba(accent, 0.055)} 17px 18px, transparent 18px 34px)`;
+        const alpha = (0.025 + level * 0.105).toFixed(3);
+        return `repeating-linear-gradient(135deg, transparent 0 13px, ${colorToRgba(accent, alpha)} 13px 14px, transparent 14px 27px)`;
       }
       if (pattern === 'dot-grid') {
-        return `radial-gradient(${colorToRgba(accent, 0.14)} 0.75px, transparent 0.9px)`;
+        const alpha = (level * 0.19).toFixed(3);
+        return `radial-gradient(${colorToRgba(accent, alpha)} 0.85px, transparent 1px)`;
       }
       if (pattern === 'soft-floral') {
-        const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="112" height="112" viewBox="0 0 112 112"><g fill="none" stroke="${accent}" stroke-opacity="0.20" stroke-width="1.15"><circle cx="56" cy="39" r="8"/><circle cx="73" cy="56" r="8"/><circle cx="56" cy="73" r="8"/><circle cx="39" cy="56" r="8"/><circle cx="56" cy="56" r="3.3"/><path d="M56 8v10M56 94v10M8 56h10M94 56h10" stroke-opacity="0.10"/></g></svg>`;
+        const opacity = (0.08 + level * 0.30).toFixed(3);
+        const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="84" height="84" viewBox="0 0 84 84"><g fill="none" stroke="${accent}" stroke-opacity="${opacity}" stroke-width="1.1"><circle cx="42" cy="29" r="7"/><circle cx="55" cy="42" r="7"/><circle cx="42" cy="55" r="7"/><circle cx="29" cy="42" r="7"/><circle cx="42" cy="42" r="2.7"/><path d="M42 6v8M42 70v8M6 42h8M70 42h8" stroke-opacity="${(level * 0.19).toFixed(3)}"/></g></svg>`;
         return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
       }
       return 'none';
@@ -1981,6 +2051,8 @@
       const textColor = appearance.textColor || '#1c1917';
       const cardColor = appearance.cardColor || '#ffffff';
       const borderColor = appearance.borderColor || '#ede8e0';
+      const brightness = Math.max(85, Math.min(115, Number(appearance.backgroundBrightness) || 100));
+      const patternIntensity = Math.max(0, Math.min(100, Number(appearance.patternIntensity ?? 60)));
       const darkMix = (hex) => blendThemeColors(hex, '#000000', 0.30);
       const accentDark = darkMix(accent);
       const panelBg = blendThemeColors(cardColor, background, 0.48);
@@ -1997,16 +2069,32 @@
       root.style.setProperty('--ui-text-muted', mutedText);
       root.style.setProperty('--ui-border-color', borderColor);
       root.style.setProperty('--ui-root-size', appearance.fontSize || '16px');
+      root.style.setProperty('--ui-bg-brightness', String(brightness / 100));
       root.style.setProperty('--ui-card-shadow', appearance.shadow === 'none'
         ? 'none'
         : (appearance.shadow === 'strong' ? '0 5px 18px -4px rgba(28, 25, 23, 0.13)' : '0 2px 10px -2px rgba(28, 25, 23, 0.04)'));
       document.body.style.fontFamily = appearance.font || "'Plus Jakarta Sans', sans-serif";
       document.body.style.backgroundColor = background;
-      document.body.style.backgroundImage = getAppearancePatternImage(appearance.backgroundPattern || 'none', accent);
-      document.body.style.backgroundRepeat = 'repeat';
-      document.body.style.backgroundSize = appearance.backgroundPattern === 'dot-grid' ? '18px 18px' : (appearance.backgroundPattern === 'fine-lines' ? 'auto' : '112px 112px');
-      document.body.style.backgroundAttachment = 'fixed';
+      document.body.style.backgroundImage = 'none';
       document.body.style.color = textColor;
+
+      const backgroundLayer = document.getElementById('theme-background-layer');
+      if (backgroundLayer) {
+        backgroundLayer.style.backgroundColor = background;
+        backgroundLayer.style.backgroundImage = getAppearancePatternImage(appearance.backgroundPattern || 'none', accent, patternIntensity);
+        backgroundLayer.style.backgroundRepeat = 'repeat';
+        backgroundLayer.style.backgroundSize = appearance.backgroundPattern === 'dot-grid'
+          ? '17px 17px'
+          : (appearance.backgroundPattern === 'fine-lines' ? 'auto' : '84px 84px');
+        backgroundLayer.style.backgroundPosition = '0 0';
+        backgroundLayer.style.filter = `brightness(${brightness / 100})`;
+      }
+
+      const brightnessOutput = document.getElementById('appearance-brightness-value');
+      if (brightnessOutput) brightnessOutput.textContent = `${brightness}%`;
+      const intensityOutput = document.getElementById('appearance-pattern-intensity-value');
+      if (intensityOutput) intensityOutput.textContent = `${patternIntensity}%`;
+
       const isCustom = accent.toLowerCase() !== '#f59e0b' || background.toLowerCase() !== '#faf8f5' ||
         textColor.toLowerCase() !== '#1c1917' || cardColor.toLowerCase() !== '#ffffff' || borderColor.toLowerCase() !== '#ede8e0';
       if (isCustom) root.setAttribute('data-theme-custom', 'true');
@@ -2014,7 +2102,7 @@
       if (accent.toLowerCase() === '#f59e0b') root.removeAttribute('data-theme-accent-custom');
       else root.setAttribute('data-theme-accent-custom', 'true');
       const themeMeta = document.querySelector('meta[name="theme-color"]');
-      if (themeMeta) themeMeta.setAttribute('content', accent);
+      if (themeMeta) themeMeta.setAttribute('content', background);
     }
 
     function readAppearanceForm() {
@@ -2027,7 +2115,9 @@
         borderColor: document.getElementById('appearance-border').value || '#ede8e0',
         fontSize: document.getElementById('appearance-size').value,
         shadow: document.getElementById('appearance-shadow').value,
-        backgroundPattern: document.getElementById('appearance-pattern').value || 'none'
+        backgroundPattern: document.getElementById('appearance-pattern').value || 'none',
+        backgroundBrightness: Number(document.getElementById('appearance-brightness').value || 100),
+        patternIntensity: Number(document.getElementById('appearance-pattern-intensity').value || 0)
       };
     }
 
@@ -2041,6 +2131,12 @@
       document.getElementById('appearance-size').value = appearance.fontSize;
       document.getElementById('appearance-shadow').value = appearance.shadow;
       document.getElementById('appearance-pattern').value = appearance.backgroundPattern || 'none';
+      document.getElementById('appearance-brightness').value = String(appearance.backgroundBrightness ?? 100);
+      document.getElementById('appearance-pattern-intensity').value = String(appearance.patternIntensity ?? 60);
+      const brightnessOutput = document.getElementById('appearance-brightness-value');
+      if (brightnessOutput) brightnessOutput.textContent = `${appearance.backgroundBrightness ?? 100}%`;
+      const intensityOutput = document.getElementById('appearance-pattern-intensity-value');
+      if (intensityOutput) intensityOutput.textContent = `${appearance.patternIntensity ?? 60}%`;
     }
 
     function openAppearanceSettings() {
@@ -2299,6 +2395,7 @@
 
     function lockAppNow() {
       sessionStorage.removeItem(SESSION_UNLOCK_KEY);
+      if (autoSyncTimer) { window.clearInterval(autoSyncTimer); autoSyncTimer = null; }
       showLockScreen(false);
       showToast('App locked.');
     }
@@ -2319,7 +2416,7 @@
         btn.disabled = true;
         lbl.textContent = 'Verifying PIN & syncing...';
         try {
-          const res = await fetch(`${targetUrl}?pin=${encodeURIComponent(enteredPin)}`);
+          const res = await fetch(`${targetUrl}?pin=${encodeURIComponent(enteredPin)}`, { cache: 'no-store' });
           const json = await res.json();
           if (!json.ok) {
             showToast(json.message || 'Incorrect PIN or connection failed.', true);
@@ -2345,6 +2442,7 @@
           config.scriptUrl = targetUrl;
           config.pin = enteredPin;
           config.isConfigured = true;
+          rememberCloudSync(json.version, json.serverTime);
           saveLocalConfig();
           sessionStorage.setItem(SESSION_UNLOCK_KEY, '1');
 
@@ -2357,6 +2455,11 @@
           btn.disabled = false;
           lbl.textContent = 'Unlock & Sync';
           if (enteredPin === String(config.pin || '123456')) {
+            if (targetUrl) {
+              config.scriptUrl = targetUrl;
+              config.pin = enteredPin;
+              saveLocalConfig();
+            }
             sessionStorage.setItem(SESSION_UNLOCK_KEY, '1');
             switchToDashboard();
             updateSyncHeaderBadge(false, 'Offline (Local Mode)');
@@ -2376,37 +2479,76 @@
       }
     }
 
+    function getCloudSyncMeta() {
+      try {
+        const meta = JSON.parse(localStorage.getItem(CLOUD_SYNC_META_KEY) || 'null') || {};
+        if (meta.scriptUrl !== config.scriptUrl) return { scriptUrl: config.scriptUrl || '', version: '', lastSyncedAt: '' };
+        return meta;
+      } catch (e) {
+        return { scriptUrl: config.scriptUrl || '', version: '', lastSyncedAt: '' };
+      }
+    }
+
+    function rememberCloudSync(version, serverTime = '') {
+      const current = getCloudSyncMeta();
+      const meta = {
+        scriptUrl: config.scriptUrl || '',
+        version: version !== undefined && version !== null && version !== '' ? String(version) : String(current.version || ''),
+        lastSyncedAt: serverTime || new Date().toISOString()
+      };
+      localStorage.setItem(CLOUD_SYNC_META_KEY, JSON.stringify(meta));
+      updateSyncHeaderBadge(true);
+    }
+
+    function formatLastSynced(meta) {
+      if (!meta || !meta.lastSyncedAt) return '';
+      const d = new Date(meta.lastSyncedAt);
+      if (Number.isNaN(d.getTime())) return '';
+      return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+    }
+
     function updateSyncHeaderBadge(isConnected, labelText) {
       const dot = document.getElementById('sync-dot');
       const txt = document.getElementById('sync-status-text');
       const syncBtn = document.getElementById('btn-manual-sync');
+      if (!dot || !txt) return;
       if (config.scriptUrl) {
-        syncBtn.classList.remove('hidden');
-        syncBtn.classList.add('flex');
+        syncBtn?.classList.remove('hidden');
+        syncBtn?.classList.add('flex');
       } else {
-        syncBtn.classList.add('hidden');
+        syncBtn?.classList.add('hidden');
       }
 
       if (isConnected) {
-        const now = new Date();
-        const hhmm = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+        const meta = getCloudSyncMeta();
+        const hhmm = formatLastSynced(meta) || `${String(new Date().getHours()).padStart(2, '0')}:${String(new Date().getMinutes()).padStart(2, '0')}`;
         dot.className = 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0';
-        txt.textContent = labelText || `Cloud Sync • ${hhmm}`;
+        txt.textContent = labelText || `Cloud checked ${hhmm}`;
+        txt.title = meta.lastSyncedAt ? `Last cloud check: ${new Date(meta.lastSyncedAt).toLocaleString()}. Automatic update checks run every 15 seconds while this app is open.` : 'Cloud connected. Automatic update checks run every 15 seconds while this app is open.';
       } else {
         dot.className = 'w-2 h-2 rounded-full bg-amber-500 shrink-0';
         txt.textContent = labelText || 'Local Mode';
+        txt.title = 'Cloud is currently unavailable. Local data remains on this device.';
       }
     }
 
-    async function syncFromCloud(silent = false) {
-      if (!config.scriptUrl || !config.pin || isSyncing) return;
+    async function syncFromCloud(silent = false, forceFull = false) {
+      if (!config.scriptUrl || !config.pin || isSyncing || pendingCloudActionCount > 0) return;
       isSyncing = true;
       const spin = document.getElementById('sync-spin-icon');
       if (spin) spin.classList.add('animate-spin');
 
       try {
-        const res = await fetch(`${config.scriptUrl}?pin=${encodeURIComponent(config.pin)}`);
+        const meta = getCloudSyncMeta();
+        const since = !forceFull && meta.version ? `&since=${encodeURIComponent(meta.version)}` : '';
+        const full = forceFull ? '&full=1' : '';
+        const res = await fetch(`${config.scriptUrl}?pin=${encodeURIComponent(config.pin)}${since}${full}`, { cache: 'no-store' });
         const json = await res.json();
+        if (json.ok && json.changed === false) {
+          rememberCloudSync(json.version, json.serverTime);
+          if (!silent) showToast('Everything is up to date.');
+          return;
+        }
         if (json.ok && json.data) {
           if (json.data.config) {
             const savedUrl = config.scriptUrl;
@@ -2426,7 +2568,9 @@
             normalizeOrderStatuses(false);
             localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
           }
-          document.getElementById('dash-biz-title').textContent = config.bizName || 'Command Center';
+          rememberCloudSync(json.version, json.serverTime);
+          const title = document.getElementById('dash-biz-title');
+          if (title) title.textContent = config.bizName || 'Command Center';
           renderDashboardAll();
           updateSyncHeaderBadge(true);
           if (!silent) showToast('Latest data downloaded successfully!');
@@ -2445,6 +2589,7 @@
     async function pushCloudAction(payload) {
       if (!config.scriptUrl) return null;
       const spin = document.getElementById('sync-spin-icon');
+      pendingCloudActionCount++;
       if (spin) spin.classList.add('animate-spin');
 
       try {
@@ -2455,34 +2600,59 @@
           body: JSON.stringify(fullPayload)
         });
         const json = await res.json();
-        if (json.ok && json.data) {
-          if (json.data.config) {
-            const savedUrl = config.scriptUrl;
-            const savedPin = config.pin;
-            rememberPublishedConfig(json.data.config);
-            if (hasConfigDraft) {
-              config = mergeCloudStockIntoLocalDraft(config, json.data.config);
-            } else {
-              config = mergeCloudConfigForThisDevice(json.data.config, savedUrl, savedPin);
+        if (json.ok) {
+          rememberCloudSync(json.version, json.serverTime);
+          if (json.orderUpdatedAt && ['createOrder', 'editOrder', 'markOrderPaid', 'markOrderDone'].includes(payload.action)) {
+            const targetId = payload.order?.id || payload.orderId;
+            const localOrder = orders.find(order => String(order.id) === String(targetId));
+            if (localOrder) {
+              localOrder.updatedAt = json.orderUpdatedAt;
+              localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
             }
-            config.appearance = Object.assign({}, getDefaultAppearance(), config.appearance || {});
-            applyAppearanceSettings(config.appearance);
-            saveLocalConfig();
           }
-          if (Array.isArray(json.data.orders)) {
-            orders = json.data.orders;
-            normalizeOrderStatuses(false);
-            localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+          // Support the previous backend response format during migration.
+          if (json.data) {
+            if (json.data.config) {
+              const savedUrl = config.scriptUrl;
+              const savedPin = config.pin;
+              rememberPublishedConfig(json.data.config);
+              if (hasConfigDraft) config = mergeCloudStockIntoLocalDraft(config, json.data.config);
+              else config = mergeCloudConfigForThisDevice(json.data.config, savedUrl, savedPin);
+              config.appearance = Object.assign({}, getDefaultAppearance(), config.appearance || {});
+              applyAppearanceSettings(config.appearance);
+              saveLocalConfig();
+            }
+            if (Array.isArray(json.data.orders)) {
+              orders = json.data.orders;
+              normalizeOrderStatuses(false);
+              localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+            }
           }
           updateSyncHeaderBadge(true);
+        } else if (json.error === 'CONFLICT') {
+          updateSyncHeaderBadge(true, 'Update conflict');
+        } else {
+          updateSyncHeaderBadge(false, 'Cloud Update Failed');
         }
         return json;
       } catch (err) {
         updateSyncHeaderBadge(false, 'Offline (Saved Locally)');
         return { ok: false, error: 'NETWORK_ERROR' };
       } finally {
+        pendingCloudActionCount = Math.max(0, pendingCloudActionCount - 1);
         if (spin) spin.classList.remove('animate-spin');
       }
+    }
+
+    function startAutoSync() {
+      if (autoSyncTimer) window.clearInterval(autoSyncTimer);
+      autoSyncTimer = window.setInterval(() => {
+        const unlocked = sessionStorage.getItem(SESSION_UNLOCK_KEY) === '1';
+        const dashboardVisible = !document.getElementById('dashboard-view')?.classList.contains('hidden');
+        if (document.visibilityState === 'visible' && dashboardVisible && unlocked && config.scriptUrl && navigator.onLine !== false && !isSyncing && pendingCloudActionCount === 0) {
+          syncFromCloud(true, false);
+        }
+      }, AUTO_SYNC_INTERVAL_MS);
     }
 
     async function testCloudConnection() {
@@ -2924,6 +3094,7 @@
       updateSyncHeaderBadge(Boolean(config.scriptUrl));
       updateConfigDraftStatus();
       renderDashboardAll();
+      if (sessionStorage.getItem(SESSION_UNLOCK_KEY) === '1' && config.scriptUrl) startAutoSync();
       if (window.lucide) lucide.createIcons();
     }
 
@@ -3673,12 +3844,14 @@
     }
 
     async function adjustStock(idx, delta) {
-      config.ingredients[idx].stock = Math.max(0, Number(config.ingredients[idx].stock) + delta);
+      const ingredient = config.ingredients[idx];
+      if (!ingredient) return;
+      ingredient.stock = Math.max(0, Number(ingredient.stock) + delta);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
       renderStockList();
-      if (delta > 0) showToast(`${config.ingredients[idx].name} stock increased!`);
-      if (config.scriptUrl) {
-        await syncOperationalStockToCloud();
+      if (delta > 0) showToast(`${ingredient.name} stock increased!`);
+      if (config.scriptUrl && ingredient.id) {
+        await syncOperationalStockToCloud({ stockDeltas: [{ id: String(ingredient.id), delta: Number(delta) }] });
       }
     }
 
@@ -3741,8 +3914,12 @@
         lowAlert: Math.max(0, parseFloat(document.getElementById('stk-m-alert').value) || 0)
       };
 
+      let stockSnapshot = null;
       if (editingStockIndex !== null && config.ingredients[editingStockIndex]) {
-        config.ingredients[editingStockIndex] = Object.assign({}, config.ingredients[editingStockIndex], itemData);
+        const existing = config.ingredients[editingStockIndex];
+        config.ingredients[editingStockIndex] = Object.assign({}, existing, itemData);
+        const publishedIds = new Set((publishedConfig?.ingredients || []).map(ing => String(ing.id)));
+        if (publishedIds.has(String(existing.id))) stockSnapshot = { id: String(existing.id), stock: itemData.stock };
         showToast(`${name} stock updated!`);
       } else {
         config.ingredients.push(Object.assign({ id: 'ing_' + Date.now() }, itemData));
@@ -3752,7 +3929,7 @@
       markConfigDraft();
       closeStockModal();
       renderStockList();
-      await syncOperationalStockToCloud();
+      if (stockSnapshot) await syncOperationalStockToCloud({ stockSnapshots: [stockSnapshot] });
     }
 
     async function deleteStockModalItem() {
@@ -3765,7 +3942,7 @@
       closeStockModal();
       renderStockList();
       showToast(`${target.name} removed from this device. Publish to remove it from all devices.`);
-      await syncOperationalStockToCloud();
+      // Inventory definition changes remain local drafts until 'Save to All Devices' is pressed.
     }
 
     // =========================================================
@@ -4157,16 +4334,27 @@
           renderDashboardAll();
 
           if (config.scriptUrl) {
-            const res = await pushCloudAction({ action: 'editOrder', order: updatedOrder, updatedIngredients: getCloudSafeIngredientsForOperationalSync() });
+            const stockDeltas = [
+              ...getOrderStockDeltas(oldOrder, +1),
+              ...getOrderStockDeltas(updatedOrder, -1)
+            ];
+            const res = await pushCloudAction({
+              action: 'editOrder', order: updatedOrder,
+              expectedUpdatedAt: oldOrder.updatedAt || '',
+              stockDeltas
+            });
             if (res && res.ok) {
               showToast('Order updated and inventory synced to the cloud!');
               renderDashboardAll();
+            } else if (res?.error === 'CONFLICT') {
+              showToast('This order changed on another device. The latest cloud version is being loaded.', true);
+              await syncFromCloud(true, true);
             } else showToast('Updated on this device (cloud sync failed).', true);
           } else showToast('Order updated and ingredient stock adjusted!');
         }
       } else {
         const newOrd = {
-          id: 'ORD-' + Math.floor(100 + Math.random() * 900),
+          id: 'ORD-' + Date.now() + '-' + Math.floor(100 + Math.random() * 900),
           customer, date: document.getElementById('ord-date').value, time: document.getElementById('ord-time').value,
           sizeId: finalItems[0].sizeId, sizeName: summarySizeName, flavours: allFlavours, addons: allAddons,
           items: finalItems, deliveryMethod: modalDeliveryMethod, codCharge: bd.codCharge, codAddress,
@@ -4181,7 +4369,7 @@
         renderDashboardAll();
 
         if (config.scriptUrl) {
-          const res = await pushCloudAction({ action: 'createOrder', order: newOrd, updatedIngredients: getCloudSafeIngredientsForOperationalSync() });
+          const res = await pushCloudAction({ action: 'createOrder', order: newOrd, stockDeltas: getOrderStockDeltas(newOrd, -1) });
           if (res && res.ok) {
             showToast(res.calendarCreated
               ? 'Order saved, inventory updated and Calendar reminder created!'
@@ -4216,7 +4404,7 @@
       showToast(`Order ${target.customer} deleted and stock restored.`);
 
       if (config.scriptUrl) {
-        await pushCloudAction({ action: 'deleteOrder', orderId: target.id, updatedIngredients: getCloudSafeIngredientsForOperationalSync() });
+        await pushCloudAction({ action: 'deleteOrder', orderId: target.id, stockDeltas: getOrderStockDeltas(target, +1) });
         renderDashboardAll();
       }
     }
@@ -4544,8 +4732,12 @@
 
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible' && sessionStorage.getItem(SESSION_UNLOCK_KEY) === '1' && config.scriptUrl) {
-        syncFromCloud(true);
+        syncFromCloud(true, false);
       }
+    });
+
+    window.addEventListener('online', () => {
+      if (sessionStorage.getItem(SESSION_UNLOCK_KEY) === '1' && config.scriptUrl) syncFromCloud(true, false);
     });
 
     // Setup edits are local drafts. Cloud settings only change after explicit publish.
@@ -4576,7 +4768,7 @@
       if (config.isConfigured) {
         if (isUnlocked) {
           switchToDashboard();
-          if (config.scriptUrl) syncFromCloud(true);
+          if (config.scriptUrl) syncFromCloud(true, false);
         } else {
           showLockScreen(false);
         }
