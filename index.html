@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="ms">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="theme-color" content="#1c1917" />
-  <title>AF Kitchen Command Center — Enhanced v3</title>
+  <title>AF Kitchen Command Center — Enhanced v4</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -100,7 +100,7 @@
   <div id="toast" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 hidden max-w-[92vw]">
     <div class="bg-stone-900 text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-lg flex items-center gap-2">
       <span id="toast-dot" class="w-2 h-2 rounded-full bg-amber-400 shrink-0"></span>
-      <span id="toast-msg" class="truncate">Tetapan disimpan!</span>
+      <span id="toast-msg" class="truncate">Settings disimpan!</span>
     </div>
   </div>
 
@@ -114,12 +114,12 @@
           <i data-lucide="lock" class="w-6 h-6"></i>
         </div>
         <h1 id="lock-biz-name" class="text-lg font-extrabold text-stone-900">Cloud Command Center</h1>
-        <p class="text-xs text-stone-500">Masukkan Kod PIN Rahsia untuk mengakses rekod tempahan, resipi &amp; stok bisnes anda.</p>
+        <p class="text-xs text-stone-500">Masukkan Secret PIN untuk mengakses rekod tempahan, resipi &amp; stok bisnes anda.</p>
       </div>
 
       <div class="space-y-3">
         <div>
-          <label class="block text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1">Kod PIN Rahsia (4–6 Digit)</label>
+          <label class="block text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1">Secret PIN (4–6 Digit)</label>
           <input type="password" inputmode="numeric" maxlength="8" id="unlock-pin-input" placeholder="••••••"
             onkeydown="if(event.key==='Enter') handleUnlock()"
             class="w-full text-center tracking-[0.4em] text-xl font-mono-num font-extrabold px-4 py-3 rounded-2xl border border-stone-200 bg-stone-50" />
@@ -183,7 +183,7 @@
       </div>
       <div class="flex items-center gap-2 shrink-0">
         <button type="button" onclick="resetToSample()" class="text-[11px] font-semibold px-2.5 py-1.5 rounded-lg border border-stone-200 bg-white text-stone-700 hover:bg-stone-50">Isi Contoh</button>
-        <button type="button" onclick="clearAllSetup()" class="text-[11px] font-semibold px-2.5 py-1.5 rounded-lg border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100">Kosongkan</button>
+        <button type="button" onclick="clearAllSetup()" class="text-[11px] font-semibold px-2.5 py-1.5 rounded-lg border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100">Clear All</button>
       </div>
     </div>
 
@@ -194,15 +194,15 @@
       </button>
       <button type="button" onclick="goSetupStep(2)" id="step-tab-2" class="bg-white border border-stone-200 rounded-xl p-2 text-left transition">
         <div class="text-[10px] font-bold text-stone-400">Langkah 2</div>
-        <div class="text-xs font-bold text-stone-700 truncate">Perisa &amp; Menu</div>
+        <div class="text-xs font-bold text-stone-700 truncate">Flavours &amp; Menu</div>
       </button>
       <button type="button" onclick="goSetupStep(3)" id="step-tab-3" class="bg-white border border-stone-200 rounded-xl p-2 text-left transition">
         <div class="text-[10px] font-bold text-stone-400">Langkah 3</div>
-        <div class="text-xs font-bold text-stone-700 truncate">Senarai Bahan</div>
+        <div class="text-xs font-bold text-stone-700 truncate">Ingredient List</div>
       </button>
       <button type="button" onclick="goSetupStep(4)" id="step-tab-4" class="bg-white border border-stone-200 rounded-xl p-2 text-left transition">
         <div class="text-[10px] font-bold text-stone-400">Langkah 4</div>
-        <div class="text-xs font-bold text-stone-700 truncate">Berat Resipi</div>
+        <div class="text-xs font-bold text-stone-700 truncate">Recipe Weights</div>
       </button>
     </div>
 
@@ -227,7 +227,7 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
           <div class="sm:col-span-2">
-            <label class="block text-xs font-bold text-stone-700 mb-1">Tagline / Jenis Produk Utama</label>
+            <label class="block text-xs font-bold text-stone-700 mb-1">Tagline / Jenis Products Home</label>
             <input type="text" id="cfg-tagline" placeholder="Contoh: Kek Marble Premium &amp; Custom" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-stone-200 bg-stone-50/50" />
           </div>
           <div>
@@ -248,7 +248,7 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
-            <label class="block text-xs font-bold text-stone-700 mb-1">Kod PIN Rahsia *</label>
+            <label class="block text-xs font-bold text-stone-700 mb-1">Secret PIN *</label>
             <input type="text" inputmode="numeric" maxlength="8" id="cfg-pin" value="123456" placeholder="123456"
               class="w-full px-3.5 py-2 text-sm rounded-xl border border-stone-200 bg-white font-mono-num font-bold" />
             <p class="text-[10px] text-stone-400 mt-1">Mesti sama dengan <code>SECRET_PIN</code> dalam Code.gs.</p>
@@ -269,7 +269,7 @@
       <div class="card-soft rounded-2xl p-4 sm:p-5 space-y-3.5">
         <div class="flex items-center justify-between border-b border-stone-100 pb-3">
           <div>
-            <h2 class="text-base font-bold text-stone-900">Saiz Produk &amp; Harga Jualan</h2>
+            <h2 class="text-base font-bold text-stone-900">Product Sizes &amp; Selling Prices</h2>
             <p class="text-xs text-stone-500 mt-0.5">Tetapkan pilihan saiz kek atau kotak produk serta harga jualan setiap satu.</p>
           </div>
           <button type="button" onclick="addProductSize()" class="text-xs font-bold bg-stone-900 text-white px-3 py-1.5 rounded-xl flex items-center gap-1 hover:bg-stone-800">
@@ -281,7 +281,7 @@
 
       <div class="flex justify-end">
         <button type="button" onclick="goSetupStep(2)" class="bg-stone-900 hover:bg-stone-800 text-white text-sm font-bold px-5 py-3 rounded-xl flex items-center gap-2 shadow-sm">
-          <span>Seterusnya: Senarai Perisa</span>
+          <span>Next: Flavour List</span>
           <i data-lucide="arrow-right" class="w-4 h-4"></i>
         </button>
       </div>
@@ -292,11 +292,11 @@
       <div class="card-soft rounded-2xl p-4 sm:p-5 space-y-4">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-stone-100 pb-3">
           <div>
-            <h2 class="text-base font-bold text-stone-900">2. Senarai Perisa (Flavours)</h2>
+            <h2 class="text-base font-bold text-stone-900">2. Senarai Flavours (Flavours)</h2>
             <p class="text-xs text-stone-500 mt-0.5">Masukkan semua perisa kek yang anda tawarkan kepada pelanggan.</p>
           </div>
           <div class="flex items-center gap-2 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-xl">
-            <span class="text-xs font-semibold text-amber-900">Had Maksimum Perisa / Kek:</span>
+            <span class="text-xs font-semibold text-amber-900">Had Maximum Flavours / Kek:</span>
             <input type="number" id="cfg-max-flavours" min="1" max="6" value="2" class="w-12 text-center text-xs font-mono-num font-bold bg-white border border-amber-300 rounded-lg py-1" />
           </div>
         </div>
@@ -314,7 +314,7 @@
       <div class="card-soft rounded-2xl p-4 sm:p-5 space-y-3.5">
         <div class="flex items-center justify-between border-b border-stone-100 pb-3">
           <div>
-            <h2 class="text-base font-bold text-stone-900">Pilihan Add-On / Topping</h2>
+            <h2 class="text-base font-bold text-stone-900">Add-On / Topping Options</h2>
             <p class="text-xs text-stone-500 mt-0.5">Contoh: Chocolate Drizzle, Salted Caramel, atau Kotak Hadiah.</p>
           </div>
           <button type="button" onclick="addAddonItem()" class="text-xs font-bold bg-stone-900 text-white px-3 py-1.5 rounded-xl flex items-center gap-1 hover:bg-stone-800">
@@ -325,9 +325,9 @@
       </div>
 
       <div class="flex items-center justify-between">
-        <button type="button" onclick="goSetupStep(1)" class="text-xs font-bold text-stone-600 hover:text-stone-900 px-4 py-2.5 rounded-xl border border-stone-200 bg-white">&larr; Kembali</button>
+        <button type="button" onclick="goSetupStep(1)" class="text-xs font-bold text-stone-600 hover:text-stone-900 px-4 py-2.5 rounded-xl border border-stone-200 bg-white">&larr; Back</button>
         <button type="button" onclick="goSetupStep(3)" class="bg-stone-900 hover:bg-stone-800 text-white text-sm font-bold px-5 py-3 rounded-xl flex items-center gap-2 shadow-sm">
-          <span>Seterusnya: Senarai Bahan</span>
+          <span>Next: Ingredient List</span>
           <i data-lucide="arrow-right" class="w-4 h-4"></i>
         </button>
       </div>
@@ -338,20 +338,20 @@
       <div class="card-soft rounded-2xl p-4 sm:p-5 space-y-4">
         <div class="flex items-center justify-between border-b border-stone-100 pb-3">
           <div>
-            <h2 class="text-base font-bold text-stone-900">3. Senarai Bahan Mentah &amp; Pembungkusan</h2>
+            <h2 class="text-base font-bold text-stone-900">3. Raw Ingredients &amp; Packaging</h2>
             <p class="text-xs text-stone-500 mt-0.5">Masukkan harga beli 1 pek/botol &amp; beratnya. Sistem akan kira kos per gram/unit secara automatik.</p>
           </div>
           <button type="button" onclick="addIngredientItem()" class="text-xs font-bold bg-amber-500 hover:bg-amber-600 text-white px-3.5 py-2 rounded-xl flex items-center gap-1.5 shrink-0 shadow-sm">
-            <i data-lucide="plus" class="w-4 h-4"></i> Tambah Bahan
+            <i data-lucide="plus" class="w-4 h-4"></i> Add Ingredient
           </button>
         </div>
         <div id="setup-ingredients-list" class="space-y-3"></div>
       </div>
 
       <div class="flex items-center justify-between">
-        <button type="button" onclick="goSetupStep(2)" class="text-xs font-bold text-stone-600 hover:text-stone-900 px-4 py-2.5 rounded-xl border border-stone-200 bg-white">&larr; Kembali</button>
+        <button type="button" onclick="goSetupStep(2)" class="text-xs font-bold text-stone-600 hover:text-stone-900 px-4 py-2.5 rounded-xl border border-stone-200 bg-white">&larr; Back</button>
         <button type="button" onclick="goSetupStep(4)" class="bg-stone-900 hover:bg-stone-800 text-white text-sm font-bold px-5 py-3 rounded-xl flex items-center gap-2 shadow-sm">
-          <span>Seterusnya: Berat Bahan Digunakan</span>
+          <span>Next: Ingredient Usage</span>
           <i data-lucide="arrow-right" class="w-4 h-4"></i>
         </button>
       </div>
@@ -361,35 +361,35 @@
     <div id="setup-step-4" class="setup-step-panel hidden animate-in space-y-4">
       <div class="card-soft rounded-2xl p-4 sm:p-5 space-y-4">
         <div class="border-b border-stone-100 pb-3">
-          <h2 class="text-base font-bold text-stone-900">4. Berat Bahan Digunakan (Resipi &amp; Auto-Deduct)</h2>
-          <p class="text-xs text-stone-500 mt-0.5">Pilih saiz kek atau add-on di bawah, kemudian masukkan berat/kuantiti bahan yang digunakan bagi setiap 1 unit.</p>
+          <h2 class="text-base font-bold text-stone-900">4. Ingredient Usage (Recipes &amp; Auto-Deduct)</h2>
+          <p class="text-xs text-stone-500 mt-0.5">Select a cake size or add-on below, then enter the ingredient weight/quantity used per unit.</p>
         </div>
 
         <div>
-          <label class="block text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1.5">Pilih Produk / Add-On Untuk Tetapkan Sukatan:</label>
+          <label class="block text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1.5">Select Products / Add-Ons to Set Measurements:</label>
           <div id="recipe-target-tabs" class="flex flex-wrap gap-2"></div>
         </div>
 
         <div id="recipe-economics-card" class="rounded-2xl p-3.5 bg-stone-900 text-white grid grid-cols-3 gap-2 text-center">
           <div>
-            <div class="text-[10px] text-stone-400 uppercase font-semibold">Harga Jual</div>
+            <div class="text-[10px] text-stone-400 uppercase font-semibold">Selling Price</div>
             <div id="rec-sell-price" class="text-sm sm:text-base font-mono-num font-bold text-white mt-0.5">RM 0.00</div>
           </div>
           <div class="border-x border-stone-700">
-            <div class="text-[10px] text-stone-400 uppercase font-semibold">Kos Bahan</div>
+            <div class="text-[10px] text-stone-400 uppercase font-semibold">Ingredient Cost</div>
             <div id="rec-cost-price" class="text-sm sm:text-base font-mono-num font-bold text-amber-400 mt-0.5">RM 0.00</div>
           </div>
           <div>
-            <div class="text-[10px] text-stone-400 uppercase font-semibold">Untung Sebiji</div>
+            <div class="text-[10px] text-stone-400 uppercase font-semibold">Profit Sebiji</div>
             <div id="rec-profit-price" class="text-sm sm:text-base font-mono-num font-bold text-emerald-400 mt-0.5">RM 0.00</div>
           </div>
         </div>
 
         <div class="space-y-2.5">
           <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-stone-700">Senarai Bahan Digunakan:</span>
+            <span class="text-xs font-bold text-stone-700">Ingredient List Digunakan:</span>
             <button type="button" onclick="addRecipeRow()" class="text-xs font-bold text-amber-700 bg-amber-100 hover:bg-amber-200 px-3 py-1.5 rounded-xl flex items-center gap-1">
-              <i data-lucide="plus" class="w-3.5 h-3.5"></i> Tambah Bahan ke Resipi
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add Ingredient to Recipe
             </button>
           </div>
           <div id="recipe-rows-list" class="space-y-2"></div>
@@ -399,7 +399,7 @@
       <div class="card-soft rounded-2xl p-4 sm:p-5 space-y-3">
         <div class="flex items-center justify-between">
           <div>
-            <h3 class="text-sm font-bold text-stone-900">Bahan Tambahan Mengikut Perisa (Opsyenal)</h3>
+            <h3 class="text-sm font-bold text-stone-900">Additional Ingredients by Flavour (Optional)</h3>
             <p class="text-xs text-stone-500">Contoh: Jika pelanggan pilih perisa <em>Belgian Chocolate</em>, tolak tambahan 35g Coklat Couverture.</p>
           </div>
           <button type="button" onclick="addFlavourRuleRow()" class="text-xs font-bold text-stone-700 bg-stone-100 hover:bg-stone-200 px-2.5 py-1.5 rounded-xl flex items-center gap-1 shrink-0">
@@ -410,7 +410,7 @@
       </div>
 
       <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 pt-2">
-        <button type="button" onclick="goSetupStep(3)" class="text-xs font-bold text-stone-600 hover:text-stone-900 px-4 py-3 rounded-xl border border-stone-200 bg-white text-center">&larr; Kembali</button>
+        <button type="button" onclick="goSetupStep(3)" class="text-xs font-bold text-stone-600 hover:text-stone-900 px-4 py-3 rounded-xl border border-stone-200 bg-white text-center">&larr; Back</button>
         <div class="flex flex-col sm:flex-row gap-2">
           <button type="button" onclick="exportConfigJSON()" class="text-xs font-bold text-stone-700 bg-white hover:bg-stone-50 border border-stone-300 px-4 py-3 rounded-xl flex items-center justify-center gap-1.5">
             <i data-lucide="download" class="w-4 h-4"></i>
@@ -418,7 +418,7 @@
           </button>
           <button type="button" id="btn-finish-setup" onclick="completeSetupAndLaunch()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-extrabold px-6 py-3 rounded-xl flex items-center justify-center gap-2 shadow-md">
             <i data-lucide="check-circle-2" class="w-4 h-4"></i>
-            <span>Simpan &amp; Lancarkan Command Center</span>
+            <span>Save &amp; Launch Command Center</span>
           </button>
         </div>
       </div>
@@ -434,7 +434,7 @@
       <div class="min-w-0">
         <div class="flex items-center gap-2">
           <span id="sync-dot" class="w-2 h-2 rounded-full bg-amber-500 shrink-0"></span>
-          <span id="sync-status-text" class="text-[11px] font-semibold text-stone-500 truncate">Mod Tempatan</span>
+          <span id="sync-status-text" class="text-[11px] font-semibold text-stone-500 truncate">Local Mode</span>
         </div>
         <h1 id="dash-biz-title" class="text-lg font-extrabold text-stone-900 tracking-tight truncate">Dapur Marble Kak Nina</h1>
       </div>
@@ -448,10 +448,10 @@
           <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5 text-amber-600"></i>
           <span class="hidden sm:inline">Setup</span>
         </button>
-        <button type="button" onclick="openAppearanceSettings()" title="Tetapan paparan dan tema" class="text-xs font-bold text-stone-700 bg-white hover:bg-stone-100 border border-stone-200 p-2 rounded-xl shadow-sm">
+        <button type="button" onclick="openAppearanceSettings()" title="Appearance and theme settings" class="text-xs font-bold text-stone-700 bg-white hover:bg-stone-100 border border-stone-200 p-2 rounded-xl shadow-sm">
           <i data-lucide="palette" class="w-3.5 h-3.5 text-amber-600"></i>
         </button>
-        <button type="button" onclick="lockAppNow()" title="Kunci Paparan (PIN)"
+        <button type="button" onclick="lockAppNow()" title="Lock App (PIN)"
           class="text-xs font-bold text-stone-700 bg-white hover:bg-rose-50 hover:text-rose-700 border border-stone-200 p-2 rounded-xl shadow-sm">
           <i data-lucide="lock" class="w-3.5 h-3.5"></i>
         </button>
@@ -471,15 +471,15 @@
           <div class="flex items-center justify-between gap-1.5">
             <span class="text-[11px] font-bold uppercase text-stone-400 flex items-center gap-1">
               <i data-lucide="shopping-bag" class="w-3.5 h-3.5 text-amber-500"></i>
-              <span>Tempahan Aktif</span>
+              <span>Active Orders</span>
             </span>
             <select id="kpi-sel-active" onchange="onKpiFilterChange('active', this.value)"
               class="text-[10px] font-bold bg-stone-100 text-stone-700 border border-stone-200 rounded-lg px-2 py-1">
-              <option value="all">Semua Tarikh</option>
-              <option value="today">Hari Ini</option>
-              <option value="week">Minggu Ini</option>
-              <option value="month">Bulan Ini</option>
-              <option value="custom">Pilih Julat</option>
+              <option value="all">All Dates</option>
+              <option value="today" selected>Today</option>
+              <option value="week">This Week</option>
+              <option value="month">This Month</option>
+              <option value="custom">Custom Range</option>
             </select>
           </div>
           <div id="kpi-custom-active" class="hidden grid grid-cols-2 gap-1.5 pt-1">
@@ -495,15 +495,15 @@
           <div class="flex items-center justify-between gap-1.5">
             <span class="text-[11px] font-bold uppercase text-stone-400 flex items-center gap-1">
               <i data-lucide="clock" class="w-3.5 h-3.5 text-rose-500"></i>
-              <span>Baki Belum Bayar</span>
+              <span>Outstanding Balance</span>
             </span>
             <select id="kpi-sel-unpaid" onchange="onKpiFilterChange('unpaid', this.value)"
               class="text-[10px] font-bold bg-stone-100 text-stone-700 border border-stone-200 rounded-lg px-2 py-1">
-              <option value="all">Semua Tarikh</option>
-              <option value="today">Hari Ini</option>
-              <option value="week">Minggu Ini</option>
-              <option value="month">Bulan Ini</option>
-              <option value="custom">Pilih Julat</option>
+              <option value="all">All Dates</option>
+              <option value="today" selected>Today</option>
+              <option value="week">This Week</option>
+              <option value="month">This Month</option>
+              <option value="custom">Custom Range</option>
             </select>
           </div>
           <div id="kpi-custom-unpaid" class="hidden grid grid-cols-2 gap-1.5 pt-1">
@@ -519,15 +519,15 @@
           <div class="flex items-center justify-between gap-1.5">
             <span class="text-[11px] font-bold uppercase text-stone-400 flex items-center gap-1">
               <i data-lucide="wallet" class="w-3.5 h-3.5 text-stone-700"></i>
-              <span>Jualan Kasar</span>
+              <span>Gross Sales</span>
             </span>
             <select id="kpi-sel-sales" onchange="onKpiFilterChange('sales', this.value)"
               class="text-[10px] font-bold bg-stone-100 text-stone-700 border border-stone-200 rounded-lg px-2 py-1">
-              <option value="all">Semua Tarikh</option>
-              <option value="today">Hari Ini</option>
-              <option value="week">Minggu Ini</option>
-              <option value="month">Bulan Ini</option>
-              <option value="custom">Pilih Julat</option>
+              <option value="all">All Dates</option>
+              <option value="today" selected>Today</option>
+              <option value="week">This Week</option>
+              <option value="month">This Month</option>
+              <option value="custom">Custom Range</option>
             </select>
           </div>
           <div id="kpi-custom-sales" class="hidden grid grid-cols-2 gap-1.5 pt-1">
@@ -543,15 +543,15 @@
           <div class="flex items-center justify-between gap-1.5">
             <span class="text-[11px] font-bold uppercase text-emerald-700 flex items-center gap-1">
               <i data-lucide="trending-up" class="w-3.5 h-3.5 text-emerald-600"></i>
-              <span>Untung Bersih</span>
+              <span>Net Profit</span>
             </span>
             <select id="kpi-sel-profit" onchange="onKpiFilterChange('profit', this.value)"
               class="text-[10px] font-bold bg-emerald-100/80 text-emerald-900 border border-emerald-200 rounded-lg px-2 py-1">
-              <option value="all">Semua Tarikh</option>
-              <option value="today">Hari Ini</option>
-              <option value="week">Minggu Ini</option>
-              <option value="month">Bulan Ini</option>
-              <option value="custom">Pilih Julat</option>
+              <option value="all">All Dates</option>
+              <option value="today" selected>Today</option>
+              <option value="week">This Week</option>
+              <option value="month">This Month</option>
+              <option value="custom">Custom Range</option>
             </select>
           </div>
           <div id="kpi-custom-profit" class="hidden grid grid-cols-2 gap-1.5 pt-1">
@@ -567,17 +567,17 @@
       <div class="card-soft rounded-2xl p-4 space-y-3">
         <div class="flex items-center justify-between gap-2">
           <div class="flex items-center gap-2 min-w-0">
-            <h2 class="text-sm font-extrabold text-stone-900 truncate">Senarai Tempahan</h2>
+            <h2 class="text-sm font-extrabold text-stone-900 truncate">Order List</h2>
             <span id="orders-count-badge" class="text-[10px] font-bold bg-stone-100 text-stone-600 px-2 py-0.5 rounded-full shrink-0">5 Terdekat</span>
           </div>
           <div class="flex items-center gap-1.5 shrink-0">
             <button type="button" id="btn-toggle-orders-filter" onclick="toggleOrdersFilterView()"
               class="text-[10px] sm:text-[11px] font-bold bg-stone-900 hover:bg-stone-800 text-white px-2.5 py-1.5 rounded-xl flex items-center gap-1 shadow-xs transition">
-              <i data-lucide="filter" class="w-3 h-3 text-amber-400"></i><span id="btn-orders-filter-label">Filter 5 Terdekat</span>
+              <i data-lucide="filter" class="w-3 h-3 text-amber-400"></i><span id="btn-orders-filter-label">Filter Upcoming 5</span>
             </button>
             <button type="button" id="btn-toggle-all-orders" onclick="toggleOrdersShowAll()"
               class="text-[10px] sm:text-[11px] font-bold bg-stone-100 hover:bg-stone-200 text-stone-700 px-2.5 py-1.5 rounded-xl flex items-center gap-1 shadow-xs transition">
-              <i data-lucide="list" class="w-3 h-3"></i><span id="btn-toggle-all-orders-label">Lihat Semua</span>
+              <i data-lucide="list" class="w-3 h-3"></i><span id="btn-toggle-all-orders-label">View All</span>
             </button>
           </div>
         </div>
@@ -586,23 +586,23 @@
         <div id="orders-filter-panel" class="hidden p-3 rounded-2xl bg-stone-50 border border-stone-200 space-y-2.5 animate-in">
           <div class="flex items-center justify-between gap-2">
             <div class="min-w-0">
-              <span id="orders-filter-title" class="text-[11px] font-extrabold text-stone-700">Tapis 5 Tempahan Terdekat</span>
+              <span id="orders-filter-title" class="text-[11px] font-extrabold text-stone-700">Filter Upcoming 5 Orders</span>
               <span class="ml-1.5 text-[9px] font-extrabold uppercase tracking-wide bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded-md">Padanan OR / ATAU</span>
             </div>
-            <button type="button" onclick="resetOrdersListFilter()" class="text-[10px] font-bold text-amber-700 hover:underline shrink-0">Reset Tapisan</button>
+            <button type="button" onclick="resetOrdersListFilter()" class="text-[10px] font-bold text-amber-700 hover:underline shrink-0">Reset Filters</button>
           </div>
 
           <input type="text" id="orders-search-input" oninput="ordersListFilter.search = this.value; renderOrdersSection();"
-            placeholder="Cari nama pelanggan, nota kek, kawasan COD atau ID..."
+            placeholder="Search nama pelanggan, nota kek, kawasan COD atau ID..."
             class="w-full px-3 py-2 text-xs rounded-xl border border-stone-200 bg-white" />
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <label class="text-[10px] font-bold text-stone-500 flex flex-col gap-1">
-              Susunan Tarikh
+              Susunan Date
               <select id="orders-sort-select" onchange="setOrdersSort(this.value)" class="w-full px-2.5 py-2 text-xs rounded-xl border border-stone-200 bg-white text-stone-700">
-                <option value="upcoming">Akan datang dahulu (terdekat)</option>
-                <option value="newest">Tarikh terbaru dahulu</option>
-                <option value="oldest">Tarikh lama dahulu</option>
+                <option value="upcoming">Upcoming dahulu (terdekat)</option>
+                <option value="newest">Date terbaru dahulu</option>
+                <option value="oldest">Date lama dahulu</option>
               </select>
             </label>
             <div class="rounded-xl bg-white border border-stone-200 px-3 py-2 flex flex-col justify-center">
@@ -613,16 +613,16 @@
 
           <!-- Status Filter Pills -->
           <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-            <button type="button" onclick="setOrdersListStatus('all')" id="olist-st-all" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-stone-900 text-white shrink-0">Semua Status</button>
-            <button type="button" onclick="setOrdersListStatus('Active')" id="olist-st-Active" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0">Aktif</button>
-            <button type="button" onclick="setOrdersListStatus('Completed')" id="olist-st-Completed" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0">Selesai</button>
-            <button type="button" onclick="setOrdersListStatus('Deposit')" id="olist-st-Deposit" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0">Deposit / Baki</button>
-            <button type="button" onclick="setOrdersListStatus('Paid')" id="olist-st-Paid" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0">Lunas</button>
+            <button type="button" onclick="setOrdersListStatus('all')" id="olist-st-all" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-stone-900 text-white shrink-0">All Statuses</button>
+            <button type="button" onclick="setOrdersListStatus('Active')" id="olist-st-Active" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0">Active</button>
+            <button type="button" onclick="setOrdersListStatus('Completed')" id="olist-st-Completed" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0">Completed</button>
+            <button type="button" onclick="setOrdersListStatus('Deposit')" id="olist-st-Deposit" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0">Deposit / Balance</button>
+            <button type="button" onclick="setOrdersListStatus('Paid')" id="olist-st-Paid" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0">Paid in Full</button>
           </div>
 
           <!-- Payment Method (Online / Cash) & Delivery Method (Pickup / COD) Pills -->
           <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-            <button type="button" onclick="setOrdersListPayMethod('all')" id="olist-pm-all" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-emerald-700 text-white shrink-0">Semua Bayaran</button>
+            <button type="button" onclick="setOrdersListPayMethod('all')" id="olist-pm-all" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-emerald-700 text-white shrink-0">All Payments</button>
             <button type="button" onclick="setOrdersListPayMethod('Online')" id="olist-pm-Online" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0">Online</button>
             <button type="button" onclick="setOrdersListPayMethod('Cash')" id="olist-pm-Cash" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0">Cash</button>
             <span class="text-stone-300">|</span>
@@ -633,20 +633,21 @@
 
           <!-- Date Filter Pills -->
           <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-            <button type="button" onclick="setOrdersListDatePreset('all')" id="olist-dt-all" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-amber-500 text-white shrink-0">Semua Tarikh</button>
-            <button type="button" onclick="setOrdersListDatePreset('today')" id="olist-dt-today" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0">Hari Ini</button>
-            <button type="button" onclick="setOrdersListDatePreset('week')" id="olist-dt-week" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0">Minggu Ini</button>
-            <button type="button" onclick="setOrdersListDatePreset('month')" id="olist-dt-month" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0">Bulan Ini</button>
-            <button type="button" onclick="setOrdersListDatePreset('custom')" id="olist-dt-custom" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0">Pilih Julat</button>
+            <button type="button" onclick="setOrdersListDatePreset('all')" id="olist-dt-all" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0">All Dates</button>
+            <button type="button" onclick="setOrdersListDatePreset('today')" id="olist-dt-today" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0">Today</button>
+            <button type="button" onclick="setOrdersListDatePreset('upcoming')" id="olist-dt-upcoming" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-amber-500 text-white shrink-0">Today onwards</button>
+            <button type="button" onclick="setOrdersListDatePreset('week')" id="olist-dt-week" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0">This Week</button>
+            <button type="button" onclick="setOrdersListDatePreset('month')" id="olist-dt-month" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0">This Month</button>
+            <button type="button" onclick="setOrdersListDatePreset('custom')" id="olist-dt-custom" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0">Custom Range</button>
           </div>
 
           <div id="orders-list-custom-range" class="hidden grid grid-cols-2 gap-2 pt-1">
             <div>
-              <label class="block text-[10px] font-bold text-stone-400 mb-0.5">Dari Tarikh</label>
+              <label class="block text-[10px] font-bold text-stone-400 mb-0.5">From Date</label>
               <input type="date" id="orders-list-from" onchange="ordersListFilter.from = this.value; renderOrdersSection();" class="w-full px-2.5 py-1.5 text-xs rounded-xl border border-stone-200 font-mono-num bg-white" />
             </div>
             <div>
-              <label class="block text-[10px] font-bold text-stone-400 mb-0.5">Hingga Tarikh</label>
+              <label class="block text-[10px] font-bold text-stone-400 mb-0.5">To Date</label>
               <input type="date" id="orders-list-to" onchange="ordersListFilter.to = this.value; renderOrdersSection();" class="w-full px-2.5 py-1.5 text-xs rounded-xl border border-stone-200 font-mono-num bg-white" />
             </div>
           </div>
@@ -665,7 +666,7 @@
         <div class="flex items-center justify-between mb-3">
           <div>
             <h2 id="cal-month-title" class="text-base font-extrabold text-stone-900">November 2026</h2>
-            <p class="text-[11px] text-stone-500">Tekan tarikh untuk lihat, edit atau kemas kini jadual tempahan</p>
+            <p class="text-[11px] text-stone-500">Select a date to view, edit or update the order schedule</p>
           </div>
           <div class="flex items-center gap-1.5">
             <button type="button" onclick="changeCalMonth(-1)" class="p-2 rounded-xl border border-stone-200 hover:bg-stone-50"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
@@ -680,12 +681,12 @@
 
         <div class="flex items-center justify-center gap-4 mt-3 pt-3 border-t border-stone-100 text-[11px] text-stone-500">
           <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-500"></span> Akan Datang</span>
-          <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Selesai</span>
+          <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Completed</span>
         </div>
       </div>
 
       <div class="card-soft rounded-2xl p-4">
-        <h3 id="selected-date-title" class="text-sm font-extrabold text-stone-900 mb-2.5">Tempahan pada 2026-11-15</h3>
+        <h3 id="selected-date-title" class="text-sm font-extrabold text-stone-900 mb-2.5">Orders on 2026-11-15</h3>
         <div id="selected-date-orders" class="space-y-2.5"></div>
       </div>
     </section>
@@ -697,16 +698,16 @@
       <div class="card-soft rounded-2xl p-4 space-y-3">
         <div class="flex items-center justify-between gap-2">
           <div>
-            <h2 class="text-base font-extrabold text-stone-900">Inventori &amp; Stock Bahan</h2>
+            <h2 class="text-base font-extrabold text-stone-900">Inventory &amp; Ingredients</h2>
             <p class="text-[11px] text-stone-500">Pantau baki stok (%), restock 1 pek, atau tambah barang baharu</p>
           </div>
           <div class="flex items-center gap-1.5 shrink-0">
-            <button type="button" onclick="exportStockCSV()" title="Muat turun senarai inventori CSV" class="text-[10px] font-bold bg-white hover:bg-stone-50 text-stone-700 border border-stone-200 px-2.5 py-2 rounded-xl flex items-center gap-1">
+            <button type="button" onclick="exportStockCSV()" title="Download senarai inventori CSV" class="text-[10px] font-bold bg-white hover:bg-stone-50 text-stone-700 border border-stone-200 px-2.5 py-2 rounded-xl flex items-center gap-1">
               <i data-lucide="download" class="w-3.5 h-3.5"></i><span class="hidden sm:inline">CSV</span>
             </button>
             <button type="button" onclick="openStockModal(null)" class="text-xs font-bold bg-stone-900 hover:bg-stone-800 text-white px-3 py-2 rounded-xl flex items-center gap-1.5 shadow-xs">
               <i data-lucide="plus" class="w-3.5 h-3.5 text-amber-400"></i>
-              <span>Tambah Barang</span>
+              <span>Add Item</span>
             </button>
           </div>
         </div>
@@ -714,7 +715,7 @@
         <!-- 3 Clean KPI Boxes -->
         <div class="grid grid-cols-3 gap-2 text-center">
           <div class="bg-stone-50 border border-stone-200/80 rounded-xl p-2.5">
-            <div class="text-[10px] font-bold text-stone-400 uppercase">Jumlah Item</div>
+            <div class="text-[10px] font-bold text-stone-400 uppercase">Total Items</div>
             <div id="stk-kpi-total" class="text-base font-mono-num font-extrabold text-stone-900 mt-0.5">0</div>
           </div>
           <div class="bg-rose-50/70 border border-rose-200/80 rounded-xl p-2.5">
@@ -722,7 +723,7 @@
             <div id="stk-kpi-low" class="text-base font-mono-num font-extrabold text-rose-700 mt-0.5">0</div>
           </div>
           <div class="bg-emerald-50/70 border border-emerald-200/80 rounded-xl p-2.5">
-            <div class="text-[10px] font-bold text-emerald-700 uppercase">Nilai Modal Stok</div>
+            <div class="text-[10px] font-bold text-emerald-700 uppercase">Inventory Value</div>
             <div id="stk-kpi-value" class="text-sm sm:text-base font-mono-num font-extrabold text-emerald-800 mt-0.5">RM 0</div>
           </div>
         </div>
@@ -730,7 +731,7 @@
         <!-- Visual Health Progress Bar -->
         <div class="space-y-1">
           <div class="flex items-center justify-between text-[11px]">
-            <span class="font-bold text-stone-600">Tahap Kesihatan Stok Keseluruhan</span>
+            <span class="font-bold text-stone-600">Overall Stock Health</span>
             <span id="stk-health-pct-label" class="font-mono-num font-extrabold text-emerald-700">100% Sihat</span>
           </div>
           <div class="w-full h-2.5 bg-stone-100 rounded-full overflow-hidden flex">
@@ -742,24 +743,24 @@
         <!-- Search & Category Filter -->
         <div class="space-y-2 pt-1">
           <input type="text" id="stock-search-input" oninput="stockFilter.search = this.value; renderStockList();"
-            placeholder="Cari nama bahan mentah atau pembungkusan..."
+            placeholder="Search nama bahan mentah atau pembungkusan..."
             class="w-full px-3 py-2 text-xs rounded-xl border border-stone-200 bg-stone-50" />
           <div class="flex items-center justify-between gap-2">
             <label class="text-[10px] font-bold text-stone-500 shrink-0">Susun inventori</label>
             <select id="stock-sort-select" onchange="setStockSort(this.value)" class="flex-1 max-w-[230px] px-2.5 py-2 text-[11px] font-semibold rounded-xl border border-stone-200 bg-white text-stone-700">
-              <option value="low">Stok rendah dahulu</option>
+              <option value="low">Lowest Stock First</option>
               <option value="name">Nama A – Z</option>
-              <option value="stock-asc">Baki paling sedikit</option>
-              <option value="stock-desc">Baki paling banyak</option>
+              <option value="stock-asc">Balance paling sedikit</option>
+              <option value="stock-desc">Balance paling banyak</option>
               <option value="value-desc">Nilai stok tertinggi</option>
             </select>
           </div>
           <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-            <button type="button" onclick="setStockCategoryFilter('all')" id="stk-cat-all" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-stone-900 text-white shrink-0">Semua</button>
-            <button type="button" onclick="setStockCategoryFilter('low')" id="stk-cat-low" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-stone-100 text-rose-700 shrink-0">Stok Rendah</button>
-            <button type="button" onclick="setStockCategoryFilter('Bahan Asas')" id="stk-cat-Bahan Asas" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-stone-100 text-stone-600 shrink-0">Bahan Asas</button>
-            <button type="button" onclick="setStockCategoryFilter('Perisa & Topping')" id="stk-cat-Perisa & Topping" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-stone-100 text-stone-600 shrink-0">Perisa &amp; Topping</button>
-            <button type="button" onclick="setStockCategoryFilter('Pembungkusan')" id="stk-cat-Pembungkusan" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-stone-100 text-stone-600 shrink-0">Pembungkusan</button>
+            <button type="button" onclick="setStockCategoryFilter('all')" id="stk-cat-all" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-stone-900 text-white shrink-0">All</button>
+            <button type="button" onclick="setStockCategoryFilter('low')" id="stk-cat-low" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-stone-100 text-rose-700 shrink-0">Low Stock</button>
+            <button type="button" onclick="setStockCategoryFilter('Bahan Asas')" id="stk-cat-Bahan Asas" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-stone-100 text-stone-600 shrink-0">Basic Ingredients</button>
+            <button type="button" onclick="setStockCategoryFilter('Perisa & Topping')" id="stk-cat-Perisa & Topping" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-stone-100 text-stone-600 shrink-0">Flavours &amp; Topping</button>
+            <button type="button" onclick="setStockCategoryFilter('Pembungkusan')" id="stk-cat-Pembungkusan" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-stone-100 text-stone-600 shrink-0">Packaging</button>
           </div>
         </div>
       </div>
@@ -774,17 +775,17 @@
     <section id="tab-analisis" class="dash-tab hidden space-y-4 animate-in">
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div class="card-soft rounded-2xl p-3.5 space-y-1.5">
-          <div class="text-[10px] font-bold uppercase text-stone-400">Bilangan Tempahan</div>
+          <div class="text-[10px] font-bold uppercase text-stone-400">Order Count</div>
           <div id="an-filtered-count" class="text-lg font-mono-num font-extrabold text-stone-900">0 (0 unit)</div>
           <div id="an-range-controls-orderCount"></div>
         </div>
         <div class="card-soft rounded-2xl p-3.5 space-y-1.5">
-          <div class="text-[10px] font-bold uppercase text-stone-400">Jumlah Jualan</div>
+          <div class="text-[10px] font-bold uppercase text-stone-400">Total Sales</div>
           <div id="an-filtered-sales" class="text-lg font-mono-num font-extrabold text-stone-900">RM 0.00</div>
           <div id="an-range-controls-sales"></div>
         </div>
         <div class="card-soft rounded-2xl p-3.5 space-y-1.5">
-          <div class="text-[10px] font-bold uppercase text-emerald-700">Untung Bersih</div>
+          <div class="text-[10px] font-bold uppercase text-emerald-700">Net Profit</div>
           <div id="an-filtered-profit" class="text-lg font-mono-num font-extrabold text-emerald-700">RM 0.00</div>
           <div id="an-range-controls-profit"></div>
         </div>
@@ -797,7 +798,7 @@
             <i data-lucide="sparkles" class="w-4 h-4"></i>
             <span>Insight &amp; Cadangan Tingkatkan Bisnes</span>
           </span>
-          <span class="text-[10px] text-stone-400 font-semibold">Auto-Analisis</span>
+          <span class="text-[10px] text-stone-400 font-semibold">Auto-Analytics</span>
         </div>
         <div id="an-range-controls-insights" class="mb-2"></div>
         <div id="smart-business-insights" class="space-y-2 text-xs text-stone-200 leading-relaxed"></div>
@@ -806,17 +807,17 @@
       <!-- 4 Actionable Business Metrics -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div class="card-soft rounded-2xl p-3.5 space-y-1">
-          <div class="text-[10px] font-bold uppercase text-stone-400">Purata Nilai Order (AOV)</div>
+          <div class="text-[10px] font-bold uppercase text-stone-400">Average Order Value (AOV)</div>
           <div id="an-range-controls-aov"></div>
           <div id="an-aov-val" class="text-lg font-mono-num font-extrabold text-stone-900">RM 0.00</div>
-          <div id="an-avg-profit-val" class="text-[11px] font-semibold text-emerald-700">Purata untung RM 0.00 / order</div>
+          <div id="an-avg-profit-val" class="text-[11px] font-semibold text-emerald-700">Average profit RM 0.00 / order</div>
         </div>
 
         <div class="card-soft rounded-2xl p-3.5 space-y-1">
-          <div class="text-[10px] font-bold uppercase text-stone-400">Margin Bersih &amp; Kos Bahan</div>
+          <div class="text-[10px] font-bold uppercase text-stone-400">Margin Bersih &amp; Ingredient Cost</div>
           <div id="an-range-controls-margin"></div>
           <div id="an-margin-val" class="text-lg font-mono-num font-extrabold text-emerald-700">0%</div>
-          <div id="an-cogs-val" class="text-[11px] font-semibold text-stone-500">Kos bahan RM 0.00 • Diskaun RM 0.00</div>
+          <div id="an-cogs-val" class="text-[11px] font-semibold text-stone-500">Cost bahan RM 0.00 • Discount RM 0.00</div>
         </div>
 
         <div class="card-soft rounded-2xl p-3.5 space-y-1.5">
@@ -838,12 +839,12 @@
         <div class="card-soft rounded-2xl p-3.5 space-y-1.5">
           <div class="flex items-center justify-between">
             <span class="text-[10px] font-bold uppercase text-stone-400">Pickup vs COD</span>
-            <span id="an-cod-fees-total" class="text-[10px] font-mono-num font-bold text-sky-700">Caj COD: RM 0</span>
+            <span id="an-cod-fees-total" class="text-[10px] font-mono-num font-bold text-sky-700">Delivery Charges: RM 0</span>
           </div>
           <div id="an-range-controls-delivery" class="mb-1"></div>
           <div class="flex items-center justify-between text-xs font-mono-num font-extrabold">
             <span id="an-pickup-count" class="text-stone-800">Pickup: 0 order</span>
-            <span id="an-cod-count" class="text-sky-700">COD: 0 order</span>
+            <span id="an-cod-count" class="text-sky-700">Delivery: 0 order</span>
           </div>
           <div class="w-full h-2 bg-stone-100 rounded-full overflow-hidden flex">
             <div id="an-del-bar-pickup" class="h-full bg-stone-800" style="width: 50%"></div>
@@ -855,12 +856,12 @@
       <div class="card-soft rounded-2xl p-4 space-y-3">
         <div class="flex items-center justify-between">
           <div>
-            <h2 class="text-sm font-extrabold text-stone-900">Prestasi Jualan &amp; Untung Bersih</h2>
-            <p class="text-[11px] text-stone-500">Pilih Hari Ini, Minggu Ini, Bulan Ini atau julat tarikh sendiri</p>
+            <h2 class="text-sm font-extrabold text-stone-900">Prestasi Sales &amp; Net Profit</h2>
+            <p class="text-[11px] text-stone-500">Choose Today, This Week, This Month or a custom date range</p>
           </div>
           <div class="flex bg-stone-100 p-0.5 rounded-xl text-[11px] font-bold">
-            <button type="button" onclick="setChartPeriod('daily')" id="btn-period-daily" class="px-2.5 py-1 rounded-lg bg-white text-stone-900 shadow-sm">Harian</button>
-            <button type="button" onclick="setChartPeriod('monthly')" id="btn-period-monthly" class="px-2.5 py-1 rounded-lg text-stone-500">Bulanan</button>
+            <button type="button" onclick="setChartPeriod('daily')" id="btn-period-daily" class="px-2.5 py-1 rounded-lg bg-white text-stone-900 shadow-sm">Daily</button>
+            <button type="button" onclick="setChartPeriod('monthly')" id="btn-period-monthly" class="px-2.5 py-1 rounded-lg text-stone-500">Monthly</button>
           </div>
         </div>
         <div id="an-range-controls-salesChart"></div>
@@ -871,8 +872,8 @@
 
       <div class="card-soft rounded-2xl p-4 space-y-3">
         <div>
-          <h2 class="text-sm font-extrabold text-stone-900">Hari Paling Sibuk (Isnin – Ahad)</h2>
-          <p class="text-[11px] text-stone-500">Penapis tarikh berasingan seperti kad Jualan Kasar di tab Utama</p>
+          <h2 class="text-sm font-extrabold text-stone-900">Busiest Day (Monday – Sunday)</h2>
+          <p class="text-[11px] text-stone-500">Penapis tarikh berasingan seperti kad Gross Sales di tab Home</p>
         </div>
         <div id="an-range-controls-weekdays"></div>
         <div class="h-40">
@@ -882,13 +883,13 @@
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div class="card-soft rounded-2xl p-4">
-          <h3 class="text-sm font-extrabold text-stone-900 mb-2">Perisa Paling Laris</h3>
+          <h3 class="text-sm font-extrabold text-stone-900 mb-2">Flavours Paling Laris</h3>
           <div id="an-range-controls-flavours"></div>
           <div id="top-flavours-bars" class="space-y-2.5"></div>
         </div>
 
         <div class="card-soft rounded-2xl p-4">
-          <h3 class="text-sm font-extrabold text-stone-900 mb-2">Kos, Margin &amp; Unit Terjual</h3>
+          <h3 class="text-sm font-extrabold text-stone-900 mb-2">Cost, Margin &amp; Units Sold</h3>
           <div id="an-range-controls-productMargins"></div>
           <div id="product-margin-cards" class="space-y-2"></div>
         </div>
@@ -906,19 +907,19 @@
       <div class="max-w-2xl mx-auto grid grid-cols-4 py-2 px-2">
         <button type="button" onclick="switchDashTab('utama')" id="nav-utama" class="flex flex-col items-center gap-0.5 text-amber-600 font-bold">
           <i data-lucide="layout-grid" class="w-5 h-5"></i>
-          <span class="text-[10px]">Utama</span>
+          <span class="text-[10px]">Home</span>
         </button>
         <button type="button" onclick="switchDashTab('kalendar')" id="nav-kalendar" class="flex flex-col items-center gap-0.5 text-stone-400 font-semibold">
           <i data-lucide="calendar" class="w-5 h-5"></i>
-          <span class="text-[10px]">Kalendar</span>
+          <span class="text-[10px]">Calendar</span>
         </button>
         <button type="button" onclick="switchDashTab('stok')" id="nav-stok" class="flex flex-col items-center gap-0.5 text-stone-400 font-semibold">
           <i data-lucide="package" class="w-5 h-5"></i>
-          <span class="text-[10px]">Stock Bahan</span>
+          <span class="text-[10px]">Inventory</span>
         </button>
         <button type="button" onclick="switchDashTab('analisis')" id="nav-analisis" class="flex flex-col items-center gap-0.5 text-stone-400 font-semibold">
           <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
-          <span class="text-[10px]">Analisis</span>
+          <span class="text-[10px]">Analytics</span>
         </button>
       </div>
     </nav>
@@ -933,8 +934,8 @@
       <div class="flex items-center justify-between border-b border-stone-100 pb-3">
         <div>
           <span class="text-[10px] font-extrabold uppercase tracking-wider bg-amber-100 text-amber-800 px-2 py-0.5 rounded-md">Personalisasi</span>
-          <h3 class="text-base font-extrabold text-stone-900 mt-1">Tetapan Tema & Paparan</h3>
-          <p class="text-[11px] text-stone-500 mt-0.5">Pilih warna sendiri daripada colour palette. Semua perubahan dipratonton serta-merta.</p>
+          <h3 class="text-base font-extrabold text-stone-900 mt-1">Settings Tema & View</h3>
+          <p class="text-[11px] text-stone-500 mt-0.5">Choose your own colours from the palette. All changes are previewed instantly.</p>
         </div>
         <button type="button" onclick="closeAppearanceSettings(false)" class="p-1.5 rounded-xl bg-stone-100 text-stone-600"><i data-lucide="x" class="w-4 h-4"></i></button>
       </div>
@@ -948,7 +949,7 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div class="space-y-2">
               <div class="flex items-center justify-between gap-2">
-                <div><div class="text-[11px] font-extrabold text-stone-700">Warna utama / button</div><div class="text-[10px] text-stone-500">Butang tindakan dan aksen</div></div>
+                <div><div class="text-[11px] font-extrabold text-stone-700">Accent colour / button</div><div class="text-[10px] text-stone-500">Butang tindakan dan aksen</div></div>
                 <input id="appearance-accent" type="color" value="#f59e0b" oninput="previewAppearanceSettings()" class="w-11 h-9 p-0.5 bg-white border border-stone-200 rounded-lg cursor-pointer" />
               </div>
               <div class="flex flex-wrap gap-2">
@@ -979,7 +980,7 @@
               </div>
             </div>
             <label class="space-y-1">
-              <span class="block text-[11px] font-extrabold text-stone-700">Warna tulisan</span>
+              <span class="block text-[11px] font-extrabold text-stone-700">Text colour</span>
               <input id="appearance-text" type="color" value="#1c1917" oninput="previewAppearanceSettings()" class="w-full h-9 p-1 bg-white border border-stone-200 rounded-lg cursor-pointer" />
             </label>
             <label class="space-y-1">
@@ -987,7 +988,7 @@
               <input id="appearance-card" type="color" value="#ffffff" oninput="previewAppearanceSettings()" class="w-full h-9 p-1 bg-white border border-stone-200 rounded-lg cursor-pointer" />
             </label>
             <label class="space-y-1 sm:col-span-2">
-              <span class="block text-[11px] font-extrabold text-stone-700">Warna border / garisan</span>
+              <span class="block text-[11px] font-extrabold text-stone-700">Border colour / garisan</span>
               <input id="appearance-border" type="color" value="#ede8e0" oninput="previewAppearanceSettings()" class="w-full h-9 p-1 bg-white border border-stone-200 rounded-lg cursor-pointer" />
             </label>
           </div>
@@ -1006,13 +1007,13 @@
             </select>
           </label>
           <label class="space-y-1">
-            <span class="block text-xs font-extrabold text-stone-700">Saiz tulisan</span>
+            <span class="block text-xs font-extrabold text-stone-700">Font size</span>
             <select id="appearance-size" onchange="previewAppearanceSettings()" class="w-full px-3 py-2.5 text-xs rounded-xl border border-stone-200 bg-white">
               <option value="15px">Kecil</option><option value="16px">Normal</option><option value="17px">Besar</option><option value="18px">Sangat besar</option>
             </select>
           </label>
           <label class="space-y-1 sm:col-span-2">
-            <span class="block text-xs font-extrabold text-stone-700">Bayang kad</span>
+            <span class="block text-xs font-extrabold text-stone-700">Card shadow</span>
             <select id="appearance-shadow" onchange="previewAppearanceSettings()" class="w-full px-3 py-2.5 text-xs rounded-xl border border-stone-200 bg-white">
               <option value="soft">Lembut</option><option value="strong">Lebih jelas</option><option value="none">Tanpa bayang</option>
             </select>
@@ -1020,7 +1021,7 @@
         </div>
 
         <div class="rounded-xl border border-stone-200 p-3 space-y-2" style="background:var(--ui-card-bg)">
-          <div class="text-[10px] font-bold uppercase tracking-wide text-stone-400">Pratonton langsung</div>
+          <div class="text-[10px] font-bold uppercase tracking-wide text-stone-400">Preview langsung</div>
           <div class="flex items-center justify-between gap-3">
             <div class="min-w-0"><div class="text-xs font-extrabold" style="color:var(--ui-text-color)">Contoh paparan kad</div><div class="text-[10px]" style="color:var(--ui-text-muted)">Warna, font dan latar akan berubah serta-merta.</div></div>
             <span class="px-3 py-2 rounded-xl text-[10px] font-extrabold" style="background:var(--ui-accent);color:var(--ui-accent-contrast)">Contoh button</span>
@@ -1030,8 +1031,8 @@
 
       <div class="flex gap-2 pt-1">
         <button type="button" onclick="resetAppearanceSettings()" class="px-3 py-3 rounded-xl border border-stone-200 bg-white text-stone-700 text-xs font-bold">Reset Asal</button>
-        <button type="button" onclick="closeAppearanceSettings(false)" class="flex-1 px-3 py-3 rounded-xl border border-stone-200 bg-white text-stone-700 text-xs font-bold">Batal</button>
-        <button type="button" onclick="saveAppearanceSettings()" class="flex-1 px-3 py-3 rounded-xl bg-stone-900 text-white text-xs font-extrabold">Simpan Tema</button>
+        <button type="button" onclick="closeAppearanceSettings(false)" class="flex-1 px-3 py-3 rounded-xl border border-stone-200 bg-white text-stone-700 text-xs font-bold">Cancel</button>
+        <button type="button" onclick="saveAppearanceSettings()" class="flex-1 px-3 py-3 rounded-xl bg-stone-900 text-white text-xs font-extrabold">Save Theme</button>
       </div>
     </div>
   </div>
@@ -1042,8 +1043,8 @@
     <div class="bg-white w-full max-w-lg rounded-t-3xl sm:rounded-3xl p-5 max-h-[92vh] overflow-y-auto space-y-4 animate-in">
       <div class="flex items-center justify-between border-b border-stone-100 pb-3">
         <div>
-          <span id="ord-modal-badge" class="text-[10px] font-extrabold uppercase tracking-wider bg-amber-100 text-amber-800 px-2 py-0.5 rounded-md">Tempahan Baharu</span>
-          <h3 id="ord-modal-title" class="text-base font-extrabold text-stone-900 mt-0.5">Rekod Tempahan Pelanggan</h3>
+          <span id="ord-modal-badge" class="text-[10px] font-extrabold uppercase tracking-wider bg-amber-100 text-amber-800 px-2 py-0.5 rounded-md">New Order</span>
+          <h3 id="ord-modal-title" class="text-base font-extrabold text-stone-900 mt-0.5">Customer Order Details</h3>
         </div>
         <button type="button" onclick="closeOrderModal()" class="p-1.5 rounded-xl bg-stone-100 text-stone-600"><i data-lucide="x" class="w-4 h-4"></i></button>
       </div>
@@ -1051,22 +1052,22 @@
       <div class="space-y-3.5">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
           <div class="sm:col-span-2">
-            <label class="block text-xs font-bold text-stone-700 mb-1">Nama Pelanggan *</label>
+            <label class="block text-xs font-bold text-stone-700 mb-1">Nama Customer *</label>
             <input type="text" id="ord-customer" placeholder="Contoh: Puan Aisyah" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-stone-200 font-semibold" />
           </div>
           <div>
-            <label class="block text-xs font-bold text-stone-700 mb-1">Tarikh Pickup / COD</label>
+            <label class="block text-xs font-bold text-stone-700 mb-1">Date Pickup / COD</label>
             <input type="date" id="ord-date" class="w-full px-3 py-2 text-xs rounded-xl border border-stone-200 font-mono-num" />
           </div>
           <div>
-            <label class="block text-xs font-bold text-stone-700 mb-1">Masa</label>
+            <label class="block text-xs font-bold text-stone-700 mb-1">Time</label>
             <input type="time" id="ord-time" value="14:00" class="w-full px-3 py-2 text-xs rounded-xl border border-stone-200 font-mono-num" />
           </div>
         </div>
 
         <div class="rounded-2xl bg-stone-50 border border-stone-200 p-3.5 space-y-3">
           <div class="flex items-center justify-between">
-            <span class="text-xs font-extrabold text-stone-900">Pilih Item &amp; Kuantiti</span>
+            <span class="text-xs font-extrabold text-stone-900">Select Items &amp; Quantity</span>
             <span class="text-[10px] font-semibold text-stone-500">Boleh tambah pelbagai jenis</span>
           </div>
 
@@ -1077,8 +1078,8 @@
 
           <div>
             <div class="flex items-center justify-between mb-1">
-              <label class="text-[11px] font-bold text-stone-600">Pilih Perisa</label>
-              <span id="ord-flavour-hint" class="text-[10px] font-semibold text-amber-700">Maksimum 2 perisa</span>
+              <label class="text-[11px] font-bold text-stone-600">Select Flavours</label>
+              <span id="ord-flavour-hint" class="text-[10px] font-semibold text-amber-700">Maximum 2 perisa</span>
             </div>
             <div id="ord-flavour-options" class="flex flex-wrap gap-1.5"></div>
           </div>
@@ -1090,7 +1091,7 @@
 
           <div class="flex items-center justify-between gap-2 pt-2 border-t border-stone-200">
             <div class="flex items-center gap-2">
-              <span class="text-xs font-bold text-stone-700">Kuantiti:</span>
+              <span class="text-xs font-bold text-stone-700">Quantity:</span>
               <div class="flex items-center bg-white border border-stone-300 rounded-xl overflow-hidden">
                 <button type="button" onclick="changeBuilderQty(-1)" class="w-8 h-8 font-extrabold text-stone-700 hover:bg-stone-100">-</button>
                 <span id="ord-builder-qty" class="w-8 text-center text-xs font-mono-num font-extrabold">1</span>
@@ -1100,14 +1101,14 @@
 
             <button type="button" onclick="addItemToOrderCart()" class="bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold px-3.5 py-2.5 rounded-xl flex items-center gap-1.5 shadow-xs">
               <i data-lucide="plus-circle" class="w-3.5 h-3.5 text-amber-400"></i>
-              <span>Tambah ke Senarai</span>
+              <span>Add to Order</span>
             </button>
           </div>
         </div>
 
         <div class="space-y-2">
           <div class="flex items-center justify-between">
-            <span class="text-xs font-extrabold text-stone-900">Senarai Item Tempahan</span>
+            <span class="text-xs font-extrabold text-stone-900">Order Items</span>
             <span id="ord-cart-badge" class="text-[10px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">0 item</span>
           </div>
           <div id="ord-cart-list" class="space-y-2"></div>
@@ -1118,23 +1119,24 @@
           <div class="flex items-center justify-between">
             <span class="text-xs font-extrabold text-stone-900 flex items-center gap-1.5">
               <i data-lucide="truck" class="w-3.5 h-3.5 text-sky-600"></i>
-              <span>Kaedah Pengambilan / Penghantaran</span>
+              <span>Collection / Delivery Method</span>
             </span>
             <div class="flex bg-white p-0.5 rounded-xl border border-stone-200 text-[11px] font-bold">
               <button type="button" onclick="setModalDeliveryMethod('Pickup')" id="btn-del-Pickup" class="px-3 py-1 rounded-lg bg-stone-900 text-white">Self Pickup</button>
-              <button type="button" onclick="setModalDeliveryMethod('COD')" id="btn-del-COD" class="px-3 py-1 rounded-lg text-stone-600">COD / Hantar</button>
+              <button type="button" onclick="setModalDeliveryMethod('COD')" id="btn-del-COD" class="px-3 py-1 rounded-lg text-stone-600">Delivery</button>
             </div>
           </div>
 
           <div id="ord-cod-fields" class="hidden grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
             <div>
-              <label class="block text-[10px] font-bold text-stone-600 mb-0.5">Caj COD (RM)</label>
+              <label class="block text-[10px] font-bold text-stone-600 mb-0.5">Delivery Charge (RM)</label>
               <input type="number" step="0.5" min="0" id="ord-cod-charge" value="5" oninput="renderOrderModalOptions()"
                 class="w-full px-3 py-2 text-xs font-mono-num font-bold bg-white rounded-xl border border-sky-200" />
+              <p class="text-[9px] text-sky-700 mt-1">Collected from the customer; excluded from product sales and profit.</p>
             </div>
             <div class="sm:col-span-2">
-              <label class="block text-[10px] font-bold text-stone-600 mb-0.5">Kawasan / Alamat COD (Opsyenal)</label>
-              <input type="text" id="ord-cod-address" placeholder="Contoh: Taman Balok Perdana / Petronas"
+              <label class="block text-[10px] font-bold text-stone-600 mb-0.5">Delivery Area / Address (Optional)</label>
+              <input type="text" id="ord-cod-address" placeholder="e.g. Taman Balok Perdana / Petronas"
                 class="w-full px-3 py-2 text-xs bg-white rounded-xl border border-sky-200" />
             </div>
           </div>
@@ -1144,7 +1146,7 @@
         <div class="space-y-1">
           <label class="block text-xs font-bold text-stone-700 flex items-center gap-1.5">
             <i data-lucide="message-square-plus" class="w-3.5 h-3.5 text-amber-600"></i>
-            <span>Notes / Special Request / Tulisan Kek</span>
+            <span>Notes / Special Requests / Cake Message</span>
           </label>
           <textarea id="ord-notes" rows="2" placeholder="Contoh: Tulis 'Happy Birthday Ibu' atas kek, potong 16 pcs, kurang manis..."
             class="w-full px-3 py-2 text-xs rounded-xl border border-stone-200 bg-amber-50/30"></textarea>
@@ -1153,26 +1155,32 @@
         <!-- CARA PEMBAYARAN (ONLINE / CASH) & STATUS BAYARAN -->
         <div class="grid grid-cols-2 gap-2.5">
           <div>
-            <label class="block text-xs font-bold text-stone-700 mb-1">Cara Pembayaran</label>
+            <label class="block text-xs font-bold text-stone-700 mb-1">Payment Method</label>
             <div class="grid grid-cols-2 gap-1.5 bg-stone-100 p-1 rounded-xl border border-stone-200">
               <button type="button" onclick="setModalPayMethod('Online')" id="btn-pm-Online" class="py-1.5 rounded-lg text-xs font-bold bg-emerald-600 text-white shadow-xs">Online</button>
               <button type="button" onclick="setModalPayMethod('Cash')" id="btn-pm-Cash" class="py-1.5 rounded-lg text-xs font-bold text-stone-600">Cash</button>
             </div>
           </div>
           <div>
-            <label class="block text-xs font-bold text-stone-700 mb-1">Status Bayaran</label>
+            <label class="block text-xs font-bold text-stone-700 mb-1">Payment Status</label>
             <select id="ord-payment" onchange="renderOrderModalOptions()" class="w-full px-3 py-2 text-xs font-bold rounded-xl border border-stone-200 bg-white">
-              <option value="Paid">Penuh (Paid)</option>
-              <option value="Deposit">Deposit 50%</option>
+              <option value="Paid">Paid in Full</option>
+              <option value="Deposit">Deposit / Partial Payment</option>
             </select>
           </div>
         </div>
 
+        <div id="ord-paid-amount-wrap" class="hidden rounded-xl border border-amber-200 bg-amber-50/70 p-3 space-y-1.5">
+          <label for="ord-paid-amount" class="block text-xs font-bold text-stone-700">Deposit Amount Received (RM)</label>
+          <input type="number" id="ord-paid-amount" min="0" step="0.01" value="0" oninput="renderOrderModalOptions()" class="w-full px-3 py-2 text-sm font-mono-num font-bold rounded-xl border border-amber-200 bg-white" placeholder="Enter amount received" />
+          <p class="text-[10px] text-stone-500">Enter the exact amount received. No fixed percentage is applied.</p>
+        </div>
+
         <div id="ord-status-box" class="hidden">
-          <label class="block text-xs font-bold text-stone-700 mb-1">Status Kerja</label>
+          <label class="block text-xs font-bold text-stone-700 mb-1">Order Status</label>
           <select id="ord-work-status" class="w-full px-3 py-2 text-xs font-bold rounded-xl border border-stone-200 bg-white">
-            <option value="Active">Aktif (Belum Siap)</option>
-            <option value="Completed">Selesai (Completed)</option>
+            <option value="Active">Active (Not Completed)</option>
+            <option value="Completed">Completed (Completed)</option>
           </select>
         </div>
 
@@ -1181,41 +1189,41 @@
           <div class="flex items-center justify-between gap-2">
             <span class="text-xs font-extrabold text-stone-800 flex items-center gap-1">
               <i data-lucide="tag" class="w-3.5 h-3.5 text-amber-600"></i>
-              <span>Pelarasan Harga / Diskaun</span>
+              <span>Price Adjustment / Discount</span>
             </span>
             <select id="ord-price-mode" onchange="onPriceModeChange(this.value)"
               class="text-[11px] font-bold bg-white border border-stone-200 rounded-lg px-2 py-1 text-stone-700">
-              <option value="normal">Harga Normal (Auto)</option>
-              <option value="discount">Beri Diskaun (RM)</option>
-              <option value="override">Tukar Harga Khas (RM)</option>
+              <option value="normal">Standard Price (Automatic)</option>
+              <option value="discount">Beri Discount (RM)</option>
+              <option value="override">Set Custom Price (RM)</option>
             </select>
           </div>
 
           <div id="ord-price-adjust-box" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
             <div id="ord-discount-input-wrap" class="hidden">
-              <label class="block text-[10px] font-bold text-stone-500 mb-0.5">Jumlah Diskaun (RM)</label>
+              <label class="block text-[10px] font-bold text-stone-500 mb-0.5">Discount Amount (RM)</label>
               <input type="number" step="0.5" min="0" id="ord-discount-val" value="5" oninput="renderOrderModalOptions()"
                 class="w-full px-3 py-1.5 text-xs font-mono-num font-bold bg-white rounded-xl border border-amber-300" />
             </div>
             <div id="ord-override-input-wrap" class="hidden">
-              <label class="block text-[10px] font-bold text-stone-500 mb-0.5">Harga Akhir Baharu (RM)</label>
+              <label class="block text-[10px] font-bold text-stone-500 mb-0.5">New Final Price (RM)</label>
               <input type="number" step="0.5" min="0" id="ord-override-val" value="0" oninput="renderOrderModalOptions()"
                 class="w-full px-3 py-1.5 text-xs font-mono-num font-bold bg-white rounded-xl border border-amber-300" />
             </div>
             <div>
-              <label class="block text-[10px] font-bold text-stone-500 mb-0.5">Sebab / Catatan Harga</label>
-              <input type="text" id="ord-price-reason" placeholder="Cth: Diskaun / Kek sedikit rosak"
+              <label class="block text-[10px] font-bold text-stone-500 mb-0.5">Reason / Price Notes</label>
+              <input type="text" id="ord-price-reason" placeholder="Cth: Discount / Kek sedikit rosak"
                 class="w-full px-3 py-1.5 text-xs bg-white rounded-xl border border-stone-200" />
             </div>
           </div>
 
           <div class="bg-stone-900 text-white rounded-xl p-3 flex items-center justify-between gap-2">
             <div>
-              <div id="ord-total-breakdown" class="text-[10px] text-stone-400">Produk RM 0.00</div>
-              <div id="ord-live-profit-hint" class="text-[10px] font-semibold text-emerald-400 mt-0.5">Anggaran untung: RM 0.00</div>
+              <div id="ord-total-breakdown" class="text-[10px] text-stone-400">Products RM 0.00</div>
+              <div id="ord-live-profit-hint" class="text-[10px] font-semibold text-emerald-400 mt-0.5">Estimated profit: RM 0.00</div>
             </div>
             <div class="text-right">
-              <span class="text-[10px] text-stone-400 uppercase font-bold block">Jumlah Akhir</span>
+              <span class="text-[10px] text-stone-400 uppercase font-bold block">Final Total</span>
               <span id="ord-total-display" class="text-lg font-mono-num font-extrabold text-amber-400">RM 0.00</span>
             </div>
           </div>
@@ -1224,12 +1232,12 @@
 
       <div class="space-y-2 pt-1">
         <button type="button" id="btn-save-order" onclick="saveOrderFromModal()" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-sm py-3 rounded-xl shadow-md">
-          Simpan Order, Sync &amp; Tolak Stok
+          Save Order, Sync &amp; Deduct Stock
         </button>
 
         <button type="button" id="btn-delete-order-modal" onclick="deleteEditingOrder()" class="hidden w-full bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold text-xs py-2.5 rounded-xl flex items-center justify-center gap-1.5">
           <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-          <span>Padam Tempahan Ini &amp; Pulangkan Stok</span>
+          <span>Delete This Order &amp; Restore Stock</span>
         </button>
       </div>
     </div>
@@ -1242,25 +1250,25 @@
     <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl p-5 max-h-[90vh] overflow-y-auto space-y-4 animate-in">
       <div class="flex items-center justify-between border-b border-stone-100 pb-3">
         <div>
-          <span class="text-[10px] font-extrabold uppercase tracking-wider bg-amber-100 text-amber-800 px-2 py-0.5 rounded-md">Pengurusan Inventori</span>
-          <h3 id="stk-modal-title" class="text-base font-extrabold text-stone-900 mt-0.5">Tambah Barang Stok</h3>
+          <span class="text-[10px] font-extrabold uppercase tracking-wider bg-amber-100 text-amber-800 px-2 py-0.5 rounded-md">Pengurusan Inventory</span>
+          <h3 id="stk-modal-title" class="text-base font-extrabold text-stone-900 mt-0.5">Add Inventory Item</h3>
         </div>
         <button type="button" onclick="closeStockModal()" class="p-1.5 rounded-xl bg-stone-100 text-stone-600"><i data-lucide="x" class="w-4 h-4"></i></button>
       </div>
 
       <div class="space-y-3">
         <div>
-          <label class="block text-xs font-bold text-stone-700 mb-1">Nama Barang / Bahan *</label>
+          <label class="block text-xs font-bold text-stone-700 mb-1">Item / Ingredient Name *</label>
           <input type="text" id="stk-m-name" placeholder="Contoh: Mentega Pure SCS" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-stone-200 font-semibold" />
         </div>
 
         <div class="grid grid-cols-2 gap-2.5">
           <div>
-            <label class="block text-xs font-bold text-stone-700 mb-1">Kategori</label>
+            <label class="block text-xs font-bold text-stone-700 mb-1">Category</label>
             <select id="stk-m-cat" class="w-full px-3 py-2 text-xs font-bold rounded-xl border border-stone-200 bg-white">
-              <option value="Bahan Asas">Bahan Asas</option>
-              <option value="Perisa & Topping">Perisa &amp; Topping</option>
-              <option value="Pembungkusan">Pembungkusan</option>
+              <option value="Bahan Asas">Basic Ingredients</option>
+              <option value="Perisa & Topping">Flavours &amp; Topping</option>
+              <option value="Pembungkusan">Packaging</option>
             </select>
           </div>
           <div>
@@ -1280,35 +1288,35 @@
             <input type="number" step="any" id="stk-m-packqty" value="250" oninput="updateStockModalCalc()" class="w-full px-3 py-2 text-xs font-mono-num font-bold rounded-xl border border-stone-200" />
           </div>
           <div>
-            <label class="block text-xs font-bold text-stone-700 mb-1">Harga Beli 1 Pek (RM)</label>
+            <label class="block text-xs font-bold text-stone-700 mb-1">Purchase Price per Pack (RM)</label>
             <input type="number" step="0.1" id="stk-m-packprice" value="13.50" oninput="updateStockModalCalc()" class="w-full px-3 py-2 text-xs font-mono-num font-bold rounded-xl border border-stone-200" />
           </div>
         </div>
 
         <div class="grid grid-cols-2 gap-2.5">
           <div>
-            <label class="block text-xs font-bold text-stone-700 mb-1">Baki Stok Semasa</label>
+            <label class="block text-xs font-bold text-stone-700 mb-1">Current Stock Balance</label>
             <input type="number" step="any" id="stk-m-stock" value="1000" oninput="updateStockModalCalc()" class="w-full px-3 py-2 text-xs font-mono-num font-bold rounded-xl border border-emerald-300 bg-emerald-50/40" />
           </div>
           <div>
-            <label class="block text-xs font-bold text-stone-700 mb-1">Had Amaran Rendah</label>
+            <label class="block text-xs font-bold text-stone-700 mb-1">Alert Threshold Rendah</label>
             <input type="number" step="any" id="stk-m-alert" value="300" oninput="updateStockModalCalc()" class="w-full px-3 py-2 text-xs font-mono-num font-bold rounded-xl border border-rose-200 bg-rose-50/40" />
           </div>
         </div>
 
         <div class="bg-amber-50 border border-amber-200 rounded-xl p-2.5 flex items-center justify-between text-xs">
-          <span class="font-semibold text-amber-900">Kos Seunit Dikira Automatik:</span>
+          <span class="font-semibold text-amber-900">Unit Cost Dikira Automatik:</span>
           <span id="stk-m-unitcost" class="font-mono-num font-extrabold text-amber-800">RM 0.054 / g</span>
         </div>
       </div>
 
       <div class="space-y-2 pt-1">
         <button type="button" onclick="saveStockModal()" class="w-full bg-stone-900 hover:bg-stone-800 text-white font-extrabold text-sm py-3 rounded-xl shadow-md">
-          Simpan Maklumat Stok
+          Save Inventory Details
         </button>
         <button type="button" id="btn-delete-stock-item" onclick="deleteStockModalItem()" class="hidden w-full bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold text-xs py-2.5 rounded-xl flex items-center justify-center gap-1.5">
           <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-          <span>Padam Barang Ini</span>
+          <span>Delete This Item</span>
         </button>
       </div>
     </div>
@@ -1454,7 +1462,7 @@
           items: [{ sizeId: 'size_8', sizeName: 'Kek Marble 8"', flavours: ['Red Velvet Cheese', 'Belgian Chocolate'], addons: ['Chocolate Drizzle'], qty: 1, unitPrice: 83 }],
           deliveryMethod: 'Pickup', codCharge: 0, codAddress: '',
           notes: '', paymentMethod: 'Online',
-          priceMode: 'discount', discountAmount: 5, priceReason: 'Diskaun Pelanggan Tetap',
+          priceMode: 'discount', discountAmount: 5, priceReason: 'Discount Customer Tetap',
           total: 78, paidAmount: 78, paymentStatus: 'Paid', status: 'Completed'
         }
       ];
@@ -1475,17 +1483,17 @@
     let isSyncing = false;
 
     let kpiFilters = {
-      active: { preset: 'all', from: '', to: '' },
-      unpaid: { preset: 'all', from: '', to: '' },
-      sales:  { preset: 'all', from: '', to: '' },
-      profit: { preset: 'all', from: '', to: '' }
+      active: { preset: 'today', from: getTodayISO(), to: getTodayISO() },
+      unpaid: { preset: 'today', from: getTodayISO(), to: getTodayISO() },
+      sales:  { preset: 'today', from: getTodayISO(), to: getTodayISO() },
+      profit: { preset: 'today', from: getTodayISO(), to: getTodayISO() }
     };
 
     let ordersListExpanded = false;
     let ordersFilterPanelOpen = false;
     let nextOrderIndex = 0;
     let ordersListFilter = {
-      preset: 'all', from: '', to: '', status: 'all', payMethod: 'all', delivery: 'all', search: '', sort: 'upcoming'
+      preset: 'upcoming', from: getTodayISO(), to: '', status: 'all', payMethod: 'all', delivery: 'all', search: '', sort: 'upcoming'
     };
 
     let stockFilter = { category: 'all', search: '', sort: 'low' };
@@ -1746,7 +1754,7 @@
       applyAppearanceSettings(config.appearance);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
       document.getElementById('appearance-modal').classList.add('hidden');
-      showToast('Tema dan paparan berjaya disimpan!');
+      showToast('Tema dan paparan saved successfully!');
       if (config.scriptUrl) await pushCloudAction({ action: 'saveConfig', config });
     }
 
@@ -1765,6 +1773,7 @@
       const now = new Date();
 
       if (preset === 'today') return allOrders.filter(o => o.date === todayStr);
+      if (preset === 'upcoming') return allOrders.filter(o => /^\d{4}-\d{2}-\d{2}$/.test(String(o.date || '')) && o.date >= todayStr);
       if (preset === 'week') {
         const day = now.getDay();
         const diffToMon = (day + 6) % 7;
@@ -1795,12 +1804,13 @@
 
     function getSpecShortLabel(spec) {
       const p = spec?.preset || 'all';
-      if (p === 'all') return 'Semua tarikh';
-      if (p === 'today') return 'Hari ini';
-      if (p === 'week') return 'Minggu ini';
-      if (p === 'month') return 'Bulan ini';
+      if (p === 'all') return 'All dates';
+      if (p === 'today') return 'Today';
+      if (p === 'upcoming') return 'Today onwards';
+      if (p === 'week') return 'This week';
+      if (p === 'month') return 'This month';
       if (p === 'custom') return `${spec.from || '...'} → ${spec.to || '...'}`;
-      return 'Semua tarikh';
+      return 'All dates';
     }
 
     function onKpiFilterChange(metricKey, presetVal) {
@@ -1817,13 +1827,13 @@
       } else {
         customBox.classList.add('hidden');
       }
-      renderUtamaKpis();
+      renderHomeKpis();
     }
 
     function onKpiCustomDateChange(metricKey) {
       kpiFilters[metricKey].from = document.getElementById(`kpi-from-${metricKey}`).value;
       kpiFilters[metricKey].to = document.getElementById(`kpi-to-${metricKey}`).value;
-      renderUtamaKpis();
+      renderHomeKpis();
     }
 
     function toggleOrdersFilterView() {
@@ -1835,10 +1845,10 @@
       btn.className = ordersFilterPanelOpen
         ? 'text-[10px] sm:text-[11px] font-bold bg-amber-500 hover:bg-amber-600 text-stone-950 px-2.5 py-1.5 rounded-xl flex items-center gap-1 shadow-xs transition'
         : 'text-[10px] sm:text-[11px] font-bold bg-stone-900 hover:bg-stone-800 text-white px-2.5 py-1.5 rounded-xl flex items-center gap-1 shadow-xs transition';
-      label.textContent = ordersFilterPanelOpen ? 'Tutup Filter' : (ordersListExpanded ? 'Filter Semua' : 'Filter 5 Terdekat');
+      label.textContent = ordersFilterPanelOpen ? 'Close Filters' : (ordersListExpanded ? 'Filter All' : 'Filter Upcoming 5');
       document.getElementById('orders-filter-title').textContent = ordersListExpanded
-        ? 'Tapis Semua Rekod Tempahan'
-        : 'Tapis 5 Tempahan Terdekat';
+        ? 'Filter All Orders'
+        : 'Filter Upcoming 5 Orders';
       renderOrdersSection();
     }
 
@@ -1846,14 +1856,14 @@
       ordersListExpanded = !ordersListExpanded;
       const label = document.getElementById('btn-toggle-all-orders-label');
       const btn = document.getElementById('btn-toggle-all-orders');
-      label.textContent = ordersListExpanded ? 'Lihat 5 Terdekat' : 'Lihat Semua';
+      label.textContent = ordersListExpanded ? 'Lihat 5 Terdekat' : 'View All';
       btn.className = ordersListExpanded
         ? 'text-[10px] sm:text-[11px] font-bold bg-amber-100 hover:bg-amber-200 text-amber-900 px-2.5 py-1.5 rounded-xl flex items-center gap-1 shadow-xs transition'
         : 'text-[10px] sm:text-[11px] font-bold bg-stone-100 hover:bg-stone-200 text-stone-700 px-2.5 py-1.5 rounded-xl flex items-center gap-1 shadow-xs transition';
       const title = document.getElementById('orders-filter-title');
-      if (title) title.textContent = ordersListExpanded ? 'Tapis Semua Rekod Tempahan' : 'Tapis 5 Tempahan Terdekat';
+      if (title) title.textContent = ordersListExpanded ? 'Filter All Orders' : 'Filter Upcoming 5 Orders';
       const filterLabel = document.getElementById('btn-orders-filter-label');
-      if (filterLabel && !ordersFilterPanelOpen) filterLabel.textContent = ordersListExpanded ? 'Filter Semua' : 'Filter 5 Terdekat';
+      if (filterLabel && !ordersFilterPanelOpen) filterLabel.textContent = ordersListExpanded ? 'Filter All' : 'Filter Upcoming 5';
       renderOrdersSection();
     }
 
@@ -1903,7 +1913,7 @@
 
     function setOrdersListDatePreset(preset) {
       ordersListFilter.preset = preset;
-      ['all', 'today', 'week', 'month', 'custom'].forEach(p => {
+      ['all', 'today', 'upcoming', 'week', 'month', 'custom'].forEach(p => {
         const el = document.getElementById(`olist-dt-${p}`);
         if (el) {
           el.className = p === preset
@@ -1927,7 +1937,7 @@
     }
 
     function resetOrdersListFilter() {
-      ordersListFilter = { preset: 'all', from: '', to: '', status: 'all', payMethod: 'all', delivery: 'all', search: '', sort: 'upcoming' };
+      ordersListFilter = { preset: 'upcoming', from: getTodayISO(), to: '', status: 'all', payMethod: 'all', delivery: 'all', search: '', sort: 'upcoming' };
       document.getElementById('orders-search-input').value = '';
       document.getElementById('orders-list-from').value = '';
       document.getElementById('orders-list-to').value = '';
@@ -1936,7 +1946,7 @@
       setOrdersListStatus('all');
       setOrdersListPayMethod('all');
       setOrdersListDelivery('all');
-      setOrdersListDatePreset('all');
+      setOrdersListDatePreset('upcoming');
     }
 
     // =========================================================
@@ -1971,14 +1981,14 @@
     function lockAppNow() {
       sessionStorage.removeItem(SESSION_UNLOCK_KEY);
       showLockScreen(false);
-      showToast('Paparan dikunci.');
+      showToast('View dikunci.');
     }
 
     async function handleUnlock() {
       const enteredPin = document.getElementById('unlock-pin-input').value.trim();
       const enteredUrl = document.getElementById('unlock-script-url').value.trim();
       if (!enteredPin) {
-        showToast('Sila masukkan Kod PIN Rahsia.', true);
+        showToast('Please enter Secret PIN.', true);
         return;
       }
 
@@ -2016,7 +2026,7 @@
           btn.disabled = false;
           lbl.textContent = 'Buka Kunci & Sync';
           switchToDashboard();
-          updateSyncHeaderBadge(true, 'Cloud Sync Aktif');
+          updateSyncHeaderBadge(true, 'Cloud Sync Active');
           showToast('Berjaya log masuk & data disegerakkan!');
         } catch (err) {
           btn.disabled = false;
@@ -2024,7 +2034,7 @@
           if (enteredPin === String(config.pin || '123456')) {
             sessionStorage.setItem(SESSION_UNLOCK_KEY, '1');
             switchToDashboard();
-            updateSyncHeaderBadge(false, 'Offline (Mod Tempatan)');
+            updateSyncHeaderBadge(false, 'Offline (Local Mode)');
             showToast('Tiada internet — dibuka dalam mod luar talian.');
           } else {
             showToast('Gagal menyambung ke Cloud. Semak URL atau internet.', true);
@@ -2059,7 +2069,7 @@
         txt.textContent = labelText || `Cloud Sync • ${hhmm}`;
       } else {
         dot.className = 'w-2 h-2 rounded-full bg-amber-500 shrink-0';
-        txt.textContent = labelText || 'Mod Tempatan';
+        txt.textContent = labelText || 'Local Mode';
       }
     }
 
@@ -2096,7 +2106,7 @@
           showToast(json.message || 'Gagal menyegerak data.', true);
         }
       } catch (e) {
-        updateSyncHeaderBadge(false, 'Offline (Mod Tempatan)');
+        updateSyncHeaderBadge(false, 'Offline (Local Mode)');
         if (!silent) showToast('Sambungan Cloud terganggu.', true);
       } finally {
         isSyncing = false;
@@ -2295,7 +2305,7 @@
     function renderStep3() {
       const list = document.getElementById('setup-ingredients-list');
       if (!config.ingredients.length) {
-        list.innerHTML = `<div class="text-center py-6 text-xs text-stone-400">Tiada bahan lagi. Klik <strong>+ Tambah Bahan</strong> di atas.</div>`;
+        list.innerHTML = `<div class="text-center py-6 text-xs text-stone-400">No ingredients yet. Click <strong>+ Add Ingredient</strong> di atas.</div>`;
         return;
       }
       list.innerHTML = config.ingredients.map((ing, idx) => {
@@ -2303,14 +2313,14 @@
         return `
           <div class="bg-stone-50 border border-stone-200 rounded-2xl p-3 space-y-2.5">
             <div class="flex items-center gap-2">
-              <input type="text" value="${ing.name}" placeholder="Nama Bahan (cth: Mentega Pure)"
+              <input type="text" value="${ing.name}" placeholder="Nama Ingredient (cth: Mentega Pure)"
                 onchange="config.ingredients[${idx}].name = this.value"
                 class="flex-1 px-3 py-2 text-xs font-bold bg-white rounded-xl border border-stone-200" />
               <select onchange="config.ingredients[${idx}].category = this.value"
                 class="px-2.5 py-2 text-[11px] font-semibold bg-white rounded-xl border border-stone-200">
-                <option ${ing.category==='Bahan Asas'?'selected':''}>Bahan Asas</option>
-                <option ${ing.category==='Perisa & Topping'?'selected':''}>Perisa & Topping</option>
-                <option ${ing.category==='Pembungkusan'?'selected':''}>Pembungkusan</option>
+                <option value="Bahan Asas" ${ing.category==='Bahan Asas'?'selected':''}>Basic Ingredients</option>
+                <option value="Perisa & Topping" ${ing.category==='Perisa & Topping'?'selected':''}>Flavours &amp; Toppings</option>
+                <option value="Pembungkusan" ${ing.category==='Pembungkusan'?'selected':''}>Packaging</option>
               </select>
               <button type="button" onclick="removeIngredient(${idx})" class="p-2 text-rose-500 hover:bg-rose-100 rounded-xl">
                 <i data-lucide="trash-2" class="w-4 h-4"></i>
@@ -2335,21 +2345,21 @@
               </div>
 
               <div>
-                <label class="block text-[10px] font-bold text-stone-500 mb-0.5">Harga Beli 1 Pek (${config.currency})</label>
+                <label class="block text-[10px] font-bold text-stone-500 mb-0.5">Price Beli 1 Pek (${config.currency})</label>
                 <input type="number" step="0.10" value="${ing.packPrice}"
                   onchange="config.ingredients[${idx}].packPrice = parseFloat(this.value) || 0; renderStep3(); lucide.createIcons();"
                   class="w-full px-2.5 py-1.5 text-xs font-mono-num font-bold bg-white rounded-xl border border-stone-200" />
               </div>
 
               <div>
-                <label class="block text-[10px] font-bold text-stone-500 mb-0.5">Stok Semasa (${ing.unit})</label>
+                <label class="block text-[10px] font-bold text-stone-500 mb-0.5">Current Stock (${ing.unit})</label>
                 <input type="number" step="any" value="${ing.stock}"
                   onchange="config.ingredients[${idx}].stock = parseFloat(this.value) || 0"
                   class="w-full px-2.5 py-1.5 text-xs font-mono-num font-bold bg-white rounded-xl border border-stone-200" />
               </div>
 
               <div class="bg-amber-100/70 border border-amber-200 rounded-xl px-2.5 py-1.5 flex flex-col justify-center">
-                <span class="text-[10px] font-bold text-amber-900">Kos Seunit</span>
+                <span class="text-[10px] font-bold text-amber-900">Unit Cost</span>
                 <span class="text-xs font-mono-num font-extrabold text-amber-800">${config.currency} ${unitCost.toFixed(3)} / ${ing.unit}</span>
               </div>
             </div>
@@ -2414,7 +2424,7 @@
             <div class="flex items-center gap-2 bg-stone-50 border border-stone-200 p-2 rounded-xl">
               <select onchange="config.recipes['${activeRecipeTarget}'][${rIdx}].ingId = this.value; renderStep4(); lucide.createIcons();"
                 class="flex-1 px-2.5 py-2 text-xs font-bold bg-white rounded-lg border border-stone-200">
-                ${config.ingredients.map(ing => `<option value="${ing.id}" ${ing.id === r.ingId ? 'selected' : ''}>${ing.name || 'Bahan Tanpa Nama'} (${ing.unit})</option>`).join('')}
+                ${config.ingredients.map(ing => `<option value="${ing.id}" ${ing.id === r.ingId ? 'selected' : ''}>${ing.name || 'Unnamed Ingredient'} (${ing.unit})</option>`).join('')}
               </select>
               <div class="flex items-center bg-white border border-stone-200 rounded-lg px-2 py-1.5">
                 <input type="number" step="any" value="${r.qty}" placeholder="Berat"
@@ -2439,7 +2449,7 @@
           <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 bg-stone-50 border border-stone-200 p-2 rounded-xl">
             <select onchange="config.flavourRules[${fIdx}].flavourName = this.value"
               class="flex-1 px-2.5 py-1.5 text-xs font-bold bg-white rounded-lg border border-stone-200">
-              ${config.flavours.map(f => `<option value="${f.name}" ${f.name === fr.flavourName ? 'selected' : ''}>Perisa: ${f.name}</option>`).join('')}
+              ${config.flavours.map(f => `<option value="${f.name}" ${f.name === fr.flavourName ? 'selected' : ''}>Flavours: ${f.name}</option>`).join('')}
             </select>
             <select onchange="config.flavourRules[${fIdx}].ingId = this.value; renderStep4(); lucide.createIcons();"
               class="flex-1 px-2.5 py-1.5 text-xs font-semibold bg-white rounded-lg border border-stone-200">
@@ -2518,14 +2528,14 @@
 
       if (config.scriptUrl) {
         const res = await pushCloudAction({ action: 'saveConfig', config });
-        if (res && res.ok) showToast('Tetapan disimpan ke Google Sheets & Command Center!');
+        if (res && res.ok) showToast('Settings disimpan ke Google Sheets & Command Center!');
         else showToast('Disimpan di peranti. Semak URL Cloud jika gagal sync.', true);
       } else {
         showToast(`Selamat datang ke ${config.bizName}!`);
       }
 
       btn.disabled = false;
-      btn.innerHTML = `<i data-lucide="check-circle-2" class="w-4 h-4"></i><span>Simpan &amp; Lancarkan Command Center</span>`;
+      btn.innerHTML = `<i data-lucide="check-circle-2" class="w-4 h-4"></i><span>Save &amp; Launch Command Center</span>`;
       switchToDashboard();
     }
 
@@ -2601,18 +2611,41 @@
 
     function renderDashboardAll() {
       normalizeOrderStatuses();
-      renderUtama();
+      renderHome();
       renderCalendar();
       renderStockList();
       if (!document.getElementById('tab-analisis').classList.contains('hidden')) renderAnalytics();
       if (window.lucide) lucide.createIcons();
     }
 
-    function renderUtama() {
+    function renderHome() {
       renderNextOrderCard();
-      renderUtamaKpis();
+      renderHomeKpis();
       renderOrdersSection();
       if (window.lucide) lucide.createIcons();
+    }
+
+    // Product revenue excludes pass-through delivery charges. Delivery fees are collected
+    // from customers but are not treated as cake/product sales or business profit.
+    function getOrderProductRevenue(order) {
+      return Math.max(0, Number(order?.total || 0) - Number(order?.codCharge || 0));
+    }
+
+    function updateDepositAmountVisibility() {
+      const status = document.getElementById('ord-payment')?.value || 'Paid';
+      const wrap = document.getElementById('ord-paid-amount-wrap');
+      if (wrap) wrap.classList.toggle('hidden', status !== 'Deposit');
+    }
+
+    function getEnteredPaidAmount(total, status) {
+      if (status === 'Paid') return Number(total || 0);
+      const input = document.getElementById('ord-paid-amount');
+      const amount = Math.max(0, Number(input?.value || 0));
+      if (amount > Number(total || 0)) {
+        showToast('Deposit amount cannot exceed the order total.', true);
+        return null;
+      }
+      return amount;
     }
 
     function getOrderMetaBadgesHtml(o) {
@@ -2633,9 +2666,9 @@
       }
 
       if (o.priceMode === 'override') {
-        html += `<span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-purple-100 text-purple-800">Harga Khas${o.priceReason ? ' (' + o.priceReason + ')' : ''}</span>`;
+        html += `<span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-purple-100 text-purple-800">Custom Price${o.priceReason ? ' (' + o.priceReason + ')' : ''}</span>`;
       } else if (disc > 0) {
-        html += `<span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-purple-100 text-purple-800">Diskaun -${fmtMoney(disc)}</span>`;
+        html += `<span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-purple-100 text-purple-800">Discount -${fmtMoney(disc)}</span>`;
       }
       html += `</div>`;
       return html;
@@ -2688,8 +2721,8 @@
         nextOrderIndex = 0;
         nextCard.innerHTML = `
           <div class="card-soft rounded-2xl p-4 text-center space-y-1">
-            <div class="text-sm font-bold text-stone-800">Tiada tempahan belum selesai</div>
-            <p class="text-xs text-stone-500">Semua tempahan telah ditandakan selesai.</p>
+            <div class="text-sm font-bold text-stone-800">No outstanding orders</div>
+            <p class="text-xs text-stone-500">All orders have been marked as completed.</p>
           </div>`;
         return;
       }
@@ -2698,9 +2731,9 @@
       const group = groups[nextOrderIndex];
       const today = getTodayISO();
       const groupState = group.date === 'undated' ? 'undated' : (group.date < today ? 'overdue' : (group.date === today ? 'today' : 'upcoming'));
-      const groupTitle = groupState === 'undated' ? 'Tarikh belum ditetapkan'
-        : groupState === 'overdue' ? `Lewat • ${group.date}`
-        : groupState === 'today' ? `Hari ini • ${group.date}` : `Akan datang • ${group.date}`;
+      const groupTitle = groupState === 'undated' ? 'Date belum ditetapkan'
+        : groupState === 'overdue' ? `Overdue • ${group.date}`
+        : groupState === 'today' ? `Today • ${group.date}` : `Upcoming • ${group.date}`;
       const groupTone = groupState === 'overdue' ? 'bg-rose-100 text-rose-800'
         : groupState === 'undated' ? 'bg-amber-100 text-amber-800'
         : groupState === 'today' ? 'bg-amber-100 text-amber-800' : 'bg-sky-100 text-sky-800';
@@ -2732,12 +2765,12 @@
               const overdue = state === 'overdue';
               const undated = state === 'undated';
               const balance = Number(order.total || 0) - Number(order.paidAmount || 0);
-              const customer = String(order.customer || '').trim() || 'Nama pelanggan belum diisi';
-              const summary = getOrderDisplaySummary(order) || 'Butiran produk belum lengkap — sila semak tempahan';
-              const time = String(order.time || 'Masa belum ditetapkan');
+              const customer = String(order.customer || '').trim() || 'Customer name belum diisi';
+              const summary = getOrderDisplaySummary(order) || 'Product details are incomplete — please review this order';
+              const time = String(order.time || 'Time belum ditetapkan');
               const orderId = String(order.id || 'ID belum ditetapkan');
               const rowTone = overdue ? 'bg-rose-50 border-rose-300' : (undated ? 'bg-amber-50 border-amber-200' : 'bg-stone-50 border-stone-200');
-              const stateLabel = overdue ? 'LEWAT • BELUM SELESAI' : (undated ? 'TARIKH PERLU DIISI' : (state === 'today' ? 'AKTIF • HARI INI' : 'AKTIF • AKAN DATANG'));
+              const stateLabel = overdue ? 'OVERDUE • NOT COMPLETED' : (undated ? 'DATE REQUIRED' : (state === 'today' ? 'ACTIVE • TODAY' : 'ACTIVE • UPCOMING'));
               const stateBadge = overdue ? 'bg-rose-100 text-rose-800' : (undated ? 'bg-amber-100 text-amber-800' : (state === 'today' ? 'bg-amber-100 text-amber-800' : 'bg-sky-100 text-sky-800'));
               return `
                 <article class="rounded-xl border ${rowTone} p-3 space-y-2">
@@ -2748,18 +2781,18 @@
                         <span class="text-[9px] font-extrabold px-2 py-0.5 rounded-full ${stateBadge}">${stateLabel}</span>
                       </div>
                       <p class="text-[11px] text-stone-600 mt-0.5 leading-snug">${summary}</p>
-                      <div class="text-[10px] text-stone-500 mt-1">${group.date === 'undated' ? 'Tarikh belum ditetapkan' : group.date} • ${time} • ${orderId}</div>
-                      ${order.notes ? `<div class="text-[10px] text-amber-900 mt-1">Nota: ${order.notes}</div>` : ''}
+                      <div class="text-[10px] text-stone-500 mt-1">${group.date === 'undated' ? 'Date belum ditetapkan' : group.date} • ${time} • ${orderId}</div>
+                      ${order.notes ? `<div class="text-[10px] text-amber-900 mt-1">Note: ${order.notes}</div>` : ''}
                     </div>
                     <div class="text-right shrink-0">
                       <div class="text-xs font-mono-num font-extrabold text-stone-900">${fmtMoney(order.total || 0)}</div>
-                      <div class="text-[10px] font-bold ${balance > 0 ? 'text-rose-600' : 'text-emerald-700'}">${balance > 0 ? `Baki ${fmtMoney(balance)}` : 'Lunas'}</div>
+                      <div class="text-[10px] font-bold ${balance > 0 ? 'text-rose-600' : 'text-emerald-700'}">${balance > 0 ? `Balance ${fmtMoney(balance)}` : 'Paid in Full'}</div>
                     </div>
                   </div>
                   <div class="flex justify-end gap-1.5 border-t border-black/5 pt-2">
                     ${order.id ? `<button type="button" onclick="openOrderModal('${order.id}')" class="text-[10px] font-bold bg-white border border-stone-200 text-stone-700 px-2.5 py-1.5 rounded-lg">Edit</button>` : ''}
-                    ${balance > 0 && order.id ? `<button type="button" onclick="markOrderPaid('${order.id}')" class="text-[10px] font-bold bg-white border border-amber-200 text-amber-800 px-2.5 py-1.5 rounded-lg">Sahkan Baki</button>` : ''}
-                    ${order.id ? `<button type="button" onclick="markOrderDone('${order.id}')" class="text-[10px] font-bold ${overdue ? 'bg-rose-600 hover:bg-rose-700 text-white' : 'bg-emerald-600 hover:bg-emerald-700 text-white'} px-3 py-1.5 rounded-lg">Selesai</button>` : ''}
+                    ${balance > 0 && order.id ? `<button type="button" onclick="markOrderPaid('${order.id}')" class="text-[10px] font-bold bg-white border border-amber-200 text-amber-800 px-2.5 py-1.5 rounded-lg">Sahkan Balance</button>` : ''}
+                    ${order.id ? `<button type="button" onclick="markOrderDone('${order.id}')" class="text-[10px] font-bold ${overdue ? 'bg-rose-600 hover:bg-rose-700 text-white' : 'bg-emerald-600 hover:bg-emerald-700 text-white'} px-3 py-1.5 rounded-lg">Completed</button>` : ''}
                   </div>
                 </article>`;
             }).join('')}
@@ -2768,7 +2801,7 @@
       if (window.lucide) lucide.createIcons();
     }
 
-    function renderUtamaKpis() {
+    function renderHomeKpis() {
       const activeSubset = filterOrdersBySpec(orders, kpiFilters.active);
       const activeOnly = activeSubset.filter(o => o.status === 'Active');
       const activeUnits = activeOnly.reduce((s, o) => s + getOrderTotalUnits(o), 0);
@@ -2782,12 +2815,12 @@
       document.getElementById('kpi-unpaid-count').textContent = `${unpaidCount} deposit (${getSpecShortLabel(kpiFilters.unpaid)})`;
 
       const salesSubset = filterOrdersBySpec(orders, kpiFilters.sales);
-      const grossSales = salesSubset.reduce((s, o) => s + Number(o.total || 0), 0);
+      const grossSales = salesSubset.reduce((s, o) => s + getOrderProductRevenue(o), 0);
       document.getElementById('kpi-gross-sales').textContent = fmtMoney(grossSales);
       document.getElementById('kpi-sales-sub').textContent = `${salesSubset.length} order (${getSpecShortLabel(kpiFilters.sales)})`;
 
       const profitSubset = filterOrdersBySpec(orders, kpiFilters.profit);
-      const pSales = profitSubset.reduce((s, o) => s + Number(o.total || 0), 0);
+      const pSales = profitSubset.reduce((s, o) => s + getOrderProductRevenue(o), 0);
       const pCogs = profitSubset.reduce((s, o) => s + calculateOrderCost(o), 0);
       const netProfit = pSales - pCogs;
       const marginPct = pSales > 0 ? Math.round((netProfit / pSales) * 100) : 0;
@@ -2872,16 +2905,16 @@
         : `${displayOrders.length} daripada ${Math.min(5, orders.length)} terdekat`;
 
       if (!displayOrders.length) {
-        listEl.innerHTML = `<div class="text-center py-6 text-xs text-stone-400">Tiada rekod tempahan ditemui.</div>`;
+        listEl.innerHTML = `<div class="text-center py-6 text-xs text-stone-400">No matching orders found.</div>`;
       } else {
         listEl.innerHTML = displayOrders.map(o => {
           const bal = Number(o.total || 0) - Number(o.paidAmount || 0);
           const dateState = getOrderDateState(o);
           const overdue = dateState === 'overdue' && !isOrderCompleted(o);
-          const statusLabel = isOrderCompleted(o) ? 'Selesai'
-            : overdue ? 'LEWAT • BELUM SELESAI'
-            : dateState === 'undated' ? 'Tarikh belum ditetapkan'
-            : dateState === 'today' ? 'Aktif • Hari Ini' : 'Aktif • Akan Datang';
+          const statusLabel = isOrderCompleted(o) ? 'Completed'
+            : overdue ? 'OVERDUE • NOT COMPLETED'
+            : dateState === 'undated' ? 'Date belum ditetapkan'
+            : dateState === 'today' ? 'Active • Today' : 'Active • Akan Datang';
           const statusTone = isOrderCompleted(o) ? 'bg-emerald-100 text-emerald-700'
             : overdue ? 'bg-rose-100 text-rose-800'
             : dateState === 'undated' ? 'bg-amber-100 text-amber-800'
@@ -2892,7 +2925,7 @@
               <div class="flex items-start justify-between gap-2">
                 <div class="min-w-0">
                   <div class="flex items-center gap-1.5 flex-wrap">
-                    <span class="text-xs font-extrabold text-stone-900 truncate">${o.customer || 'Nama pelanggan belum diisi'}</span>
+                    <span class="text-xs font-extrabold text-stone-900 truncate">${o.customer || 'Customer name belum diisi'}</span>
                     <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${statusTone}">${statusLabel}</span>
                   </div>
                   <div class="text-[11px] text-stone-600 mt-0.5 leading-snug">${getOrderDisplaySummary(o)}</div>
@@ -2903,23 +2936,23 @@
                       <span>${o.notes}</span>
                     </div>
                   ` : ''}
-                  <div class="text-[10px] font-mono-num ${overdue ? 'text-rose-700 font-bold' : 'text-stone-400'} mt-1">${o.date || 'Tarikh belum ditetapkan'} (${o.time || 'Masa belum ditetapkan'}) • ${o.id || 'Tiada ID'}</div>
+                  <div class="text-[10px] font-mono-num ${overdue ? 'text-rose-700 font-bold' : 'text-stone-400'} mt-1">${o.date || 'Date belum ditetapkan'} (${o.time || 'Time belum ditetapkan'}) • ${o.id || 'Tiada ID'}</div>
                 </div>
                 <div class="text-right shrink-0">
                   <div class="text-xs font-mono-num font-extrabold text-stone-900">${fmtMoney(o.total)}</div>
                   <div class="text-[10px] font-bold ${bal > 0 ? 'text-rose-500' : 'text-emerald-600'}">
-                    ${bal > 0 ? `Baki ${fmtMoney(bal)}` : 'Lunas'}
+                    ${bal > 0 ? `Balance ${fmtMoney(bal)}` : 'Paid in Full'}
                   </div>
                 </div>
               </div>
 
               <div class="flex items-center justify-end gap-1.5 pt-1.5 border-t border-stone-200/70">
-                ${bal > 0 ? `<button type="button" onclick="markOrderPaid('${o.id}')" class="text-[10px] font-bold bg-amber-100 hover:bg-amber-200 text-amber-900 px-2.5 py-1 rounded-lg">Sahkan Baki</button>` : ''}
-                ${!isOrderCompleted(o) && o.id ? `<button type="button" onclick="markOrderDone('${o.id}')" class="text-[10px] font-bold ${overdue ? 'bg-rose-600 hover:bg-rose-700 text-white' : 'bg-emerald-100 hover:bg-emerald-200 text-emerald-800'} px-2.5 py-1 rounded-lg">Selesai</button>` : ''}
+                ${bal > 0 ? `<button type="button" onclick="markOrderPaid('${o.id}')" class="text-[10px] font-bold bg-amber-100 hover:bg-amber-200 text-amber-900 px-2.5 py-1 rounded-lg">Sahkan Balance</button>` : ''}
+                ${!isOrderCompleted(o) && o.id ? `<button type="button" onclick="markOrderDone('${o.id}')" class="text-[10px] font-bold ${overdue ? 'bg-rose-600 hover:bg-rose-700 text-white' : 'bg-emerald-100 hover:bg-emerald-200 text-emerald-800'} px-2.5 py-1 rounded-lg">Completed</button>` : ''}
                 <button type="button" onclick="openOrderModal('${o.id}')" class="text-[10px] font-bold bg-white hover:bg-stone-100 text-stone-700 border border-stone-200 px-2.5 py-1 rounded-lg flex items-center gap-1">
                   <i data-lucide="pencil" class="w-3 h-3 text-amber-600"></i> Edit / Note
                 </button>
-                <button type="button" onclick="confirmDeleteOrderById('${o.id}')" class="text-[10px] font-bold bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 p-1 rounded-lg" title="Padam Order">
+                <button type="button" onclick="confirmDeleteOrderById('${o.id}')" class="text-[10px] font-bold bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 p-1 rounded-lg" title="Delete Order">
                   <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                 </button>
               </div>
@@ -2940,7 +2973,7 @@
         footerEl.innerHTML = `
           <button type="button" onclick="toggleOrdersShowAll()"
             class="w-full py-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold flex items-center justify-center gap-1.5 transition">
-            <span>Kembali kepada 5 tempahan terdekat</span>
+            <span>Back kepada 5 tempahan terdekat</span>
             <i data-lucide="chevron-up" class="w-3.5 h-3.5"></i>
           </button>
         `;
@@ -2957,8 +2990,8 @@
       ord.paidAmount = ord.total;
       ord.paymentStatus = 'Paid';
       localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
-      renderUtama();
-      showToast('Baki bayaran disahkan lunas!');
+      renderHome();
+      showToast('Balance bayaran disahkan lunas!');
       if (config.scriptUrl) {
         await pushCloudAction({ action: 'markOrderPaid', orderId });
         renderDashboardAll();
@@ -2971,7 +3004,7 @@
       ord.status = 'Completed';
       localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
       renderDashboardAll();
-      showToast(`Tempahan ${ord.customer} ditandakan selesai!`);
+      showToast(`Order ${ord.customer} ditandakan selesai!`);
       if (config.scriptUrl) {
         await pushCloudAction({ action: 'markOrderDone', orderId });
         renderDashboardAll();
@@ -3019,11 +3052,11 @@
       }
       document.getElementById('calendar-grid').innerHTML = html;
 
-      document.getElementById('selected-date-title').textContent = `Tempahan pada ${selectedCalDate}`;
+      document.getElementById('selected-date-title').textContent = `Orders on ${selectedCalDate}`;
       const filtered = orders.filter(o => o.date === selectedCalDate);
       const dayEl = document.getElementById('selected-date-orders');
       if (!filtered.length) {
-        dayEl.innerHTML = `<div class="text-xs text-stone-400 py-3 text-center">Tiada tempahan dijadualkan pada tarikh ini.</div>`;
+        dayEl.innerHTML = `<div class="text-xs text-stone-400 py-3 text-center">No orders dijadualkan pada tarikh ini.</div>`;
       } else {
         dayEl.innerHTML = filtered.map(o => `
           <div class="p-3 rounded-xl bg-stone-50 border border-stone-200 flex items-start justify-between gap-2">
@@ -3036,9 +3069,9 @@
             <div class="flex items-center gap-1.5 shrink-0">
               <button type="button" onclick="openOrderModal('${o.id}')" class="text-[10px] font-bold bg-white border border-stone-200 text-stone-700 px-2 py-1 rounded-lg">Edit</button>
               ${o.status === 'Active' ? `
-                <button type="button" onclick="markOrderDone('${o.id}')" class="text-[10px] font-bold bg-emerald-600 text-white px-2.5 py-1 rounded-lg">Selesai</button>
+                <button type="button" onclick="markOrderDone('${o.id}')" class="text-[10px] font-bold bg-emerald-600 text-white px-2.5 py-1 rounded-lg">Completed</button>
               ` : `
-                <span class="text-[10px] font-bold px-2 py-1 rounded-lg bg-emerald-100 text-emerald-700">Selesai</span>
+                <span class="text-[10px] font-bold px-2 py-1 rounded-lg bg-emerald-100 text-emerald-700">Completed</span>
               `}
             </div>
           </div>
@@ -3076,13 +3109,13 @@
 
     function exportStockCSV() {
       const rows = [
-        ['ID', 'Nama Barang', 'Kategori', 'Baki Stok', 'Unit', 'Had Amaran', 'Kuantiti 1 Pek', 'Harga 1 Pek', 'Kos Seunit', 'Nilai Stok', 'Status']
+        ['ID', 'Item Name', 'Category', 'Stock Balance', 'Unit', 'Alert Threshold', 'Quantity per Pack', 'Price per Pack', 'Unit Cost', 'Stock Value', 'Status']
       ];
       config.ingredients.forEach(ing => {
         const stock = Number(ing.stock || 0);
         const lowAlert = Number(ing.lowAlert || 0);
         const unitCost = getUnitCost(ing);
-        const status = stock <= 0 ? 'Habis' : (stock <= lowAlert ? 'Rendah' : 'Normal');
+        const status = stock <= 0 ? 'Out of stock' : (stock <= lowAlert ? 'Rendah' : 'Normal');
         rows.push([
           ing.id || '', ing.name || '', ing.category || '', stock, ing.unit || '', lowAlert,
           Number(ing.packQty || 0), Number(ing.packPrice || 0), unitCost,
@@ -3157,7 +3190,7 @@
         const isOut = curStock <= 0;
         const isLow = curStock <= lowAlert;
         const isWarn = !isLow && curStock <= lowAlert * 1.5;
-        const statusText = isOut ? 'Stok habis' : (isLow ? 'Perlu restock' : (isWarn ? 'Hampir rendah' : 'Stok mencukupi'));
+        const statusText = isOut ? 'Out of stock' : (isLow ? 'Restock required' : (isWarn ? 'Low stock warning' : 'Stock sufficient'));
         const barColor = isLow ? 'bg-rose-500' : (isWarn ? 'bg-amber-500' : 'bg-emerald-500');
         const categoryIcon = ing.category === 'Pembungkusan' ? 'package' : (ing.category === 'Perisa & Topping' ? 'droplet' : 'wheat');
         const statusClass = isOut ? 'bg-rose-100 text-rose-700' : (isLow ? 'bg-rose-50 text-rose-700' : (isWarn ? 'bg-amber-50 text-amber-800' : 'bg-emerald-50 text-emerald-700'));
@@ -3171,7 +3204,7 @@
                   <i data-lucide="${categoryIcon}" class="w-4 h-4"></i>
                 </div>
                 <div class="min-w-0">
-                  <div class="text-xs font-extrabold text-stone-900 leading-snug">${ing.name || 'Bahan Tanpa Nama'}</div>
+                  <div class="text-xs font-extrabold text-stone-900 leading-snug">${ing.name || 'Unnamed Ingredient'}</div>
                   <div class="flex flex-wrap items-center gap-1 mt-1">
                     <span class="text-[9px] font-bold bg-stone-100 text-stone-600 px-1.5 py-0.5 rounded">${ing.category || 'Tiada kategori'}</span>
                     <span class="text-[9px] font-bold ${statusClass} px-1.5 py-0.5 rounded">${statusText}</span>
@@ -3189,7 +3222,7 @@
                 <div class="h-full ${barColor} rounded-full transition-all duration-300" style="width: ${pct}%"></div>
               </div>
               <div class="grid grid-cols-3 gap-1.5 text-[9px] text-stone-500">
-                <div><span class="block font-bold text-stone-700">~${packsLeft} pek</span>Baki pek</div>
+                <div><span class="block font-bold text-stone-700">~${packsLeft} pek</span>Balance pek</div>
                 <div class="text-center"><span class="block font-bold text-stone-700">${lowAlert} ${ing.unit}</span>Had amaran</div>
                 <div class="text-right"><span class="block font-bold text-stone-700">${fmtMoney(itemStockVal)}</span>Nilai stok</div>
               </div>
@@ -3218,7 +3251,7 @@
       config.ingredients[idx].stock = Math.max(0, Number(config.ingredients[idx].stock) + delta);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
       renderStockList();
-      if (delta > 0) showToast(`Stok ${config.ingredients[idx].name} ditambah!`);
+      if (delta > 0) showToast(`${config.ingredients[idx].name} stock increased!`);
       if (config.scriptUrl) {
         await pushCloudAction({ action: 'updateStock', ingredients: config.ingredients });
       }
@@ -3229,7 +3262,7 @@
       const delBtn = document.getElementById('btn-delete-stock-item');
       if (idx !== null && config.ingredients[idx]) {
         const ing = config.ingredients[idx];
-        document.getElementById('stk-modal-title').textContent = `Edit Stok: ${ing.name}`;
+        document.getElementById('stk-modal-title').textContent = `Edit Stock: ${ing.name}`;
         document.getElementById('stk-m-name').value = ing.name;
         document.getElementById('stk-m-cat').value = ing.category || 'Bahan Asas';
         document.getElementById('stk-m-unit').value = ing.unit || 'g';
@@ -3239,7 +3272,7 @@
         document.getElementById('stk-m-alert').value = ing.lowAlert || 0;
         delBtn.classList.remove('hidden');
       } else {
-        document.getElementById('stk-modal-title').textContent = 'Tambah Barang Baharu ke Inventori';
+        document.getElementById('stk-modal-title').textContent = 'Add Item Baharu ke Inventory';
         document.getElementById('stk-m-name').value = '';
         document.getElementById('stk-m-cat').value = 'Bahan Asas';
         document.getElementById('stk-m-unit').value = 'g';
@@ -3270,7 +3303,7 @@
     async function saveStockModal() {
       const name = document.getElementById('stk-m-name').value.trim();
       if (!name) {
-        showToast('Sila masukkan nama barang.', true);
+        showToast('Please enter nama barang.', true);
         return;
       }
       const itemData = {
@@ -3285,7 +3318,7 @@
 
       if (editingStockIndex !== null && config.ingredients[editingStockIndex]) {
         config.ingredients[editingStockIndex] = Object.assign({}, config.ingredients[editingStockIndex], itemData);
-        showToast(`Stok ${name} dikemas kini!`);
+        showToast(`${name} stock updated!`);
       } else {
         config.ingredients.push(Object.assign({ id: 'ing_' + Date.now() }, itemData));
         showToast(`${name} ditambah ke inventori!`);
@@ -3304,7 +3337,7 @@
       if (editingStockIndex === null) return;
       const target = config.ingredients[editingStockIndex];
       if (!target) return;
-      if (!confirm(`Padam "${target.name}" daripada senarai inventori?`)) return;
+      if (!confirm(`Delete "${target.name}" daripada senarai inventori?`)) return;
       removeIngredient(editingStockIndex);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
       closeStockModal();
@@ -3407,7 +3440,7 @@
       }
 
       const estimatedCost = calculateItemsCost(activeItems);
-      const estimatedProfit = finalTotal - estimatedCost;
+      const estimatedProfit = (finalTotal - codCharge) - estimatedCost;
 
       return { activeItems, itemsSubtotal, codCharge, baseTotal, priceMode, discountAmount, finalTotal, estimatedCost, estimatedProfit };
     }
@@ -3430,11 +3463,12 @@
         if (!existing) return;
         badge.textContent = `Edit Order • ${existing.id}`;
         badge.className = 'text-[10px] font-extrabold uppercase tracking-wider bg-stone-900 text-amber-400 px-2 py-0.5 rounded-md';
-        title.textContent = `Kemas Kini Tempahan ${existing.customer}`;
+        title.textContent = `Kemas Kini Order ${existing.customer}`;
         document.getElementById('ord-customer').value = existing.customer;
         document.getElementById('ord-date').value = existing.date;
         document.getElementById('ord-time').value = existing.time || '14:00';
         document.getElementById('ord-payment').value = existing.paymentStatus || 'Paid';
+        document.getElementById('ord-paid-amount').value = Number(existing.paidAmount || 0);
         document.getElementById('ord-work-status').value = existing.status || 'Active';
         document.getElementById('ord-notes').value = existing.notes || '';
 
@@ -3453,15 +3487,16 @@
 
         statusBox.classList.remove('hidden');
         delBtn.classList.remove('hidden');
-        saveBtn.textContent = 'Simpan Perubahan & Selaraskan Stok';
+        saveBtn.textContent = 'Save Changes & Update Stock';
       } else {
-        badge.textContent = 'Tempahan Baharu';
+        badge.textContent = 'New Order';
         badge.className = 'text-[10px] font-extrabold uppercase tracking-wider bg-amber-100 text-amber-800 px-2 py-0.5 rounded-md';
-        title.textContent = 'Rekod Tempahan Pelanggan';
+        title.textContent = 'Customer Order Details';
         document.getElementById('ord-customer').value = '';
         document.getElementById('ord-date').value = getTodayISO();
         document.getElementById('ord-time').value = '14:00';
         document.getElementById('ord-payment').value = 'Paid';
+        document.getElementById('ord-paid-amount').value = '0';
         document.getElementById('ord-work-status').value = 'Active';
         document.getElementById('ord-notes').value = '';
 
@@ -3479,10 +3514,10 @@
 
         statusBox.classList.add('hidden');
         delBtn.classList.add('hidden');
-        saveBtn.textContent = 'Simpan Order, Sync & Tolak Stok';
+        saveBtn.textContent = 'Save Order, Sync & Deduct Stock';
       }
 
-      document.getElementById('ord-flavour-hint').textContent = `Maksimum ${config.maxFlavours} perisa`;
+      document.getElementById('ord-flavour-hint').textContent = `Maximum ${config.maxFlavours} perisa`;
       renderOrderModalOptions();
       document.getElementById('order-modal').classList.remove('hidden');
       if (window.lucide) lucide.createIcons();
@@ -3530,7 +3565,7 @@
       modalBuilderQty = 1;
       document.getElementById('ord-builder-qty').textContent = '1';
       renderOrderModalOptions();
-      showToast(`${newItem.qty}x ${newItem.sizeName} ditambah ke senarai!`);
+      showToast(`${newItem.qty}x ${newItem.sizeName} added to the order!`);
     }
 
     function adjustCartItemQty(idx, delta) {
@@ -3547,6 +3582,7 @@
     }
 
     function renderOrderModalOptions() {
+      updateDepositAmountVisibility();
       document.getElementById('ord-size-options').innerHTML = config.sizes.map(s => `
         <button type="button" onclick="modalSizeId='${s.id}'; renderOrderModalOptions();"
           class="p-2.5 rounded-xl border text-left transition ${modalSizeId === s.id ? 'bg-amber-50 border-amber-500 text-amber-950 font-bold' : 'bg-white border-stone-200 text-stone-700'}">
@@ -3586,7 +3622,7 @@
         const previewTotal = previewItem ? previewItem.unitPrice * previewItem.qty : 0;
         cartEl.innerHTML = `
           <div class="p-3 rounded-xl border border-dashed border-stone-300 bg-stone-50/70 text-[11px] text-stone-500 flex items-center justify-between gap-2">
-            <span>Pilihan semasa: <strong>${previewItem ? previewItem.qty + 'x ' + previewItem.sizeName : '-'}</strong></span>
+            <span>Current Selection: <strong>${previewItem ? previewItem.qty + 'x ' + previewItem.sizeName : '-'}</strong></span>
             <span class="font-mono-num font-bold text-stone-800 shrink-0">${fmtMoney(previewTotal)}</span>
           </div>
         `;
@@ -3614,13 +3650,13 @@
       }
 
       const bd = getModalPriceBreakdown();
-      let parts = [`Produk ${fmtMoney(bd.itemsSubtotal)}`];
-      if (bd.codCharge > 0) parts.push(`COD +${fmtMoney(bd.codCharge)}`);
-      if (bd.discountAmount > 0) parts.push(`Potongan -${fmtMoney(bd.discountAmount)}`);
+      let parts = [`Products ${fmtMoney(bd.itemsSubtotal)}`];
+      if (bd.codCharge > 0) parts.push(`Delivery +${fmtMoney(bd.codCharge)}`);
+      if (bd.discountAmount > 0) parts.push(`Discount -${fmtMoney(bd.discountAmount)}`);
       document.getElementById('ord-total-breakdown').textContent = parts.join(' • ');
 
       const profitHintEl = document.getElementById('ord-live-profit-hint');
-      profitHintEl.textContent = `Anggaran untung: ${fmtMoney(bd.estimatedProfit)} (Kos ${fmtMoney(bd.estimatedCost)})`;
+      profitHintEl.textContent = `Estimated profit: ${fmtMoney(bd.estimatedProfit)} (Cost ${fmtMoney(bd.estimatedCost)})`;
       profitHintEl.className = `text-[10px] font-semibold mt-0.5 ${bd.estimatedProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
 
       document.getElementById('ord-total-display').textContent = fmtMoney(bd.finalTotal);
@@ -3631,7 +3667,7 @@
       if (modalFlavours.includes(name)) modalFlavours = modalFlavours.filter(f => f !== name);
       else {
         if (modalFlavours.length >= (config.maxFlavours || 2)) {
-          showToast(`Maksimum ${config.maxFlavours} perisa dibenarkan.`, true);
+          showToast(`Maximum ${config.maxFlavours} flavours allowed.`, true);
           return;
         }
         modalFlavours.push(name);
@@ -3648,19 +3684,22 @@
     async function saveOrderFromModal() {
       const customer = document.getElementById('ord-customer').value.trim();
       if (!customer) {
-        showToast('Sila masukkan nama pelanggan.', true);
+        showToast('Please enter the customer name.', true);
         return;
       }
 
       const bd = getModalPriceBreakdown();
       const finalItems = bd.activeItems;
       if (finalItems.length === 0) {
-        showToast('Sila pilih sekurang-kurangnya satu produk.', true);
+        showToast('Please select at least one product.', true);
         return;
       }
 
       const total = bd.finalTotal;
-      const payStatus = document.getElementById('ord-payment').value;
+      const selectedPayStatus = document.getElementById('ord-payment').value;
+      const paidAmtEntered = getEnteredPaidAmount(total, selectedPayStatus);
+      if (paidAmtEntered === null) return;
+      const payStatus = selectedPayStatus === 'Deposit' && paidAmtEntered >= total ? 'Paid' : selectedPayStatus;
       const workStatus = document.getElementById('ord-work-status').value || 'Active';
       const notes = document.getElementById('ord-notes').value.trim();
       const codAddress = modalDeliveryMethod === 'COD' ? document.getElementById('ord-cod-address').value.trim() : '';
@@ -3672,7 +3711,7 @@
 
       const btn = document.getElementById('btn-save-order');
       btn.disabled = true;
-      btn.textContent = 'Menyimpan & Sync...';
+      btn.textContent = 'Saving & Syncing...';
 
       if (editingOrderId) {
         const idx = orders.findIndex(o => o.id === editingOrderId);
@@ -3680,10 +3719,7 @@
           const oldOrder = orders[idx];
           applyStockDeltaForOrder(oldOrder, +1);
 
-          let paidAmt = payStatus === 'Paid' ? total : total * 0.5;
-          if (payStatus === 'Deposit' && oldOrder.paymentStatus === 'Deposit' && Number(oldOrder.total) === total) {
-            paidAmt = Number(oldOrder.paidAmount || total * 0.5);
-          }
+          const paidAmt = paidAmtEntered;
 
           const updatedOrder = Object.assign({}, oldOrder, {
             customer, date: document.getElementById('ord-date').value, time: document.getElementById('ord-time').value,
@@ -3703,10 +3739,10 @@
           if (config.scriptUrl) {
             const res = await pushCloudAction({ action: 'editOrder', order: updatedOrder, updatedIngredients: config.ingredients });
             if (res && res.ok) {
-              showToast('Order dikemas kini & stok diselaraskan di Cloud!');
+              showToast('Order updated and inventory synced to the cloud!');
               renderDashboardAll();
-            } else showToast('Dikemas kini di peranti (gagal sync ke Cloud).', true);
-          } else showToast('Order dikemas kini & stok bahan diselaraskan!');
+            } else showToast('Updated on this device (cloud sync failed).', true);
+          } else showToast('Order updated and ingredient stock adjusted!');
         }
       } else {
         const newOrd = {
@@ -3715,7 +3751,7 @@
           sizeId: finalItems[0].sizeId, sizeName: summarySizeName, flavours: allFlavours, addons: allAddons,
           items: finalItems, deliveryMethod: modalDeliveryMethod, codCharge: bd.codCharge, codAddress,
           notes, paymentMethod: modalPayMethod, priceMode: bd.priceMode, discountAmount: bd.discountAmount,
-          priceReason, total, paidAmount: payStatus === 'Paid' ? total : total * 0.5, paymentStatus: payStatus, status: 'Active'
+          priceReason, total, paidAmount: paidAmtEntered, paymentStatus: payStatus, status: 'Active'
         };
 
         orders.push(newOrd);
@@ -3749,7 +3785,7 @@
       const idx = orders.findIndex(o => o.id === orderId);
       if (idx === -1) return;
       const target = orders[idx];
-      const ok = confirm(`Padam tempahan ${target.customer} (${getOrderDisplaySummary(target)})?\n\nStok bahan untuk tempahan ini akan dipulangkan semula secara automatik.`);
+      const ok = confirm(`Delete order for ${target.customer} (${getOrderDisplaySummary(target)})?\n\nStok bahan untuk tempahan ini akan dipulangkan semula secara automatik.`);
       if (!ok) return;
 
       applyStockDeltaForOrder(target, +1);
@@ -3757,7 +3793,7 @@
       orders.splice(idx, 1);
       localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
       renderDashboardAll();
-      showToast(`Tempahan ${target.customer} dipadam & stok dipulangkan.`);
+      showToast(`Order ${target.customer} deleted and stock restored.`);
 
       if (config.scriptUrl) {
         await pushCloudAction({ action: 'deleteOrder', orderId: target.id, updatedIngredients: config.ingredients });
@@ -3794,17 +3830,17 @@
         <div class="space-y-1.5">
           <select id="an-range-${key}-preset" onchange="onAnalyticsPresetChange('${key}', this.value)"
             class="w-full text-[10px] font-bold bg-stone-100 text-stone-700 border border-stone-200 rounded-lg px-2 py-1.5">
-            <option value="today" ${filter.preset === 'today' ? 'selected' : ''}>Hari Ini</option>
-            <option value="week" ${filter.preset === 'week' ? 'selected' : ''}>Minggu Ini</option>
-            <option value="month" ${filter.preset === 'month' ? 'selected' : ''}>Bulan Ini</option>
-            <option value="custom" ${filter.preset === 'custom' ? 'selected' : ''}>Pilih Range</option>
-            <option value="all" ${filter.preset === 'all' ? 'selected' : ''}>Semua Tarikh</option>
+            <option value="today" ${filter.preset === 'today' ? 'selected' : ''}>Today</option>
+            <option value="week" ${filter.preset === 'week' ? 'selected' : ''}>This Week</option>
+            <option value="month" ${filter.preset === 'month' ? 'selected' : ''}>This Month</option>
+            <option value="custom" ${filter.preset === 'custom' ? 'selected' : ''}>Custom Range</option>
+            <option value="all" ${filter.preset === 'all' ? 'selected' : ''}>All Dates</option>
           </select>
           <div id="an-range-${key}-custom" class="${filter.preset === 'custom' ? '' : 'hidden'} grid grid-cols-2 gap-1.5">
-            <label class="min-w-0 text-[9px] font-semibold text-stone-500">Dari
+            <label class="min-w-0 text-[9px] font-semibold text-stone-500">From
               <input type="date" id="an-range-${key}-from" value="${filter.from || ''}" onchange="onAnalyticsCustomDateChange('${key}')" class="w-full min-w-0 px-1.5 py-1 text-[10px] rounded-md border border-stone-200 bg-white font-mono-num" />
             </label>
-            <label class="min-w-0 text-[9px] font-semibold text-stone-500">Hingga
+            <label class="min-w-0 text-[9px] font-semibold text-stone-500">To
               <input type="date" id="an-range-${key}-to" value="${filter.to || ''}" onchange="onAnalyticsCustomDateChange('${key}')" class="w-full min-w-0 px-1.5 py-1 text-[10px] rounded-md border border-stone-200 bg-white font-mono-num" />
             </label>
           </div>
@@ -3883,31 +3919,31 @@
       const orderUnits = orderCountOrders.reduce((sum, order) => sum + getOrderTotalUnits(order), 0);
       document.getElementById('an-filtered-count').textContent = `${orderCountOrders.length} (${orderUnits} unit)`;
 
-      const salesTotal = salesOrders.reduce((sum, order) => sum + Number(order.total || 0), 0);
+      const salesTotal = salesOrders.reduce((sum, order) => sum + getOrderProductRevenue(order), 0);
       document.getElementById('an-filtered-sales').textContent = fmtMoney(salesTotal);
 
-      const profitSales = profitOrders.reduce((sum, order) => sum + Number(order.total || 0), 0);
+      const profitSales = profitOrders.reduce((sum, order) => sum + getOrderProductRevenue(order), 0);
       const profitCogs = profitOrders.reduce((sum, order) => sum + calculateOrderCost(order), 0);
       document.getElementById('an-filtered-profit').textContent = fmtMoney(profitSales - profitCogs);
 
-      const aovSales = aovOrders.reduce((sum, order) => sum + Number(order.total || 0), 0);
+      const aovSales = aovOrders.reduce((sum, order) => sum + getOrderProductRevenue(order), 0);
       const aovProfit = aovSales - aovOrders.reduce((sum, order) => sum + calculateOrderCost(order), 0);
       const aov = aovOrders.length ? aovSales / aovOrders.length : 0;
       const avgProfitPerOrder = aovOrders.length ? aovProfit / aovOrders.length : 0;
       document.getElementById('an-aov-val').textContent = fmtMoney(aov);
-      document.getElementById('an-avg-profit-val').textContent = `Purata untung ${fmtMoney(avgProfitPerOrder)} / order`;
+      document.getElementById('an-avg-profit-val').textContent = `Average profit ${fmtMoney(avgProfitPerOrder)} / order`;
 
-      const marginSales = marginOrders.reduce((sum, order) => sum + Number(order.total || 0), 0);
+      const marginSales = marginOrders.reduce((sum, order) => sum + getOrderProductRevenue(order), 0);
       const marginCogs = marginOrders.reduce((sum, order) => sum + calculateOrderCost(order), 0);
       const marginDiscounts = marginOrders.reduce((sum, order) => sum + Number(order.discountAmount || 0), 0);
       const marginProfit = marginSales - marginCogs;
       const marginPct = marginSales > 0 ? Math.round((marginProfit / marginSales) * 100) : 0;
       document.getElementById('an-margin-val').textContent = `${marginPct}%`;
-      document.getElementById('an-cogs-val').textContent = `Kos ${fmtMoney(marginCogs)} • Diskaun ${fmtMoney(marginDiscounts)}`;
+      document.getElementById('an-cogs-val').textContent = `Cost ${fmtMoney(marginCogs)} • Discount ${fmtMoney(marginDiscounts)}`;
 
-      const paymentSales = paymentOrders.reduce((sum, order) => sum + Number(order.total || 0), 0);
-      const onlineSales = paymentOrders.filter(order => (order.paymentMethod || 'Online') === 'Online').reduce((sum, order) => sum + Number(order.total || 0), 0);
-      const cashSales = paymentOrders.filter(order => order.paymentMethod === 'Cash').reduce((sum, order) => sum + Number(order.total || 0), 0);
+      const paymentSales = paymentOrders.reduce((sum, order) => sum + getOrderProductRevenue(order), 0);
+      const onlineSales = paymentOrders.filter(order => (order.paymentMethod || 'Online') === 'Online').reduce((sum, order) => sum + getOrderProductRevenue(order), 0);
+      const cashSales = paymentOrders.filter(order => order.paymentMethod === 'Cash').reduce((sum, order) => sum + getOrderProductRevenue(order), 0);
       const onlinePct = paymentSales > 0 ? Math.round((onlineSales / paymentSales) * 100) : 50;
       const cashPct = paymentSales > 0 ? 100 - onlinePct : 50;
       document.getElementById('an-pay-ratio').textContent = `${onlinePct}% / ${cashPct}%`;
@@ -3922,9 +3958,9 @@
       const codFeesTotal = codOrders.reduce((sum, order) => sum + Number(order.codCharge || 0), 0);
       const pickupPct = deliveryCount > 0 ? Math.round((pickupOrders.length / deliveryCount) * 100) : 50;
       const codPct = deliveryCount > 0 ? 100 - pickupPct : 50;
-      document.getElementById('an-cod-fees-total').textContent = `Caj COD: ${fmtMoney(codFeesTotal)}`;
+      document.getElementById('an-cod-fees-total').textContent = `Delivery Charges: ${fmtMoney(codFeesTotal)}`;
       document.getElementById('an-pickup-count').textContent = `Pickup: ${pickupOrders.length}`;
-      document.getElementById('an-cod-count').textContent = `COD: ${codOrders.length}`;
+      document.getElementById('an-cod-count').textContent = `Delivery: ${codOrders.length}`;
       document.getElementById('an-del-bar-pickup').style.width = `${pickupPct}%`;
       document.getElementById('an-del-bar-cod').style.width = `${codPct}%`;
 
@@ -3937,7 +3973,7 @@
           const date = new Date(parts[0], parts[1] - 1, parts[2]);
           const index = (date.getDay() + 6) % 7;
           weekdayStats[index].count += 1;
-          weekdayStats[index].sales += Number(order.total || 0);
+          weekdayStats[index].sales += getOrderProductRevenue(order);
         }
       });
 
@@ -3967,7 +4003,7 @@
             </div>
           </div>
         `;
-      }).join('') : '<div class="text-xs text-stone-400">Tiada data perisa dalam julat tarikh ini.</div>';
+      }).join('') : '<div class="text-xs text-stone-400">No data perisa dalam julat tarikh ini.</div>';
 
       const soldBySize = {};
       productOrders.forEach(order => {
@@ -3985,7 +4021,7 @@
           <div class="p-2.5 rounded-xl bg-stone-50 border border-stone-200 flex items-center justify-between">
             <div>
               <div class="text-xs font-bold text-stone-900">${size.name} <span class="text-[10px] font-mono-num text-amber-700">(${soldQty} terjual)</span></div>
-              <div class="text-[11px] text-stone-500">Jual ${fmtMoney(size.price)} • Kos ${fmtMoney(cogs)}</div>
+              <div class="text-[11px] text-stone-500">Jual ${fmtMoney(size.price)} • Cost ${fmtMoney(cogs)}</div>
             </div>
             <div class="text-right">
               <div class="text-xs font-mono-num font-extrabold text-emerald-700">+${fmtMoney(profit)}/unit</div>
@@ -3995,7 +4031,7 @@
         `;
       }).join('');
 
-      const insightSales = insightOrders.reduce((sum, order) => sum + Number(order.total || 0), 0);
+      const insightSales = insightOrders.reduce((sum, order) => sum + getOrderProductRevenue(order), 0);
       const insightCogs = insightOrders.reduce((sum, order) => sum + calculateOrderCost(order), 0);
       const insightProfit = insightSales - insightCogs;
       const insightMargin = insightSales > 0 ? Math.round((insightProfit / insightSales) * 100) : 0;
@@ -4012,28 +4048,28 @@
             const date = new Date(parts[0], parts[1] - 1, parts[2]);
             const index = (date.getDay() + 6) % 7;
             insightWeekday[index].count += 1;
-            insightWeekday[index].sales += Number(order.total || 0);
+            insightWeekday[index].sales += getOrderProductRevenue(order);
           }
         }
       });
       const insightSortedFlavours = Object.entries(insightFlavours).sort((a, b) => b[1] - a[1]);
       const insights = [];
       if (!insightOrders.length) {
-        insights.push('• Tiada rekod tempahan dalam julat tarikh yang dipilih untuk insight.');
+        insights.push('• No records tempahan dalam julat tarikh yang dipilih untuk insight.');
       } else {
         if (insightSortedFlavours.length) {
-          insights.push(`• <strong>Perisa Juara:</strong> <em>${insightSortedFlavours[0][0]}</em> paling tinggi permintaan (${insightSortedFlavours[0][1]} unit). Pastikan stok bahan perisa ini mencukupi.`);
+          insights.push(`• <strong>Flavours Juara:</strong> <em>${insightSortedFlavours[0][0]}</em> paling tinggi permintaan (${insightSortedFlavours[0][1]} unit). Pastikan stok bahan perisa ini mencukupi.`);
         }
         const busiestIndex = insightWeekday.reduce((best, current, index, array) => current.count > array[best].count ? index : best, 0);
         if (insightWeekday[busiestIndex].count > 0) {
-          insights.push(`• <strong>Hari Puncak:</strong> Tempahan paling tinggi pada hari <strong>${dayLabels[busiestIndex]}</strong> (${insightWeekday[busiestIndex].count} order • ${fmtMoney(insightWeekday[busiestIndex].sales)}).`);
+          insights.push(`• <strong>Peak Day:</strong> Most orders occurred on <strong>${dayLabels[busiestIndex]}</strong> (${insightWeekday[busiestIndex].count} order • ${fmtMoney(insightWeekday[busiestIndex].sales)}).`);
         }
         insights.push(insightMargin < 40
           ? `• <strong>Amaran Margin (${insightMargin}%):</strong> Semak kos bahan mentah atau diskaun yang diberikan.`
           : `• <strong>Kesihatan Margin:</strong> Margin bersih ${insightMargin}% dengan purata nilai order ${fmtMoney(insightAov)}.`);
       }
       const lowStockCount = config.ingredients.filter(item => Number(item.stock || 0) <= Number(item.lowAlert || 0)).length;
-      if (lowStockCount > 0) insights.push(`• <strong>Tindakan Inventori:</strong> ${lowStockCount} barang berada pada paras stok rendah. Semak tab <em>Stock Bahan</em>.`);
+      if (lowStockCount > 0) insights.push(`• <strong>Inventory Action:</strong> ${lowStockCount} items are running low. Check the <em>Inventory</em>.`);
       document.getElementById('smart-business-insights').innerHTML = insights.map(line => `<div>${line}</div>`).join('');
 
       // Sales/profit chart has its own date range.
@@ -4042,9 +4078,9 @@
         if (profitChartInstance) profitChartInstance.destroy();
         const grouped = {};
         chartOrders.forEach(order => {
-          const key = chartPeriod === 'monthly' ? String(order.date || '').slice(0, 7) : String(order.date || 'Tiada Tarikh');
+          const key = chartPeriod === 'monthly' ? String(order.date || '').slice(0, 7) : String(order.date || 'Tiada Date');
           if (!grouped[key]) grouped[key] = { sales: 0, profit: 0 };
-          const salesValue = Number(order.total || 0);
+          const salesValue = getOrderProductRevenue(order);
           const cogsValue = calculateOrderCost(order);
           grouped[key].sales += salesValue;
           grouped[key].profit += salesValue - cogsValue;
@@ -4056,8 +4092,8 @@
         profitChartInstance = new Chart(ctx, {
           type: 'bar',
           data: { labels, datasets: [
-            { label: 'Jualan Kasar', data: salesData, backgroundColor: '#1c1917', borderRadius: 6 },
-            { label: 'Untung Bersih', data: profitData, backgroundColor: '#10b981', borderRadius: 6 }
+            { label: 'Gross Sales', data: salesData, backgroundColor: '#1c1917', borderRadius: 6 },
+            { label: 'Net Profit', data: profitData, backgroundColor: '#10b981', borderRadius: 6 }
           ] },
           options: {
             responsive: true, maintainAspectRatio: false,
