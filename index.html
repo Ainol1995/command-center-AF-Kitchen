@@ -6,7 +6,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="theme-color" content="#1c1917" />
-  <title>AF Kitchen Command Center — English UI v6.2</title>
+  <title>AF Kitchen Command Center — English UI v7.0</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -457,6 +457,29 @@
         </button>
       </div>
     </header>
+
+    <!-- LOCAL DRAFT / PUBLISH SETTINGS BAR -->
+    <section id="config-draft-bar" class="hidden card-soft rounded-2xl p-3.5 mb-4 border border-amber-200 bg-gradient-to-r from-amber-50/90 via-white to-white shadow-sm">
+      <div class="flex items-start gap-2.5">
+        <span class="w-9 h-9 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0"><i data-lucide="cloud-upload" class="w-4 h-4"></i></span>
+        <div class="min-w-0 flex-1">
+          <div class="flex flex-wrap items-center gap-1.5">
+            <h2 class="text-xs font-extrabold text-stone-900">Unpublished Settings</h2>
+            <span class="text-[9px] font-extrabold rounded-full px-2 py-0.5 bg-amber-100 text-amber-800">THIS DEVICE ONLY</span>
+          </div>
+          <p class="text-[10px] leading-relaxed text-stone-600 mt-0.5">Your changes are saved on this device. Publish them to update every device connected to this cloud account.</p>
+          <div class="flex flex-wrap gap-2 mt-2.5">
+            <button type="button" onclick="publishConfigToCloud()" id="btn-publish-config" class="flex-1 min-w-[145px] bg-stone-900 hover:bg-stone-800 text-white text-[11px] font-extrabold px-3 py-2.5 rounded-xl flex items-center justify-center gap-1.5 shadow-sm"><i data-lucide="cloud-upload" class="w-3.5 h-3.5"></i><span>Save to All Devices</span></button>
+            <button type="button" onclick="revertConfigDraft()" id="btn-revert-config" class="px-3 py-2.5 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 text-stone-700 text-[11px] font-bold flex items-center justify-center gap-1.5"><i data-lucide="undo-2" class="w-3.5 h-3.5"></i><span>Revert</span></button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="config-published-bar" class="hidden rounded-xl border border-emerald-100 bg-emerald-50/60 px-3 py-2 mb-4 items-center gap-2">
+      <i data-lucide="cloud-check" class="w-4 h-4 text-emerald-700 shrink-0"></i>
+      <span class="text-[10px] font-semibold text-emerald-800">All devices are using the latest published settings.</span>
+    </section>
 
     <!-- ========================================================= -->
     <!-- TAB 1: UTAMA                                              -->
@@ -964,7 +987,7 @@
         <div>
           <span class="text-[10px] font-extrabold uppercase tracking-wider bg-amber-100 text-amber-800 px-2 py-0.5 rounded-md">Personalisation</span>
           <h3 class="text-base font-extrabold text-stone-900 mt-1">Theme & Display Settings</h3>
-          <p class="text-[11px] text-stone-500 mt-0.5">Choose your own colours from the palette. All changes are previewed instantly.</p>
+          <p class="text-[11px] text-stone-500 mt-0.5">Preview your theme here. Applying it saves a local draft; use Save to All Devices on the dashboard to publish it.</p>
         </div>
         <button type="button" onclick="closeAppearanceSettings(false)" class="p-1.5 rounded-xl bg-stone-100 text-stone-600"><i data-lucide="x" class="w-4 h-4"></i></button>
       </div>
@@ -1023,6 +1046,37 @@
           </div>
         </div>
 
+        <div class="rounded-2xl bg-white border border-stone-200 p-3.5 space-y-3">
+          <div>
+            <div class="text-xs font-extrabold text-stone-800">Curated Theme Presets</div>
+            <div class="text-[10px] text-stone-500">Balanced colour combinations designed to keep the dashboard calm and minimal.</div>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
+            <button type="button" onclick="applyAppearancePreset('warm')" class="rounded-xl border border-amber-200 bg-amber-50 p-2 text-left"><span class="block w-full h-5 rounded-lg bg-gradient-to-r from-amber-100 via-white to-stone-100 mb-1.5"></span><span class="block text-[10px] font-extrabold text-stone-700">Warm Cream</span></button>
+            <button type="button" onclick="applyAppearancePreset('sage')" class="rounded-xl border border-emerald-200 bg-emerald-50 p-2 text-left"><span class="block w-full h-5 rounded-lg bg-gradient-to-r from-emerald-100 via-white to-stone-100 mb-1.5"></span><span class="block text-[10px] font-extrabold text-stone-700">Soft Sage</span></button>
+            <button type="button" onclick="applyAppearancePreset('rose')" class="rounded-xl border border-rose-200 bg-rose-50 p-2 text-left"><span class="block w-full h-5 rounded-lg bg-gradient-to-r from-rose-100 via-white to-orange-50 mb-1.5"></span><span class="block text-[10px] font-extrabold text-stone-700">Rose Bakery</span></button>
+            <button type="button" onclick="applyAppearancePreset('lavender')" class="rounded-xl border border-violet-200 bg-violet-50 p-2 text-left"><span class="block w-full h-5 rounded-lg bg-gradient-to-r from-violet-100 via-white to-slate-50 mb-1.5"></span><span class="block text-[10px] font-extrabold text-stone-700">Lavender</span></button>
+            <button type="button" onclick="applyAppearancePreset('slate')" class="rounded-xl border border-slate-200 bg-slate-50 p-2 text-left"><span class="block w-full h-5 rounded-lg bg-gradient-to-r from-slate-200 via-white to-slate-100 mb-1.5"></span><span class="block text-[10px] font-extrabold text-stone-700">Slate</span></button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <label class="space-y-1">
+            <span class="block text-xs font-extrabold text-stone-700">Background Pattern</span>
+            <select id="appearance-pattern" onchange="previewAppearanceSettings()" class="w-full px-3 py-2.5 text-xs rounded-xl border border-stone-200 bg-white">
+              <option value="none">Plain Minimal</option>
+              <option value="fine-lines">Fine Diagonal Lines</option>
+              <option value="soft-floral">Soft Floral Motif</option>
+              <option value="dot-grid">Tiny Dot Grid</option>
+            </select>
+            <span class="block text-[10px] text-stone-400">Patterns use a very light tint so text and cards remain easy to read.</span>
+          </label>
+          <div class="rounded-xl border border-stone-200 p-3 flex items-center gap-2.5" style="background:var(--ui-page-bg)">
+            <span class="w-12 h-12 rounded-xl border border-stone-200/70 flex items-center justify-center" style="background:var(--ui-card-bg);color:var(--ui-accent)"><i data-lucide="flower-2" class="w-6 h-6"></i></span>
+            <div><div class="text-[11px] font-extrabold text-stone-700">Subtle by design</div><div class="text-[10px] text-stone-500">Decorative details stay in the background, never over your content.</div></div>
+          </div>
+        </div>
+
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <label class="space-y-1">
             <span class="block text-xs font-extrabold text-stone-700">Font Family</span>
@@ -1061,7 +1115,7 @@
       <div class="flex gap-2 pt-1">
         <button type="button" onclick="resetAppearanceSettings()" class="px-3 py-3 rounded-xl border border-stone-200 bg-white text-stone-700 text-xs font-bold">Reset to Default</button>
         <button type="button" onclick="closeAppearanceSettings(false)" class="flex-1 px-3 py-3 rounded-xl border border-stone-200 bg-white text-stone-700 text-xs font-bold">Cancel</button>
-        <button type="button" onclick="saveAppearanceSettings()" class="flex-1 px-3 py-3 rounded-xl bg-stone-900 text-white text-xs font-extrabold">Save Theme</button>
+        <button type="button" onclick="saveAppearanceSettings()" class="flex-1 px-3 py-3 rounded-xl bg-stone-900 text-white text-xs font-extrabold">Apply on This Device</button>
       </div>
     </div>
   </div>
@@ -1355,6 +1409,8 @@
     const STORAGE_KEY = 'cloud_command_center_config_v2';
     const ORDERS_KEY = 'cloud_command_center_orders_v2';
     const SESSION_UNLOCK_KEY = 'cloud_command_center_unlocked_v2';
+    const PUBLISHED_CONFIG_KEY = 'cloud_command_center_published_config_v1';
+    const CONFIG_DRAFT_KEY = 'cloud_command_center_config_draft_v1';
 
     function getTodayISO() {
       const d = new Date();
@@ -1401,7 +1457,8 @@
         cardColor: '#ffffff',
         borderColor: '#ede8e0',
         fontSize: '16px',
-        shadow: 'soft'
+        shadow: 'soft',
+        backgroundPattern: 'none'
       };
     }
 
@@ -1510,6 +1567,9 @@
     let weekdayChartInstance = null;
     let chartPeriod = 'daily';
     let isSyncing = false;
+    let hasConfigDraft = localStorage.getItem(CONFIG_DRAFT_KEY) === '1';
+    let publishedConfig = null;
+    try { publishedConfig = JSON.parse(localStorage.getItem(PUBLISHED_CONFIG_KEY) || 'null'); } catch (e) { publishedConfig = null; }
 
     let kpiFilters = {
       active: { preset: 'today', from: getTodayISO(), to: getTodayISO() },
@@ -1685,6 +1745,171 @@
     }
 
     // =========================================================
+    // LOCAL CONFIG DRAFTS / CLOUD PUBLISHING
+    // =========================================================
+    function clonePlainObject(value) {
+      try { return JSON.parse(JSON.stringify(value)); } catch (e) { return {}; }
+    }
+
+    function saveLocalConfig() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+    }
+
+    function rememberPublishedConfig(serverConfig) {
+      if (!serverConfig || typeof serverConfig !== 'object') return;
+      publishedConfig = clonePlainObject(serverConfig);
+      delete publishedConfig.pin;
+      if (!publishedConfig.scriptUrl && config.scriptUrl) publishedConfig.scriptUrl = config.scriptUrl;
+      localStorage.setItem(PUBLISHED_CONFIG_KEY, JSON.stringify(publishedConfig));
+    }
+
+    function mergeCloudStockIntoLocalDraft(localConfig, cloudConfig) {
+      const localCopy = clonePlainObject(localConfig || config);
+      const cloudIngredients = Array.isArray(cloudConfig?.ingredients) ? cloudConfig.ingredients : [];
+      const cloudById = new Map(cloudIngredients.map(item => [String(item.id), item]));
+      if (Array.isArray(localCopy.ingredients)) {
+        localCopy.ingredients = localCopy.ingredients.map(item => {
+          const cloudItem = cloudById.get(String(item.id));
+          return cloudItem ? Object.assign({}, item, { stock: Number(cloudItem.stock || 0) }) : item;
+        });
+      }
+      return localCopy;
+    }
+
+    function getCloudSafeIngredientsForOperationalSync() {
+      const cloudBase = Array.isArray(publishedConfig?.ingredients) ? publishedConfig.ingredients : null;
+      if (!cloudBase) return hasConfigDraft ? null : (config.ingredients || []).map(item => Object.assign({}, item));
+      const localById = new Map((config.ingredients || []).map(item => [String(item.id), item]));
+      return cloudBase.map(cloudItem => {
+        const localItem = localById.get(String(cloudItem.id));
+        return Object.assign({}, cloudItem, localItem ? { stock: Number(localItem.stock || 0) } : {});
+      });
+    }
+
+    function updateConfigDraftStatus() {
+      const draftBar = document.getElementById('config-draft-bar');
+      const publishedBar = document.getElementById('config-published-bar');
+      if (!draftBar || !publishedBar) return;
+      draftBar.classList.toggle('hidden', !hasConfigDraft);
+      publishedBar.classList.toggle('hidden', hasConfigDraft || !config.scriptUrl || !publishedConfig);
+      publishedBar.classList.toggle('flex', !hasConfigDraft && Boolean(config.scriptUrl && publishedConfig));
+      const saveBtn = document.getElementById('btn-publish-config');
+      const revertBtn = document.getElementById('btn-revert-config');
+      if (saveBtn) saveBtn.disabled = !config.scriptUrl;
+      if (saveBtn && !config.scriptUrl) {
+        saveBtn.title = 'Connect Google Apps Script in Setup before publishing.';
+        saveBtn.classList.add('opacity-50', 'cursor-not-allowed');
+      } else if (saveBtn) {
+        saveBtn.title = 'Publish your local settings to all connected devices.';
+        saveBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+      }
+      if (revertBtn) revertBtn.disabled = !publishedConfig && !config.scriptUrl;
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function markConfigDraft() {
+      hasConfigDraft = true;
+      localStorage.setItem(CONFIG_DRAFT_KEY, '1');
+      saveLocalConfig();
+      updateConfigDraftStatus();
+    }
+
+    function clearConfigDraftFlag() {
+      hasConfigDraft = false;
+      localStorage.removeItem(CONFIG_DRAFT_KEY);
+      saveLocalConfig();
+      updateConfigDraftStatus();
+    }
+
+    function mergeCloudConfigForThisDevice(serverConfig, savedUrl, savedPin) {
+      const merged = Object.assign({}, getDefaultConfig(), clonePlainObject(serverConfig || {}), {
+        scriptUrl: savedUrl || serverConfig?.scriptUrl || '',
+        pin: savedPin || config.pin || '123456',
+        isConfigured: true
+      });
+      merged.appearance = Object.assign({}, getDefaultAppearance(), merged.appearance || {});
+      return merged;
+    }
+
+    function syncOperationalStockToCloud() {
+      if (!config.scriptUrl) return Promise.resolve(null);
+      const ingredients = getCloudSafeIngredientsForOperationalSync();
+      if (!Array.isArray(ingredients)) return Promise.resolve(null);
+      return pushCloudAction({ action: 'updateStock', ingredients });
+    }
+
+    async function publishConfigToCloud() {
+      if (!config.scriptUrl || !config.pin) {
+        showToast('Connect Google Apps Script in Setup before publishing settings.', true);
+        return;
+      }
+      if (!hasConfigDraft) {
+        showToast('There are no unpublished settings to save.');
+        return;
+      }
+      if (!confirm('Publish these settings to Google Sheets? All devices connected to this cloud will use this version.')) return;
+
+      config.isConfigured = true;
+      saveLocalConfig();
+      const btn = document.getElementById('btn-publish-config');
+      if (btn) { btn.disabled = true; btn.innerHTML = '<i data-lucide="loader-circle" class="w-3.5 h-3.5 animate-spin"></i><span>Publishing...</span>'; }
+      if (window.lucide) lucide.createIcons();
+
+      const cloudConfig = clonePlainObject(config);
+      delete cloudConfig.pin;
+      const result = await pushCloudAction({ action: 'saveConfig', config: cloudConfig });
+      if (result && result.ok) {
+        const savedServerConfig = result.data?.config || cloudConfig;
+        rememberPublishedConfig(savedServerConfig);
+        config = mergeCloudConfigForThisDevice(savedServerConfig, config.scriptUrl, config.pin);
+        config.isConfigured = true;
+        clearConfigDraftFlag();
+        applyAppearanceSettings(config.appearance);
+        const title = document.getElementById('dash-biz-title');
+        if (title) title.textContent = config.bizName || 'Command Center';
+        renderDashboardAll();
+        showToast('Settings published. All connected devices can now use this version.');
+      } else {
+        markConfigDraft();
+        showToast('Could not publish settings. Your local draft is safe on this device.', true);
+      }
+      if (btn) { btn.disabled = !config.scriptUrl; btn.innerHTML = '<i data-lucide="cloud-upload" class="w-3.5 h-3.5"></i><span>Save to All Devices</span>'; }
+      updateConfigDraftStatus();
+      if (window.lucide) lucide.createIcons();
+    }
+
+    async function revertConfigDraft() {
+      if (!hasConfigDraft) { showToast('There are no local changes to revert.'); return; }
+      if (!confirm('Discard all unpublished changes on this device and restore the latest cloud settings?')) return;
+
+      let sourceConfig = publishedConfig;
+      if (config.scriptUrl && config.pin) {
+        try {
+          const response = await fetch(`${config.scriptUrl}?pin=${encodeURIComponent(config.pin)}`);
+          const json = await response.json();
+          if (json.ok && json.data?.config) {
+            sourceConfig = json.data.config;
+            rememberPublishedConfig(sourceConfig);
+          }
+        } catch (e) { /* Use the most recently cached published snapshot when offline. */ }
+      }
+      if (!sourceConfig) {
+        showToast('No published cloud settings were found yet. Connect and publish a setup first.', true);
+        return;
+      }
+
+      const savedUrl = config.scriptUrl;
+      const savedPin = config.pin;
+      config = mergeCloudConfigForThisDevice(sourceConfig, savedUrl, savedPin);
+      clearConfigDraftFlag();
+      applyAppearanceSettings(config.appearance);
+      const bizTitle = document.getElementById('dash-biz-title');
+      if (bizTitle) bizTitle.textContent = config.bizName || 'Command Center';
+      renderDashboardAll();
+      showToast('Local changes discarded. Latest published cloud settings restored.');
+    }
+
+    // =========================================================
     // APPEARANCE / THEME SETTINGS
     // =========================================================
     function getThemeContrast(hex) {
@@ -1705,6 +1930,47 @@
         parseInt(a.slice(i, i + 2), 16) * (1 - amount) + parseInt(b.slice(i, i + 2), 16) * amount
       ));
       return '#' + vals.map(v => v.toString(16).padStart(2, '0')).join('');
+    }
+
+    function colorToRgba(hex, alpha = 0.10) {
+      const clean = String(hex || '#a16207').replace('#', '');
+      if (!/^[0-9a-f]{6}$/i.test(clean)) return `rgba(161,98,7,${alpha})`;
+      const r = parseInt(clean.slice(0, 2), 16);
+      const g = parseInt(clean.slice(2, 4), 16);
+      const b = parseInt(clean.slice(4, 6), 16);
+      return `rgba(${r},${g},${b},${alpha})`;
+    }
+
+    function getAppearancePatternImage(pattern, accent) {
+      if (pattern === 'fine-lines') {
+        return `repeating-linear-gradient(135deg, transparent 0 17px, ${colorToRgba(accent, 0.055)} 17px 18px, transparent 18px 34px)`;
+      }
+      if (pattern === 'dot-grid') {
+        return `radial-gradient(${colorToRgba(accent, 0.14)} 0.75px, transparent 0.9px)`;
+      }
+      if (pattern === 'soft-floral') {
+        const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="112" height="112" viewBox="0 0 112 112"><g fill="none" stroke="${accent}" stroke-opacity="0.20" stroke-width="1.15"><circle cx="56" cy="39" r="8"/><circle cx="73" cy="56" r="8"/><circle cx="56" cy="73" r="8"/><circle cx="39" cy="56" r="8"/><circle cx="56" cy="56" r="3.3"/><path d="M56 8v10M56 94v10M8 56h10M94 56h10" stroke-opacity="0.10"/></g></svg>`;
+        return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+      }
+      return 'none';
+    }
+
+    function applyAppearancePreset(presetName) {
+      const presets = {
+        warm: { accent: '#b7791f', background: '#faf7f1', textColor: '#292524', cardColor: '#ffffff', borderColor: '#e9e2d7', backgroundPattern: 'soft-floral' },
+        sage: { accent: '#54745c', background: '#f4f7f2', textColor: '#26352b', cardColor: '#ffffff', borderColor: '#dce6dc', backgroundPattern: 'fine-lines' },
+        rose: { accent: '#b65f70', background: '#fcf6f6', textColor: '#3b2b30', cardColor: '#ffffff', borderColor: '#efdee2', backgroundPattern: 'soft-floral' },
+        lavender: { accent: '#7866a8', background: '#f7f5fb', textColor: '#302b3b', cardColor: '#ffffff', borderColor: '#e6e0f0', backgroundPattern: 'dot-grid' },
+        slate: { accent: '#475569', background: '#f5f7f9', textColor: '#1f2937', cardColor: '#ffffff', borderColor: '#e2e8f0', backgroundPattern: 'fine-lines' }
+      };
+      const selected = presets[presetName];
+      if (!selected) return;
+      Object.entries(selected).forEach(([key, value]) => {
+        const inputIds = { accent: 'appearance-accent', background: 'appearance-bg', textColor: 'appearance-text', cardColor: 'appearance-card', borderColor: 'appearance-border', backgroundPattern: 'appearance-pattern' };
+        const el = document.getElementById(inputIds[key]);
+        if (el) el.value = value;
+      });
+      previewAppearanceSettings();
     }
 
     function applyAppearanceSettings(settings = config.appearance || getDefaultAppearance()) {
@@ -1736,6 +2002,10 @@
         : (appearance.shadow === 'strong' ? '0 5px 18px -4px rgba(28, 25, 23, 0.13)' : '0 2px 10px -2px rgba(28, 25, 23, 0.04)'));
       document.body.style.fontFamily = appearance.font || "'Plus Jakarta Sans', sans-serif";
       document.body.style.backgroundColor = background;
+      document.body.style.backgroundImage = getAppearancePatternImage(appearance.backgroundPattern || 'none', accent);
+      document.body.style.backgroundRepeat = 'repeat';
+      document.body.style.backgroundSize = appearance.backgroundPattern === 'dot-grid' ? '18px 18px' : (appearance.backgroundPattern === 'fine-lines' ? 'auto' : '112px 112px');
+      document.body.style.backgroundAttachment = 'fixed';
       document.body.style.color = textColor;
       const isCustom = accent.toLowerCase() !== '#f59e0b' || background.toLowerCase() !== '#faf8f5' ||
         textColor.toLowerCase() !== '#1c1917' || cardColor.toLowerCase() !== '#ffffff' || borderColor.toLowerCase() !== '#ede8e0';
@@ -1756,7 +2026,8 @@
         cardColor: document.getElementById('appearance-card').value || '#ffffff',
         borderColor: document.getElementById('appearance-border').value || '#ede8e0',
         fontSize: document.getElementById('appearance-size').value,
-        shadow: document.getElementById('appearance-shadow').value
+        shadow: document.getElementById('appearance-shadow').value,
+        backgroundPattern: document.getElementById('appearance-pattern').value || 'none'
       };
     }
 
@@ -1769,6 +2040,7 @@
       document.getElementById('appearance-border').value = appearance.borderColor;
       document.getElementById('appearance-size').value = appearance.fontSize;
       document.getElementById('appearance-shadow').value = appearance.shadow;
+      document.getElementById('appearance-pattern').value = appearance.backgroundPattern || 'none';
     }
 
     function openAppearanceSettings() {
@@ -1797,13 +2069,12 @@
       previewAppearanceSettings();
     }
 
-    async function saveAppearanceSettings() {
+    function saveAppearanceSettings() {
       config.appearance = readAppearanceForm();
       applyAppearanceSettings(config.appearance);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+      markConfigDraft();
       document.getElementById('appearance-modal').classList.add('hidden');
-      showToast('Theme and display settings saved successfully!');
-      if (config.scriptUrl) await pushCloudAction({ action: 'saveConfig', config });
+      showToast('Theme applied on this device. Use Save to All Devices to publish it.');
     }
 
     function closeAppearanceSettings(saveChanges = false) {
@@ -2057,7 +2328,13 @@
             return;
           }
 
-          if (json.data && json.data.config) config = Object.assign({}, config, json.data.config);
+          const localUrlBeforeUnlock = targetUrl;
+          const localPinBeforeUnlock = enteredPin;
+          if (json.data && json.data.config) {
+            rememberPublishedConfig(json.data.config);
+            if (hasConfigDraft) config = mergeCloudStockIntoLocalDraft(config, json.data.config);
+            else config = mergeCloudConfigForThisDevice(json.data.config, localUrlBeforeUnlock, localPinBeforeUnlock);
+          }
           config.appearance = Object.assign({}, getDefaultAppearance(), config.appearance || {});
           applyAppearanceSettings(config.appearance);
           if (json.data && Array.isArray(json.data.orders)) {
@@ -2068,7 +2345,7 @@
           config.scriptUrl = targetUrl;
           config.pin = enteredPin;
           config.isConfigured = true;
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+          saveLocalConfig();
           sessionStorage.setItem(SESSION_UNLOCK_KEY, '1');
 
           btn.disabled = false;
@@ -2134,12 +2411,15 @@
           if (json.data.config) {
             const savedUrl = config.scriptUrl;
             const savedPin = config.pin;
-            config = Object.assign({}, config, json.data.config, {
-              scriptUrl: savedUrl, pin: savedPin, isConfigured: true
-            });
+            rememberPublishedConfig(json.data.config);
+            if (hasConfigDraft) {
+              config = mergeCloudStockIntoLocalDraft(config, json.data.config);
+            } else {
+              config = mergeCloudConfigForThisDevice(json.data.config, savedUrl, savedPin);
+            }
             config.appearance = Object.assign({}, getDefaultAppearance(), config.appearance || {});
             applyAppearanceSettings(config.appearance);
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+            saveLocalConfig();
           }
           if (Array.isArray(json.data.orders)) {
             orders = json.data.orders;
@@ -2179,12 +2459,15 @@
           if (json.data.config) {
             const savedUrl = config.scriptUrl;
             const savedPin = config.pin;
-            config = Object.assign({}, config, json.data.config, {
-              scriptUrl: savedUrl, pin: savedPin, isConfigured: true
-            });
+            rememberPublishedConfig(json.data.config);
+            if (hasConfigDraft) {
+              config = mergeCloudStockIntoLocalDraft(config, json.data.config);
+            } else {
+              config = mergeCloudConfigForThisDevice(json.data.config, savedUrl, savedPin);
+            }
             config.appearance = Object.assign({}, getDefaultAppearance(), config.appearance || {});
             applyAppearanceSettings(config.appearance);
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+            saveLocalConfig();
           }
           if (Array.isArray(json.data.orders)) {
             orders = json.data.orders;
@@ -2208,6 +2491,8 @@
         showToast('Please enter the Google Apps Script URL first.', true);
         return;
       }
+      saveLocalConfig();
+      updateConfigDraftStatus();
       const btn = document.getElementById('btn-test-cloud');
       btn.textContent = 'Testing...';
       btn.disabled = true;
@@ -2268,12 +2553,12 @@
       list.innerHTML = config.sizes.map((s, idx) => `
         <div class="flex items-center gap-2 bg-stone-50 p-2.5 rounded-xl border border-stone-200">
           <input type="text" value="${s.name}" placeholder="Size name (e.g. 6-inch cake)"
-            onchange="config.sizes[${idx}].name = this.value"
+            onchange="config.sizes[${idx}].name = this.value; markConfigDraft()"
             class="flex-1 px-3 py-2 text-xs font-bold bg-white rounded-lg border border-stone-200" />
           <div class="flex items-center gap-1 bg-white border border-stone-200 rounded-lg px-2.5 py-1.5">
             <span class="text-xs font-bold text-stone-400">${config.currency}</span>
             <input type="number" step="0.5" value="${s.price}"
-              onchange="config.sizes[${idx}].price = parseFloat(this.value) || 0"
+              onchange="config.sizes[${idx}].price = parseFloat(this.value) || 0; markConfigDraft()"
               class="w-16 text-xs font-mono-num font-bold text-right focus:shadow-none" />
           </div>
           ${config.sizes.length > 1 ? `
@@ -2289,6 +2574,7 @@
       const id = 'size_' + Date.now();
       config.sizes.push({ id, name: 'New Size', price: 50 });
       config.recipes[id] = [];
+      markConfigDraft();
       renderStep1();
       if (window.lucide) lucide.createIcons();
     }
@@ -2296,6 +2582,7 @@
     function removeProductSize(idx) {
       const removed = config.sizes.splice(idx, 1)[0];
       if (removed) delete config.recipes[removed.id];
+      markConfigDraft();
       renderStep1();
       if (window.lucide) lucide.createIcons();
     }
@@ -2305,9 +2592,9 @@
       const fList = document.getElementById('setup-flavours-list');
       fList.innerHTML = config.flavours.map((f, idx) => `
         <div class="flex items-center justify-between gap-2 bg-stone-50 border border-stone-200 px-3 py-2 rounded-xl">
-          <input type="text" value="${f.name}" onchange="config.flavours[${idx}].name = this.value"
+          <input type="text" value="${f.name}" onchange="config.flavours[${idx}].name = this.value; markConfigDraft()"
             class="flex-1 text-xs font-bold bg-transparent text-stone-800 focus:shadow-none" />
-          <button type="button" onclick="config.flavours.splice(${idx}, 1); renderStep2(); lucide.createIcons();" class="text-stone-400 hover:text-rose-600 p-1">
+          <button type="button" onclick="config.flavours.splice(${idx}, 1); renderStep2(); lucide.createIcons();; markConfigDraft()" class="text-stone-400 hover:text-rose-600 p-1">
             <i data-lucide="x" class="w-3.5 h-3.5"></i>
           </button>
         </div>
@@ -2317,15 +2604,15 @@
       aList.innerHTML = config.addons.map((a, idx) => `
         <div class="flex items-center gap-2 bg-stone-50 border border-stone-200 p-2 rounded-xl">
           <input type="text" value="${a.name}" placeholder="Add-on name"
-            onchange="config.addons[${idx}].name = this.value"
+            onchange="config.addons[${idx}].name = this.value; markConfigDraft()"
             class="flex-1 px-3 py-1.5 text-xs font-semibold bg-white rounded-lg border border-stone-200" />
           <div class="flex items-center gap-1 bg-white border border-stone-200 rounded-lg px-2 py-1">
             <span class="text-[11px] font-bold text-stone-400">+${config.currency}</span>
             <input type="number" step="0.5" value="${a.price}"
-              onchange="config.addons[${idx}].price = parseFloat(this.value) || 0"
+              onchange="config.addons[${idx}].price = parseFloat(this.value) || 0; markConfigDraft()"
               class="w-14 text-xs font-mono-num font-bold text-right focus:shadow-none" />
           </div>
-          <button type="button" onclick="config.addons.splice(${idx}, 1); renderStep2(); lucide.createIcons();" class="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg">
+          <button type="button" onclick="config.addons.splice(${idx}, 1); renderStep2(); lucide.createIcons();; markConfigDraft()" class="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg">
             <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
           </button>
         </div>
@@ -2337,6 +2624,7 @@
       const val = inp.value.trim();
       if (!val) return;
       config.flavours.push({ id: 'flv_' + Date.now(), name: val, active: true });
+      markConfigDraft();
       inp.value = '';
       renderStep2();
       if (window.lucide) lucide.createIcons();
@@ -2346,6 +2634,7 @@
       const id = 'add_' + Date.now();
       config.addons.push({ id, name: 'New Add-On', price: 5 });
       config.recipes[id] = [];
+      markConfigDraft();
       renderStep2();
       if (window.lucide) lucide.createIcons();
     }
@@ -2362,9 +2651,9 @@
           <div class="bg-stone-50 border border-stone-200 rounded-2xl p-3 space-y-2.5">
             <div class="flex items-center gap-2">
               <input type="text" value="${ing.name}" placeholder="Ingredient name (e.g. Pure Butter)"
-                onchange="config.ingredients[${idx}].name = this.value"
+                onchange="config.ingredients[${idx}].name = this.value; markConfigDraft()"
                 class="flex-1 px-3 py-2 text-xs font-bold bg-white rounded-xl border border-stone-200" />
-              <select onchange="config.ingredients[${idx}].category = this.value"
+              <select onchange="config.ingredients[${idx}].category = this.value; markConfigDraft()"
                 class="px-2.5 py-2 text-[11px] font-semibold bg-white rounded-xl border border-stone-200">
                 <option value="Bahan Asas" ${ing.category==='Bahan Asas'?'selected':''}>Basic Ingredients</option>
                 <option value="Perisa & Topping" ${ing.category==='Perisa & Topping'?'selected':''}>Flavours &amp; Toppings</option>
@@ -2380,9 +2669,9 @@
                 <label class="block text-[10px] font-bold text-stone-500 mb-0.5">Pack Weight / Quantity</label>
                 <div class="flex items-center bg-white border border-stone-200 rounded-xl overflow-hidden">
                   <input type="number" step="any" value="${ing.packQty}"
-                    onchange="config.ingredients[${idx}].packQty = parseFloat(this.value) || 1; renderStep3(); lucide.createIcons();"
+                    onchange="config.ingredients[${idx}].packQty = parseFloat(this.value) || 1; renderStep3(); lucide.createIcons();; markConfigDraft()"
                     class="w-full px-2.5 py-1.5 text-xs font-mono-num font-bold focus:shadow-none" />
-                  <select onchange="config.ingredients[${idx}].unit = this.value; renderStep3(); lucide.createIcons();"
+                  <select onchange="config.ingredients[${idx}].unit = this.value; renderStep3(); lucide.createIcons();; markConfigDraft()"
                     class="bg-stone-100 text-[11px] font-bold px-2 py-1.5 border-l border-stone-200 focus:shadow-none">
                     <option value="g" ${ing.unit==='g'?'selected':''}>g</option>
                     <option value="ml" ${ing.unit==='ml'?'selected':''}>ml</option>
@@ -2395,14 +2684,14 @@
               <div>
                 <label class="block text-[10px] font-bold text-stone-500 mb-0.5">Purchase Price per Pack (${config.currency})</label>
                 <input type="number" step="0.10" value="${ing.packPrice}"
-                  onchange="config.ingredients[${idx}].packPrice = parseFloat(this.value) || 0; renderStep3(); lucide.createIcons();"
+                  onchange="config.ingredients[${idx}].packPrice = parseFloat(this.value) || 0; renderStep3(); lucide.createIcons();; markConfigDraft()"
                   class="w-full px-2.5 py-1.5 text-xs font-mono-num font-bold bg-white rounded-xl border border-stone-200" />
               </div>
 
               <div>
                 <label class="block text-[10px] font-bold text-stone-500 mb-0.5">Current Stock (${getUnitDisplayLabel(ing.unit)})</label>
                 <input type="number" step="any" value="${ing.stock}"
-                  onchange="config.ingredients[${idx}].stock = parseFloat(this.value) || 0"
+                  onchange="config.ingredients[${idx}].stock = parseFloat(this.value) || 0; markConfigDraft()"
                   class="w-full px-2.5 py-1.5 text-xs font-mono-num font-bold bg-white rounded-xl border border-stone-200" />
               </div>
 
@@ -2421,6 +2710,7 @@
         id: 'ing_' + Date.now(), name: '', category: 'Bahan Asas', unit: 'g',
         packQty: 1000, packPrice: 10.00, stock: 1000, lowAlert: 200
       });
+      markConfigDraft();
       renderStep3();
       if (window.lucide) lucide.createIcons();
     }
@@ -2432,6 +2722,7 @@
           config.recipes[k] = (config.recipes[k] || []).filter(r => r.ingId !== removed.id);
         });
       }
+      markConfigDraft();
       renderStep3();
       if (window.lucide) lucide.createIcons();
     }
@@ -2470,18 +2761,18 @@
           const rowCost = getUnitCost(selectedIng) * Number(r.qty || 0);
           return `
             <div class="flex items-center gap-2 bg-stone-50 border border-stone-200 p-2 rounded-xl">
-              <select onchange="config.recipes['${activeRecipeTarget}'][${rIdx}].ingId = this.value; renderStep4(); lucide.createIcons();"
+              <select onchange="config.recipes['${activeRecipeTarget}'][${rIdx}].ingId = this.value; renderStep4(); lucide.createIcons();; markConfigDraft()"
                 class="flex-1 px-2.5 py-2 text-xs font-bold bg-white rounded-lg border border-stone-200">
                 ${config.ingredients.map(ing => `<option value="${ing.id}" ${ing.id === r.ingId ? 'selected' : ''}>${ing.name || 'Unnamed Ingredient'} (${getUnitDisplayLabel(ing.unit)})</option>`).join('')}
               </select>
               <div class="flex items-center bg-white border border-stone-200 rounded-lg px-2 py-1.5">
                 <input type="number" step="any" value="${r.qty}" placeholder="Weight / Quantity"
-                  onchange="config.recipes['${activeRecipeTarget}'][${rIdx}].qty = parseFloat(this.value) || 0; renderStep4(); lucide.createIcons();"
+                  onchange="config.recipes['${activeRecipeTarget}'][${rIdx}].qty = parseFloat(this.value) || 0; renderStep4(); lucide.createIcons();; markConfigDraft()"
                   class="w-16 text-xs font-mono-num font-bold text-right focus:shadow-none" />
                 <span class="text-[11px] font-bold text-stone-400 ml-1">${selectedIng ? getUnitDisplayLabel(selectedIng.unit) : 'g'}</span>
               </div>
               <span class="text-[11px] font-mono-num font-bold text-stone-600 w-16 text-right">${fmtMoney(rowCost)}</span>
-              <button type="button" onclick="config.recipes['${activeRecipeTarget}'].splice(${rIdx}, 1); renderStep4(); lucide.createIcons();" class="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg">
+              <button type="button" onclick="config.recipes['${activeRecipeTarget}'].splice(${rIdx}, 1); renderStep4(); lucide.createIcons();; markConfigDraft()" class="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg">
                 <i data-lucide="x" class="w-3.5 h-3.5"></i>
               </button>
             </div>
@@ -2495,21 +2786,21 @@
         const ing = config.ingredients.find(i => i.id === fr.ingId) || config.ingredients[0];
         return `
           <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 bg-stone-50 border border-stone-200 p-2 rounded-xl">
-            <select onchange="config.flavourRules[${fIdx}].flavourName = this.value"
+            <select onchange="config.flavourRules[${fIdx}].flavourName = this.value; markConfigDraft()"
               class="flex-1 px-2.5 py-1.5 text-xs font-bold bg-white rounded-lg border border-stone-200">
               ${config.flavours.map(f => `<option value="${f.name}" ${f.name === fr.flavourName ? 'selected' : ''}>Flavours: ${f.name}</option>`).join('')}
             </select>
-            <select onchange="config.flavourRules[${fIdx}].ingId = this.value; renderStep4(); lucide.createIcons();"
+            <select onchange="config.flavourRules[${fIdx}].ingId = this.value; renderStep4(); lucide.createIcons();; markConfigDraft()"
               class="flex-1 px-2.5 py-1.5 text-xs font-semibold bg-white rounded-lg border border-stone-200">
               ${config.ingredients.map(i => `<option value="${i.id}" ${i.id === fr.ingId ? 'selected' : ''}>${i.name}</option>`).join('')}
             </select>
             <div class="flex items-center bg-white border border-stone-200 rounded-lg px-2 py-1">
               <input type="number" step="any" value="${fr.qty}"
-                onchange="config.flavourRules[${fIdx}].qty = parseFloat(this.value) || 0"
+                onchange="config.flavourRules[${fIdx}].qty = parseFloat(this.value) || 0; markConfigDraft()"
                 class="w-14 text-xs font-mono-num font-bold text-right focus:shadow-none" />
               <span class="text-[11px] font-bold text-stone-400 ml-1">${ing ? getUnitDisplayLabel(ing.unit) : 'g'}</span>
             </div>
-            <button type="button" onclick="config.flavourRules.splice(${fIdx}, 1); renderStep4(); lucide.createIcons();" class="p-1.5 text-rose-500">
+            <button type="button" onclick="config.flavourRules.splice(${fIdx}, 1); renderStep4(); lucide.createIcons();; markConfigDraft()" class="p-1.5 text-rose-500">
               <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
             </button>
           </div>
@@ -2524,6 +2815,7 @@
       }
       if (!config.recipes[activeRecipeTarget]) config.recipes[activeRecipeTarget] = [];
       config.recipes[activeRecipeTarget].push({ ingId: config.ingredients[0].id, qty: 100 });
+      markConfigDraft();
       renderStep4();
       if (window.lucide) lucide.createIcons();
     }
@@ -2533,6 +2825,7 @@
       config.flavourRules.push({
         id: 'fr_' + Date.now(), flavourName: config.flavours[0].name, ingId: config.ingredients[0].id, qty: 25
       });
+      markConfigDraft();
       renderStep4();
       if (window.lucide) lucide.createIcons();
     }
@@ -2545,8 +2838,9 @@
       config.appearance = keepAppearance;
       config.scriptUrl = keepUrl;
       config.pin = keepPin || '123456';
+      markConfigDraft();
       goSetupStep(activeSetupStep);
-      showToast('Sample data loaded!');
+      showToast('Sample data loaded on this device.');
     }
 
     function clearAllSetup() {
@@ -2560,30 +2854,19 @@
         flavours: [{ id: 'flv_1', name: 'Original', active: true }],
         addons: [], ingredients: [], recipes: { 'size_1': [] }, flavourRules: []
       };
+      markConfigDraft();
       goSetupStep(1);
-      showToast('Form cleared. Ready for input!');
+      showToast('Form cleared on this device. Publish when ready to share.');
     }
 
-    async function completeSetupAndLaunch() {
+    function completeSetupAndLaunch() {
       syncStep1Inputs();
       config.isConfigured = true;
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+      markConfigDraft();
       sessionStorage.setItem(SESSION_UNLOCK_KEY, '1');
-
+      showToast('Setup saved on this device. Publish it from the dashboard when ready to share with all devices.');
       const btn = document.getElementById('btn-finish-setup');
-      btn.disabled = true;
-      btn.innerHTML = `<span>Saving to the cloud...</span>`;
-
-      if (config.scriptUrl) {
-        const res = await pushCloudAction({ action: 'saveConfig', config });
-        if (res && res.ok) showToast('Settings saved to Google Sheets & Command Center!');
-        else showToast('Saved on this device. Check the Cloud URL if syncing fails.', true);
-      } else {
-        showToast(`Welcome to ${config.bizName}!`);
-      }
-
-      btn.disabled = false;
-      btn.innerHTML = `<i data-lucide="check-circle-2" class="w-4 h-4"></i><span>Save &amp; Launch Command Center</span>`;
+      if (btn) btn.disabled = false;
       switchToDashboard();
     }
 
@@ -2612,9 +2895,9 @@
             config = Object.assign({}, config, parsed);
             config.appearance = Object.assign({}, getDefaultAppearance(), config.appearance || {});
             applyAppearanceSettings(config.appearance);
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+            markConfigDraft();
             goSetupStep(1);
-            showToast('Configuration file uploaded successfully!');
+            showToast('Configuration imported locally. Publish it from the dashboard to share it.');
           } else showToast('Invalid JSON file format.', true);
         } catch (err) { showToast('Error reading JSON file.', true); }
       };
@@ -2639,6 +2922,7 @@
       document.getElementById('dashboard-view').classList.remove('hidden');
       document.getElementById('dash-biz-title').textContent = config.bizName || 'Command Center';
       updateSyncHeaderBadge(Boolean(config.scriptUrl));
+      updateConfigDraftStatus();
       renderDashboardAll();
       if (window.lucide) lucide.createIcons();
     }
@@ -2659,6 +2943,7 @@
 
     function renderDashboardAll() {
       normalizeOrderStatuses();
+      updateConfigDraftStatus();
       renderHome();
       renderCalendar();
       renderStockList();
@@ -3393,7 +3678,7 @@
       renderStockList();
       if (delta > 0) showToast(`${config.ingredients[idx].name} stock increased!`);
       if (config.scriptUrl) {
-        await pushCloudAction({ action: 'updateStock', ingredients: config.ingredients });
+        await syncOperationalStockToCloud();
       }
     }
 
@@ -3464,13 +3749,10 @@
         showToast(`${name} added to inventory!`);
       }
 
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+      markConfigDraft();
       closeStockModal();
       renderStockList();
-
-      if (config.scriptUrl) {
-        await pushCloudAction({ action: 'saveConfig', config });
-      }
+      await syncOperationalStockToCloud();
     }
 
     async function deleteStockModalItem() {
@@ -3479,13 +3761,11 @@
       if (!target) return;
       if (!confirm(`Delete "${target.name}" from the inventory list?`)) return;
       removeIngredient(editingStockIndex);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+      markConfigDraft();
       closeStockModal();
       renderStockList();
-      showToast(`${target.name} deleted.`);
-      if (config.scriptUrl) {
-        await pushCloudAction({ action: 'saveConfig', config });
-      }
+      showToast(`${target.name} removed from this device. Publish to remove it from all devices.`);
+      await syncOperationalStockToCloud();
     }
 
     // =========================================================
@@ -3877,7 +4157,7 @@
           renderDashboardAll();
 
           if (config.scriptUrl) {
-            const res = await pushCloudAction({ action: 'editOrder', order: updatedOrder, updatedIngredients: config.ingredients });
+            const res = await pushCloudAction({ action: 'editOrder', order: updatedOrder, updatedIngredients: getCloudSafeIngredientsForOperationalSync() });
             if (res && res.ok) {
               showToast('Order updated and inventory synced to the cloud!');
               renderDashboardAll();
@@ -3901,7 +4181,7 @@
         renderDashboardAll();
 
         if (config.scriptUrl) {
-          const res = await pushCloudAction({ action: 'createOrder', order: newOrd, updatedIngredients: config.ingredients });
+          const res = await pushCloudAction({ action: 'createOrder', order: newOrd, updatedIngredients: getCloudSafeIngredientsForOperationalSync() });
           if (res && res.ok) {
             showToast(res.calendarCreated
               ? 'Order saved, inventory updated and Calendar reminder created!'
@@ -3936,7 +4216,7 @@
       showToast(`Order ${target.customer} deleted and stock restored.`);
 
       if (config.scriptUrl) {
-        await pushCloudAction({ action: 'deleteOrder', orderId: target.id, updatedIngredients: config.ingredients });
+        await pushCloudAction({ action: 'deleteOrder', orderId: target.id, updatedIngredients: getCloudSafeIngredientsForOperationalSync() });
         renderDashboardAll();
       }
     }
@@ -4268,9 +4548,30 @@
       }
     });
 
+    // Setup edits are local drafts. Cloud settings only change after explicit publish.
+    document.addEventListener('change', event => {
+      const target = event.target;
+      if (!target || !target.closest || !target.closest('#setup-view')) return;
+      if (['cfg-pin', 'cfg-script-url', 'import-json-input'].includes(target.id)) return;
+      if (['cfg-biz-name', 'cfg-owner-name', 'cfg-tagline', 'cfg-currency', 'cfg-max-flavours'].includes(target.id)) {
+        syncStep1Inputs();
+      }
+      markConfigDraft();
+    });
+
+    document.addEventListener('click', event => {
+      const button = event.target?.closest?.('#setup-view button');
+      if (!button) return;
+      const handler = button.getAttribute('onclick') || '';
+      if (/config\.(sizes|flavours|addons|ingredients|recipes|flavourRules)|addProductSize|removeProductSize|addFlavourItem|addAddonItem|addIngredientItem|removeIngredient|addRecipeRow|addFlavourRuleRow|resetToSample|clearAllSetup/.test(handler)) {
+        markConfigDraft();
+      }
+    });
+
     window.addEventListener('DOMContentLoaded', () => {
       config.appearance = Object.assign({}, getDefaultAppearance(), config.appearance || {});
       applyAppearanceSettings(config.appearance);
+      updateConfigDraftStatus();
       const isUnlocked = sessionStorage.getItem(SESSION_UNLOCK_KEY) === '1';
       if (config.isConfigured) {
         if (isUnlocked) {
