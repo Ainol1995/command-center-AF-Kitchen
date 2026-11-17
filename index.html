@@ -2113,7 +2113,20 @@
       }
       const cloudConfig = clonePlainObject(config);
       delete cloudConfig.pin;
-      const result = await pushCloudAction({ action: 'saveConfig', config: cloudConfig });
+      const previous = publishedConfig || {};
+      const patch = { fields: {}, ingredientUpserts: [] };
+      for (const key of Object.keys(cloudConfig)) {
+        if (key === 'ingredients' || key === 'pin') continue;
+        if (JSON.stringify(cloudConfig[key]) !== JSON.stringify(previous[key])) patch.fields[key] = cloudConfig[key];
+      }
+      const prevIngs = new Map((previous.ingredients || []).map(i => [String(i.id), i]));
+      for (const item of cloudConfig.ingredients || []) {
+        const old = prevIngs.get(String(item.id));
+        const metadata = Object.fromEntries(['id','name','category','unit','packQty','packPrice','lowAlert'].map(k=>[k,item[k]]));
+        if (!old || ['name','category','unit','packQty','packPrice','lowAlert'].some(k=>JSON.stringify(item[k])!==JSON.stringify(old[k])))
+          patch.ingredientUpserts.push(metadata);
+      }
+      const result = await pushCloudAction({ action: 'saveConfig', configPatch: patch });
       if (result && result.ok) {
         const savedServerConfig = result.data?.config || cloudConfig;
         rememberPublishedConfig(savedServerConfig);
@@ -2795,7 +2808,7 @@
 
     async function pushCloudAction(payload) {
       if (!config.scriptUrl) return null;
-      if (!['updateStock', 'saveConfig'].includes(payload?.action) && hasPendingStockChanges()) {
+      if (!['updateStock', 'saveConfig', 'saveIngredient'].includes(payload?.action) && hasPendingStockChanges()) {
         const flushed = await flushPendingStockChanges();
         if (!flushed) return { ok: false, error: 'PENDING_STOCK_SYNC_FAILED', message: 'Pending inventory changes could not be synced first.' };
       }
@@ -2850,7 +2863,7 @@
         return json;
       } catch (err) {
         updateSyncHeaderBadge(false, 'Offline (Saved Locally)');
-        return { ok: false, error: 'NETWORK_ERROR' };
+        return { ok: false, error: 'NETWORK_ERROR', message: String(err.message || err) };
       } finally {
         pendingCloudActionCount = Math.max(0, pendingCloudActionCount - 1);
         if (spin) spin.classList.remove('animate-spin');
@@ -4280,16 +4293,33 @@
       renderStockList();
       renderStep3();
 
-      if (stockSnapshot) {
-        const result = await syncOperationalStockToCloud({ stockSnapshots: [stockSnapshot] });
-        if (result?.ok) {
-          updatePublishedIngredientStock(editedIngredientId, itemData.stock);
-          showToast(`${name} inventory details saved. Stock quantity synced to the cloud.`);
-        } else {
-          showToast(`${name}: cloud save not confirmed — ${result?.error || 'Check backend deployment'}. Local value remains queued.`, true);
+      // Save this ingredient alone, without publishing an entire old Setup snapshot.
+      // A save is safe to repeat: the stock is an absolute balance, not a delta.
+      const changedFields = {};
+      const currentItem = (config.ingredients || []).find(i => String(i.id) === String(editedIngredientId));
+      const idToSave = editedIngredientId || String(config.ingredients[config.ingredients.length - 1]?.id || '');
+      const before = (publishedConfig?.ingredients || []).find(i => String(i.id) === idToSave);
+      for (const key of ['name','category','unit','packQty','packPrice','stock','lowAlert']) {
+        // Stock is always explicitly confirmed by Edit -> Save.
+        if (key === 'stock' || !before || String(before[key] ?? '') !== String(itemData[key] ?? '')) changedFields[key] = itemData[key];
+      }
+      const result = await pushCloudAction({ action: 'saveIngredient', ingredient: Object.assign({ id: idToSave }, changedFields) });
+      if (result?.ok) {
+        removePendingStockForIngredient(idToSave); // this save supersedes obsolete local stock retries
+        if (!publishedConfig) rememberPublishedConfig(config);
+        if (publishedConfig && Array.isArray(publishedConfig.ingredients)) {
+          const next = clonePlainObject(publishedConfig);
+          const ix = next.ingredients.findIndex(i => String(i.id) === idToSave);
+          if (ix >= 0) next.ingredients[ix] = Object.assign({}, next.ingredients[ix], changedFields);
+          else next.ingredients.push(Object.assign({ id: idToSave }, itemData));
+          rememberPublishedConfig(next);
         }
+        saveLocalConfig();
+        showToast(`${name}: latest balance and changed fields saved in Google Sheets.`);
       } else {
-        showToast(definitionChanged ? `${name} saved as a local settings draft.` : `${name} inventory updated.`);
+        // Do not pretend that this item has been published. Preserve its draft.
+        markConfigDraft();
+        showToast(`${name}: cloud save failed — ${result?.error || 'NETWORK_ERROR'} ${result?.message || ''}`, true);
       }
     }
 
