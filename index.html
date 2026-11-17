@@ -6,7 +6,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="theme-color" content="#1c1917" />
-  <title>AF Kitchen Command Center — English UI v9.0</title>
+  <title>AF Kitchen Command Center — English UI v10.0</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -430,7 +430,8 @@
             <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add
           </button>
         </div>
-        <div id="flavour-rules-list" class="space-y-2"></div>
+        <p class="text-[10px] text-stone-500">Flavour ingredient quantities are saved separately for each selected product or size.</p>
+          <div id="flavour-rules-list" class="space-y-2"></div>
       </div>
 
       <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 pt-2">
@@ -663,7 +664,7 @@
           <div class="flex items-center justify-between gap-2">
             <div class="min-w-0">
               <span id="orders-filter-title" class="text-[11px] font-extrabold text-stone-700">Filter Upcoming 5 Orders</span>
-              <span class="ml-1.5 text-[9px] font-extrabold uppercase tracking-wide bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded-md">OR Matching</span>
+              <span class="ml-1.5 text-[9px] font-extrabold uppercase tracking-wide bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded-md">Match All Selected</span>
             </div>
             <button type="button" onclick="resetOrdersListFilter()" class="text-[10px] font-bold text-amber-700 hover:underline shrink-0">Reset Filters</button>
           </div>
@@ -683,7 +684,7 @@
             </label>
             <div class="rounded-xl bg-white border border-stone-200 px-3 py-2 flex flex-col justify-center">
               <span class="text-[10px] font-bold text-stone-500">Filter Logic</span>
-              <span class="text-[11px] font-extrabold text-amber-800">Match Any Condition</span>
+              <span class="text-[11px] font-extrabold text-emerald-800">Match All Selected Filters</span>
             </div>
           </div>
 
@@ -709,9 +710,9 @@
 
           <!-- Date Filter Pills -->
           <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-            <button type="button" onclick="setOrdersListDatePreset('all')" id="olist-dt-all" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0">All Dates</button>
+            <button type="button" onclick="setOrdersListDatePreset('all')" id="olist-dt-all" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-amber-500 text-white shrink-0">All Dates</button>
             <button type="button" onclick="setOrdersListDatePreset('today')" id="olist-dt-today" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0">Today</button>
-            <button type="button" onclick="setOrdersListDatePreset('upcoming')" id="olist-dt-upcoming" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-amber-500 text-white shrink-0">Today onwards</button>
+            <button type="button" onclick="setOrdersListDatePreset('upcoming')" id="olist-dt-upcoming" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0">Today onwards</button>
             <button type="button" onclick="setOrdersListDatePreset('week')" id="olist-dt-week" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0">This Week</button>
             <button type="button" onclick="setOrdersListDatePreset('month')" id="olist-dt-month" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0">This Month</button>
             <button type="button" onclick="setOrdersListDatePreset('custom')" id="olist-dt-custom" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0">Custom Range</button>
@@ -1460,6 +1461,7 @@
     const PUBLISHED_CONFIG_KEY = 'cloud_command_center_published_config_v1';
     const CONFIG_DRAFT_KEY = 'cloud_command_center_config_draft_v1';
     const CLOUD_SYNC_META_KEY = 'af_kitchen_cloud_sync_meta_v1';
+    const PENDING_STOCK_KEY = 'af_kitchen_pending_stock_changes_v1';
     const AUTO_SYNC_INTERVAL_MS = 15000;
 
     function getTodayISO() {
@@ -1564,11 +1566,45 @@
           'add_2': [{ ingId: 'ing_sugar', qty: 40 }, { ingId: 'ing_butter', qty: 20 }],
           'add_3': []
         },
-        flavourRules: [
-          { id: 'fr_1', flavourName: 'Belgian Chocolate', ingId: 'ing_choc', qty: 35 },
-          { id: 'fr_2', flavourName: 'Pandan Gula Melaka', ingId: 'ing_pandan', qty: 15 }
-        ]
+        // Flavour ingredient quantities are independent for each product / size.
+        flavourRules: [],
+        flavourRulesByTarget: {
+          'size_6': [
+            { id: 'fr_1_size_6', flavourName: 'Belgian Chocolate', ingId: 'ing_choc', qty: 35 },
+            { id: 'fr_2_size_6', flavourName: 'Pandan Gula Melaka', ingId: 'ing_pandan', qty: 15 }
+          ],
+          'size_8': [
+            { id: 'fr_1_size_8', flavourName: 'Belgian Chocolate', ingId: 'ing_choc', qty: 70 },
+            { id: 'fr_2_size_8', flavourName: 'Pandan Gula Melaka', ingId: 'ing_pandan', qty: 30 }
+          ],
+          'add_1': [], 'add_2': [], 'add_3': []
+        }
       };
+    }
+
+    function ensureFlavourRulesByTarget(cfg) {
+      if (!cfg || typeof cfg !== 'object') return cfg;
+      const legacyRules = Array.isArray(cfg.flavourRules) ? cfg.flavourRules : [];
+      if (!cfg.flavourRulesByTarget || typeof cfg.flavourRulesByTarget !== 'object' || Array.isArray(cfg.flavourRulesByTarget)) {
+        cfg.flavourRulesByTarget = {};
+        // Migrate old global flavour rules to independent copies for each product size.
+        (cfg.sizes || []).forEach(size => {
+          cfg.flavourRulesByTarget[size.id] = legacyRules.map((rule, index) => Object.assign({}, rule, {
+            id: `${rule.id || 'flavour'}_${size.id}_${index}`
+          }));
+        });
+      }
+      [...(cfg.sizes || []), ...(cfg.addons || [])].forEach(target => {
+        if (!Array.isArray(cfg.flavourRulesByTarget[target.id])) cfg.flavourRulesByTarget[target.id] = [];
+      });
+      cfg.flavourRules = legacyRules; // retained for backward-compatible imports
+      return cfg;
+    }
+
+    function getFlavourRulesForTarget(targetId) {
+      ensureFlavourRulesByTarget(config);
+      if (!Array.isArray(config.flavourRulesByTarget[targetId])) config.flavourRulesByTarget[targetId] = [];
+      return config.flavourRulesByTarget[targetId];
     }
 
     function getDefaultOrders() {
@@ -1607,6 +1643,7 @@
     }
 
     let config = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null') || getDefaultConfig();
+    ensureFlavourRulesByTarget(config);
     config.appearance = Object.assign({}, getDefaultAppearance(), config.appearance || {});
     let orders = JSON.parse(localStorage.getItem(ORDERS_KEY) || 'null') || getDefaultOrders();
     normalizeOrderStatuses();
@@ -1621,6 +1658,7 @@
     let isSyncing = false;
     let pendingCloudActionCount = 0;
     let autoSyncTimer = null;
+    let isFlushingPendingStock = false;
     let hasConfigDraft = localStorage.getItem(CONFIG_DRAFT_KEY) === '1';
     let publishedConfig = null;
     try { publishedConfig = JSON.parse(localStorage.getItem(PUBLISHED_CONFIG_KEY) || 'null'); } catch (e) { publishedConfig = null; }
@@ -1636,7 +1674,7 @@
     let ordersFilterPanelOpen = false;
     let nextOrderIndex = 0;
     let ordersListFilter = {
-      preset: 'upcoming', from: getTodayISO(), to: '', status: 'all', payMethod: 'all', delivery: 'all', search: '', sort: 'upcoming'
+      preset: 'all', from: '', to: '', status: 'all', payMethod: 'all', delivery: 'all', search: '', sort: 'upcoming'
     };
 
     let stockFilter = { category: 'all', search: '', sort: 'low' };
@@ -1745,7 +1783,7 @@
           if (addObj) unitCost += calculateRecipeCost(addObj.id);
         });
         (item.flavours || []).forEach(flvName => {
-          (config.flavourRules || []).forEach(rule => {
+          getFlavourRulesForTarget(item.sizeId).forEach(rule => {
             if (rule.flavourName === flvName) {
               const ing = config.ingredients.find(i => i.id === rule.ingId);
               unitCost += getUnitCost(ing) * Number(rule.qty || 0);
@@ -1777,7 +1815,7 @@
           }
         });
         (item.flavours || []).forEach(flvName => {
-          (config.flavourRules || []).forEach(rule => {
+          getFlavourRulesForTarget(item.sizeId).forEach(rule => {
             if (rule.flavourName === flvName) {
               usageMap[rule.ingId] = (usageMap[rule.ingId] || 0) + (Number(rule.qty || 0) * qty);
             }
@@ -1889,17 +1927,130 @@
         isConfigured: true
       });
       merged.appearance = Object.assign({}, getDefaultAppearance(), merged.appearance || {});
+      ensureFlavourRulesByTarget(merged);
       return merged;
     }
 
-    function syncOperationalStockToCloud(stockChanges = null) {
-      if (!config.scriptUrl) return Promise.resolve(null);
-      if (stockChanges && (Array.isArray(stockChanges.stockDeltas) || Array.isArray(stockChanges.stockSnapshots))) {
-        return pushCloudAction(Object.assign({ action: 'updateStock' }, stockChanges));
+    function readPendingStockChanges() {
+      try {
+        const pending = JSON.parse(localStorage.getItem(PENDING_STOCK_KEY) || 'null') || {};
+        return {
+          stockDeltas: Array.isArray(pending.stockDeltas) ? pending.stockDeltas : [],
+          stockSnapshots: Array.isArray(pending.stockSnapshots) ? pending.stockSnapshots : []
+        };
+      } catch (e) {
+        return { stockDeltas: [], stockSnapshots: [] };
       }
-      const ingredients = getCloudSafeIngredientsForOperationalSync();
-      if (!Array.isArray(ingredients)) return Promise.resolve(null);
-      return pushCloudAction({ action: 'updateStock', ingredients });
+    }
+
+    function hasPendingStockChanges() {
+      const pending = readPendingStockChanges();
+      return pending.stockDeltas.length > 0 || pending.stockSnapshots.length > 0;
+    }
+
+    function removePendingStockForIngredient(ingredientId) {
+      const id = String(ingredientId);
+      const pending = readPendingStockChanges();
+      const next = {
+        stockDeltas: pending.stockDeltas.filter(item => String(item.id) !== id),
+        stockSnapshots: pending.stockSnapshots.filter(item => String(item.id) !== id)
+      };
+      if (next.stockDeltas.length || next.stockSnapshots.length) localStorage.setItem(PENDING_STOCK_KEY, JSON.stringify(next));
+      else localStorage.removeItem(PENDING_STOCK_KEY);
+    }
+
+    function queuePendingStockChanges(changes) {
+      const pending = readPendingStockChanges();
+      const deltaById = new Map(pending.stockDeltas.map(x => [String(x.id), Number(x.delta || 0)]));
+      const snapshotById = new Map(pending.stockSnapshots.map(x => [String(x.id), Number(x.stock || 0)]));
+
+      (changes?.stockSnapshots || []).forEach(change => {
+        if (!change || change.id === undefined || change.id === null) return;
+        const id = String(change.id);
+        snapshotById.set(id, Math.max(0, Number(change.stock) || 0));
+        deltaById.delete(id);
+      });
+      (changes?.stockDeltas || []).forEach(change => {
+        if (!change || change.id === undefined || change.id === null) return;
+        const id = String(change.id);
+        if (snapshotById.has(id)) {
+          // The local absolute quantity already includes this delta; retain the latest snapshot.
+          const localItem = (config.ingredients || []).find(item => String(item.id) === id);
+          if (localItem) snapshotById.set(id, Math.max(0, Number(localItem.stock) || 0));
+        } else {
+          deltaById.set(id, Number(deltaById.get(id) || 0) + Number(change.delta || 0));
+        }
+      });
+
+      localStorage.setItem(PENDING_STOCK_KEY, JSON.stringify({
+        stockDeltas: [...deltaById.entries()].filter(([, delta]) => Number.isFinite(delta) && delta !== 0).map(([id, delta]) => ({ id, delta })),
+        stockSnapshots: [...snapshotById.entries()].map(([id, stock]) => ({ id, stock }))
+      }));
+    }
+
+    async function flushPendingStockChanges() {
+      if (isFlushingPendingStock) return false;
+      const pending = readPendingStockChanges();
+      if (!pending.stockDeltas.length && !pending.stockSnapshots.length) return true;
+      if (!config.scriptUrl || !config.pin || navigator.onLine === false) return false;
+
+      isFlushingPendingStock = true;
+      try {
+        const response = await fetch(config.scriptUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(Object.assign({ pin: config.pin, action: 'updateStock' }, pending))
+        });
+        const json = await response.json();
+        if (!json.ok) return false;
+
+        localStorage.removeItem(PENDING_STOCK_KEY);
+        rememberCloudSync(json.version, json.serverTime);
+        const touchedIds = new Set([
+          ...pending.stockSnapshots.map(x => String(x.id)),
+          ...pending.stockDeltas.map(x => String(x.id))
+        ]);
+        touchedIds.forEach(id => {
+          const localItem = (config.ingredients || []).find(item => String(item.id) === id);
+          if (localItem) updatePublishedIngredientStock(id, localItem.stock);
+        });
+        updateSyncHeaderBadge(true, 'Pending stock changes synced');
+        return true;
+      } catch (e) {
+        return false;
+      } finally {
+        isFlushingPendingStock = false;
+      }
+    }
+
+    async function syncOperationalStockToCloud(stockChanges = null) {
+      if (!stockChanges) return null;
+      if (hasPendingStockChanges()) {
+        const flushed = await flushPendingStockChanges();
+        if (!flushed) {
+          queuePendingStockChanges(stockChanges);
+          return { ok: false, queued: true, error: 'PENDING_STOCK_SYNC_FAILED' };
+        }
+      }
+      if (!config.scriptUrl) {
+        queuePendingStockChanges(stockChanges);
+        return { ok: false, queued: true, error: 'NO_CLOUD_URL' };
+      }
+
+      const result = await pushCloudAction(Object.assign({ action: 'updateStock' }, stockChanges));
+      if (result?.ok) {
+        const ids = new Set([
+          ...(stockChanges.stockSnapshots || []).map(x => String(x.id)),
+          ...(stockChanges.stockDeltas || []).map(x => String(x.id))
+        ]);
+        ids.forEach(id => {
+          const localItem = (config.ingredients || []).find(item => String(item.id) === id);
+          if (localItem) updatePublishedIngredientStock(id, localItem.stock);
+        });
+      } else {
+        queuePendingStockChanges(stockChanges);
+      }
+      return result;
     }
 
     async function publishConfigToCloud() {
@@ -2352,7 +2503,7 @@
     }
 
     function resetOrdersListFilter() {
-      ordersListFilter = { preset: 'upcoming', from: getTodayISO(), to: '', status: 'all', payMethod: 'all', delivery: 'all', search: '', sort: 'upcoming' };
+      ordersListFilter = { preset: 'all', from: '', to: '', status: 'all', payMethod: 'all', delivery: 'all', search: '', sort: 'upcoming' };
       document.getElementById('orders-search-input').value = '';
       document.getElementById('orders-list-from').value = '';
       document.getElementById('orders-list-to').value = '';
@@ -2361,7 +2512,7 @@
       setOrdersListStatus('all');
       setOrdersListPayMethod('all');
       setOrdersListDelivery('all');
-      setOrdersListDatePreset('upcoming');
+      setOrdersListDatePreset('all');
     }
 
     // =========================================================
@@ -2432,6 +2583,7 @@
             if (hasConfigDraft) config = mergeCloudStockIntoLocalDraft(config, json.data.config);
             else config = mergeCloudConfigForThisDevice(json.data.config, localUrlBeforeUnlock, localPinBeforeUnlock);
           }
+          ensureFlavourRulesByTarget(config);
           config.appearance = Object.assign({}, getDefaultAppearance(), config.appearance || {});
           applyAppearanceSettings(config.appearance);
           if (json.data && Array.isArray(json.data.orders)) {
@@ -2539,6 +2691,14 @@
       if (spin) spin.classList.add('animate-spin');
 
       try {
+        if (hasPendingStockChanges()) {
+          const flushed = await flushPendingStockChanges();
+          if (!flushed) {
+            updateSyncHeaderBadge(false, 'Pending stock changes — sync required');
+            if (!silent) showToast('There are unsynced inventory changes on this device. They have been kept locally; cloud refresh was paused to prevent stock from reverting.', true);
+            return;
+          }
+        }
         const meta = getCloudSyncMeta();
         const since = !forceFull && meta.version ? `&since=${encodeURIComponent(meta.version)}` : '';
         const full = forceFull ? '&full=1' : '';
@@ -2559,6 +2719,7 @@
             } else {
               config = mergeCloudConfigForThisDevice(json.data.config, savedUrl, savedPin);
             }
+            ensureFlavourRulesByTarget(config);
             config.appearance = Object.assign({}, getDefaultAppearance(), config.appearance || {});
             applyAppearanceSettings(config.appearance);
             saveLocalConfig();
@@ -2588,6 +2749,10 @@
 
     async function pushCloudAction(payload) {
       if (!config.scriptUrl) return null;
+      if (!['updateStock', 'saveConfig'].includes(payload?.action) && hasPendingStockChanges()) {
+        const flushed = await flushPendingStockChanges();
+        if (!flushed) return { ok: false, error: 'PENDING_STOCK_SYNC_FAILED', message: 'Pending inventory changes could not be synced first.' };
+      }
       const spin = document.getElementById('sync-spin-icon');
       pendingCloudActionCount++;
       if (spin) spin.classList.add('animate-spin');
@@ -2618,6 +2783,7 @@
               rememberPublishedConfig(json.data.config);
               if (hasConfigDraft) config = mergeCloudStockIntoLocalDraft(config, json.data.config);
               else config = mergeCloudConfigForThisDevice(json.data.config, savedUrl, savedPin);
+              ensureFlavourRulesByTarget(config);
               config.appearance = Object.assign({}, getDefaultAppearance(), config.appearance || {});
               applyAppearanceSettings(config.appearance);
               saveLocalConfig();
@@ -2744,6 +2910,8 @@
       const id = 'size_' + Date.now();
       config.sizes.push({ id, name: 'New Size', price: 50 });
       config.recipes[id] = [];
+      if (!config.flavourRulesByTarget) config.flavourRulesByTarget = {};
+      config.flavourRulesByTarget[id] = [];
       markConfigDraft();
       renderStep1();
       if (window.lucide) lucide.createIcons();
@@ -2751,7 +2919,7 @@
 
     function removeProductSize(idx) {
       const removed = config.sizes.splice(idx, 1)[0];
-      if (removed) delete config.recipes[removed.id];
+      if (removed) { delete config.recipes[removed.id]; delete config.flavourRulesByTarget?.[removed.id]; }
       markConfigDraft();
       renderStep1();
       if (window.lucide) lucide.createIcons();
@@ -2804,6 +2972,8 @@
       const id = 'add_' + Date.now();
       config.addons.push({ id, name: 'New Add-On', price: 5 });
       config.recipes[id] = [];
+      if (!config.flavourRulesByTarget) config.flavourRulesByTarget = {};
+      config.flavourRulesByTarget[id] = [];
       markConfigDraft();
       renderStep2();
       if (window.lucide) lucide.createIcons();
@@ -2861,7 +3031,7 @@
               <div>
                 <label class="block text-[10px] font-bold text-stone-500 mb-0.5">Current Stock (${getUnitDisplayLabel(ing.unit)})</label>
                 <input type="number" step="any" value="${ing.stock}"
-                  onchange="config.ingredients[${idx}].stock = parseFloat(this.value) || 0; markConfigDraft()"
+                  onchange="updateSetupIngredientStock(${idx}, this.value)"
                   class="w-full px-2.5 py-1.5 text-xs font-mono-num font-bold bg-white rounded-xl border border-stone-200" />
               </div>
 
@@ -2873,6 +3043,40 @@
           </div>
         `;
       }).join('');
+    }
+
+    function updatePublishedIngredientStock(ingredientId, stock) {
+      if (!publishedConfig || !Array.isArray(publishedConfig.ingredients)) return;
+      const next = clonePlainObject(publishedConfig);
+      const item = next.ingredients.find(ing => String(ing.id) === String(ingredientId));
+      if (!item) return;
+      item.stock = Number(stock);
+      rememberPublishedConfig(next);
+    }
+
+    async function updateSetupIngredientStock(index, value) {
+      const ingredient = config.ingredients[index];
+      if (!ingredient) return;
+      const stock = Math.max(0, Number(value) || 0);
+      ingredient.stock = stock;
+      saveLocalConfig();
+      renderHomeLowStockNotifications();
+
+      const isPublished = (publishedConfig?.ingredients || []).some(item => String(item.id) === String(ingredient.id));
+      if (!isPublished) {
+        markConfigDraft();
+        showToast('Stock saved locally. Publish this new ingredient before syncing its quantity to other devices.');
+        return;
+      }
+
+      const result = await syncOperationalStockToCloud({ stockSnapshots: [{ id: String(ingredient.id), stock }] });
+      if (result?.ok) {
+        updatePublishedIngredientStock(ingredient.id, stock);
+        renderStockList();
+        showToast(`${ingredient.name} stock quantity saved to the cloud.`);
+      } else {
+        showToast(`${ingredient.name} saved on this device and queued for cloud sync. The app will retry before downloading newer stock data.`, true);
+      }
     }
 
     function addIngredientItem() {
@@ -2888,9 +3092,14 @@
     function removeIngredient(idx) {
       const removed = config.ingredients.splice(idx, 1)[0];
       if (removed) {
+        removePendingStockForIngredient(removed.id);
         Object.keys(config.recipes).forEach(k => {
           config.recipes[k] = (config.recipes[k] || []).filter(r => r.ingId !== removed.id);
         });
+        Object.keys(config.flavourRulesByTarget || {}).forEach(k => {
+          config.flavourRulesByTarget[k] = (config.flavourRulesByTarget[k] || []).filter(r => r.ingId !== removed.id);
+        });
+        config.flavourRules = (config.flavourRules || []).filter(r => r.ingId !== removed.id);
       }
       markConfigDraft();
       renderStep3();
@@ -2951,26 +3160,26 @@
       }
 
       const frEl = document.getElementById('flavour-rules-list');
-      if (!config.flavourRules) config.flavourRules = [];
-      frEl.innerHTML = config.flavourRules.map((fr, fIdx) => {
+      const flavourRulesForTarget = getFlavourRulesForTarget(activeRecipeTarget);
+      frEl.innerHTML = flavourRulesForTarget.map((fr, fIdx) => {
         const ing = config.ingredients.find(i => i.id === fr.ingId) || config.ingredients[0];
         return `
           <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 bg-stone-50 border border-stone-200 p-2 rounded-xl">
-            <select onchange="config.flavourRules[${fIdx}].flavourName = this.value; markConfigDraft()"
+            <select onchange="config.flavourRulesByTarget['${activeRecipeTarget}'][${fIdx}].flavourName = this.value; markConfigDraft()"
               class="flex-1 px-2.5 py-1.5 text-xs font-bold bg-white rounded-lg border border-stone-200">
               ${config.flavours.map(f => `<option value="${f.name}" ${f.name === fr.flavourName ? 'selected' : ''}>Flavours: ${f.name}</option>`).join('')}
             </select>
-            <select onchange="config.flavourRules[${fIdx}].ingId = this.value; renderStep4(); lucide.createIcons();; markConfigDraft()"
+            <select onchange="config.flavourRulesByTarget['${activeRecipeTarget}'][${fIdx}].ingId = this.value; renderStep4(); lucide.createIcons(); markConfigDraft()"
               class="flex-1 px-2.5 py-1.5 text-xs font-semibold bg-white rounded-lg border border-stone-200">
               ${config.ingredients.map(i => `<option value="${i.id}" ${i.id === fr.ingId ? 'selected' : ''}>${i.name}</option>`).join('')}
             </select>
             <div class="flex items-center bg-white border border-stone-200 rounded-lg px-2 py-1">
               <input type="number" step="any" value="${fr.qty}"
-                onchange="config.flavourRules[${fIdx}].qty = parseFloat(this.value) || 0; markConfigDraft()"
+                onchange="config.flavourRulesByTarget['${activeRecipeTarget}'][${fIdx}].qty = parseFloat(this.value) || 0; markConfigDraft()"
                 class="w-14 text-xs font-mono-num font-bold text-right focus:shadow-none" />
               <span class="text-[11px] font-bold text-stone-400 ml-1">${ing ? getUnitDisplayLabel(ing.unit) : 'g'}</span>
             </div>
-            <button type="button" onclick="config.flavourRules.splice(${fIdx}, 1); renderStep4(); lucide.createIcons();; markConfigDraft()" class="p-1.5 text-rose-500">
+            <button type="button" onclick="config.flavourRulesByTarget['${activeRecipeTarget}'].splice(${fIdx}, 1); renderStep4(); lucide.createIcons(); markConfigDraft()" class="p-1.5 text-rose-500">
               <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
             </button>
           </div>
@@ -2992,7 +3201,7 @@
 
     function addFlavourRuleRow() {
       if (!config.flavours.length || !config.ingredients.length) return;
-      config.flavourRules.push({
+      getFlavourRulesForTarget(activeRecipeTarget).push({
         id: 'fr_' + Date.now(), flavourName: config.flavours[0].name, ingId: config.ingredients[0].id, qty: 25
       });
       markConfigDraft();
@@ -3022,7 +3231,7 @@
         appearance: getDefaultAppearance(),
         sizes: [{ id: 'size_1', name: 'Standard Size', price: 45 }],
         flavours: [{ id: 'flv_1', name: 'Original', active: true }],
-        addons: [], ingredients: [], recipes: { 'size_1': [] }, flavourRules: []
+        addons: [], ingredients: [], recipes: { 'size_1': [] }, flavourRules: [], flavourRulesByTarget: { 'size_1': [] }
       };
       markConfigDraft();
       goSetupStep(1);
@@ -3062,7 +3271,8 @@
         try {
           const parsed = JSON.parse(evt.target.result);
           if (parsed && parsed.sizes && parsed.ingredients) {
-            config = Object.assign({}, config, parsed);
+            config = ensureFlavourRulesByTarget(Object.assign({}, config, parsed));
+            ensureFlavourRulesByTarget(config);
             config.appearance = Object.assign({}, getDefaultAppearance(), config.appearance || {});
             applyAppearanceSettings(config.appearance);
             markConfigDraft();
@@ -3368,31 +3578,39 @@
       const footerEl = document.getElementById('orders-list-footer');
       const badgeEl = document.getElementById('orders-count-badge');
 
-      // The filter is available for both the default five recent orders and the full order history.
+      const hasStatusFilter = ordersListFilter.status !== 'all';
+      const hasPaymentFilter = ordersListFilter.payMethod !== 'all';
+      const hasDeliveryFilter = ordersListFilter.delivery !== 'all';
+      const hasDateFilter = (ordersListFilter.preset || 'all') !== 'all';
+      const hasSearchFilter = Boolean((ordersListFilter.search || '').trim());
+      const hasAnyFilter = hasStatusFilter || hasPaymentFilter || hasDeliveryFilter || hasDateFilter || hasSearchFilter;
+
+      // If a filter is selected, search across the entire order history (not just the default five).
       const prioritizedOrders = sortOrderRecords(orders, 'upcoming');
-      const baseOrders = ordersListExpanded ? prioritizedOrders : prioritizedOrders.slice(0, 5);
+      const baseOrders = (ordersListExpanded || hasAnyFilter) ? prioritizedOrders : prioritizedOrders.slice(0, 5);
       const criteria = [];
-      if ((ordersListFilter.preset || 'all') !== 'all') {
+
+      if (hasDateFilter) {
         criteria.push(o => filterOrdersBySpec([o], ordersListFilter).length > 0);
       }
-      if (ordersListFilter.status !== 'all') {
+      if (hasStatusFilter) {
         criteria.push(o => {
           if (ordersListFilter.status === 'Active') return o.status === 'Active';
           if (ordersListFilter.status === 'Completed') return o.status === 'Completed';
           if (ordersListFilter.status === 'Deposit') return (Number(o.total || 0) - Number(o.paidAmount || 0)) > 0;
           if (ordersListFilter.status === 'Paid') return (Number(o.total || 0) - Number(o.paidAmount || 0)) <= 0;
-          return false;
+          return true;
         });
       }
-      if (ordersListFilter.payMethod !== 'all') {
+      if (hasPaymentFilter) {
         criteria.push(o => (o.paymentMethod || 'Online') === ordersListFilter.payMethod);
       }
-      if (ordersListFilter.delivery !== 'all') {
+      if (hasDeliveryFilter) {
         criteria.push(o => (o.deliveryMethod || 'Pickup') === ordersListFilter.delivery);
       }
 
-      // Different filter groups are alternatives (OR). Search is an additional text constraint.
-      let filtered = criteria.length ? baseOrders.filter(o => criteria.some(matches => matches(o))) : baseOrders;
+      // A record must satisfy every selected filter. Unselected groups do not restrict results.
+      let filtered = criteria.length ? baseOrders.filter(o => criteria.every(matches => matches(o))) : baseOrders;
       const q = (ordersListFilter.search || '').trim().toLowerCase();
       if (q) {
         filtered = filtered.filter(o =>
@@ -3404,7 +3622,7 @@
         );
       }
       let displayOrders = sortOrderRecords(filtered, ordersListFilter.sort || 'upcoming');
-      badgeEl.textContent = ordersListExpanded
+      badgeEl.textContent = (ordersListExpanded || hasAnyFilter)
         ? `${displayOrders.length} of ${orders.length} records`
         : `${displayOrders.length} of ${Math.min(5, orders.length)} upcoming orders`;
 
@@ -3850,8 +4068,10 @@
       localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
       renderStockList();
       if (delta > 0) showToast(`${ingredient.name} stock increased!`);
-      if (config.scriptUrl && ingredient.id) {
-        await syncOperationalStockToCloud({ stockDeltas: [{ id: String(ingredient.id), delta: Number(delta) }] });
+      if (ingredient.id) {
+        const result = await syncOperationalStockToCloud({ stockDeltas: [{ id: String(ingredient.id), delta: Number(delta) }] });
+        if (result?.ok) updatePublishedIngredientStock(ingredient.id, ingredient.stock);
+        else showToast(`${ingredient.name} quantity saved locally and queued for cloud sync.`, true);
       }
     }
 
@@ -3915,21 +4135,40 @@
       };
 
       let stockSnapshot = null;
+      let definitionChanged = true;
+      let editedIngredientId = '';
       if (editingStockIndex !== null && config.ingredients[editingStockIndex]) {
         const existing = config.ingredients[editingStockIndex];
+        editedIngredientId = String(existing.id);
+        definitionChanged = ['name', 'category', 'unit', 'packQty', 'packPrice', 'lowAlert'].some(key =>
+          String(existing[key] ?? '') !== String(itemData[key] ?? '')
+        );
+        const stockChanged = Number(existing.stock || 0) !== Number(itemData.stock || 0);
         config.ingredients[editingStockIndex] = Object.assign({}, existing, itemData);
         const publishedIds = new Set((publishedConfig?.ingredients || []).map(ing => String(ing.id)));
-        if (publishedIds.has(String(existing.id))) stockSnapshot = { id: String(existing.id), stock: itemData.stock };
-        showToast(`${name} stock updated!`);
+        if (stockChanged && publishedIds.has(editedIngredientId)) stockSnapshot = { id: editedIngredientId, stock: itemData.stock };
+        if (definitionChanged || !publishedIds.has(editedIngredientId)) markConfigDraft();
+        else saveLocalConfig();
       } else {
         config.ingredients.push(Object.assign({ id: 'ing_' + Date.now() }, itemData));
-        showToast(`${name} added to inventory!`);
+        markConfigDraft();
       }
 
-      markConfigDraft();
       closeStockModal();
       renderStockList();
-      if (stockSnapshot) await syncOperationalStockToCloud({ stockSnapshots: [stockSnapshot] });
+      renderStep3();
+
+      if (stockSnapshot) {
+        const result = await syncOperationalStockToCloud({ stockSnapshots: [stockSnapshot] });
+        if (result?.ok) {
+          updatePublishedIngredientStock(editedIngredientId, itemData.stock);
+          showToast(`${name} inventory details saved. Stock quantity synced to the cloud.`);
+        } else {
+          showToast(`${name} saved locally. Stock quantity is queued and will sync when the cloud is available.`, true);
+        }
+      } else {
+        showToast(definitionChanged ? `${name} saved as a local settings draft.` : `${name} inventory updated.`);
+      }
     }
 
     async function deleteStockModalItem() {
