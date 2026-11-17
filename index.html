@@ -6,7 +6,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="theme-color" content="#1c1917" />
-  <title>AF Kitchen Command Center — English UI v11.1</title>
+  <title>AF Kitchen Command Center — English UI v11.2</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -664,7 +664,7 @@
           <div class="flex items-center justify-between gap-2">
             <div class="min-w-0">
               <span id="orders-filter-title" class="text-[11px] font-extrabold text-stone-700">Filter Upcoming 5 Orders</span>
-              <span class="ml-1.5 text-[9px] font-extrabold uppercase tracking-wide bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded-md">Match All Selected</span>
+              <span class="ml-1.5 text-[9px] font-extrabold uppercase tracking-wide bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded-md">OR within group · AND across groups</span>
             </div>
             <button type="button" onclick="resetOrdersListFilter()" class="text-[10px] font-bold text-amber-700 hover:underline shrink-0">Reset Filters</button>
           </div>
@@ -684,7 +684,7 @@
             </label>
             <div class="rounded-xl bg-white border border-stone-200 px-3 py-2 flex flex-col justify-center">
               <span class="text-[10px] font-bold text-stone-500">Filter Logic</span>
-              <span class="text-[11px] font-extrabold text-emerald-800">Match All Selected Filters</span>
+              <span class="text-[11px] font-extrabold text-emerald-800">No default selections · Pick one or more</span>
             </div>
           </div>
 
@@ -787,6 +787,10 @@
               <span>Add Item</span>
             </button>
           </div>
+        </div>
+
+        <div id="inventory-unconfirmed-banner" class="hidden rounded-xl bg-amber-50 border border-amber-300 px-3 py-2.5 text-[11px] text-amber-900 font-semibold">
+          Some stock balances have not been confirmed. Use Edit to enter the actual quantity (0 only if really empty). Old JSON balances are never restored automatically.
         </div>
 
         <!-- 3 Clean KPI Boxes -->
@@ -1660,6 +1664,7 @@
     let pendingCloudActionCount = 0;
     let autoSyncTimer = null;
     let isFlushingPendingStock = false;
+    let lastStockSyncError = '';
     let cloudMutationEpoch = 0;
     let syncRefreshNeeded = false;
     let deferredSyncTimer = null;
@@ -1678,7 +1683,7 @@
     let ordersFilterPanelOpen = false;
     let nextOrderIndex = 0;
     let ordersListFilter = {
-      preset: 'all', from: '', to: '', status: [], payMethod: [], delivery: [], search: '', sort: 'upcoming'
+      datePresets: [], from: '', to: '', status: [], payMethod: [], delivery: [], search: '', sort: 'upcoming'
     };
 
     let stockFilter = { category: 'all', search: '', sort: 'low' };
@@ -1873,7 +1878,7 @@
       if (Array.isArray(localCopy.ingredients)) {
         localCopy.ingredients = localCopy.ingredients.map(item => {
           const cloudItem = cloudById.get(String(item.id));
-          return cloudItem ? Object.assign({}, item, { stock: Number(cloudItem.stock || 0) }) : item;
+          return cloudItem ? Object.assign({}, item, { stock: cloudItem.stock == null ? null : Number(cloudItem.stock) }) : item;
         });
       }
       return localCopy;
@@ -1885,7 +1890,7 @@
       const localById = new Map((config.ingredients || []).map(item => [String(item.id), item]));
       return cloudBase.map(cloudItem => {
         const localItem = localById.get(String(cloudItem.id));
-        return Object.assign({}, cloudItem, localItem ? { stock: Number(localItem.stock || 0) } : {});
+        return Object.assign({}, cloudItem, localItem ? { stock: localItem.stock == null ? null : Number(localItem.stock) } : {});
       });
     }
 
@@ -1992,43 +1997,76 @@
       }));
     }
 
+    function isPendingChangeForId(id) {
+      const p = readPendingStockChanges();
+      return p.stockSnapshots.some(x => String(x.id) === String(id)) ||
+        p.stockDeltas.some(x => String(x.id) === String(id));
+    }
+
     async function flushPendingStockChanges() {
       if (isFlushingPendingStock) return false;
-      const pending = readPendingStockChanges();
-      if (!pending.stockDeltas.length && !pending.stockSnapshots.length) return true;
+      if (!hasPendingStockChanges()) return true;
       if (!config.scriptUrl || !config.pin || navigator.onLine === false) return false;
-
       isFlushingPendingStock = true;
-      // Invalidate any GET that started before this inventory write. Its older
-      // response must never be allowed to restore a stale stock snapshot.
       cloudMutationEpoch++;
+      let hadError = false;
+      let completedCount = 0;
+      lastStockSyncError = '';
       try {
-        const response = await fetch(config.scriptUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify(Object.assign({ pin: config.pin, action: 'updateStock' }, pending))
-        });
-        const json = await response.json();
-        if (!json.ok) return false;
-
-        localStorage.removeItem(PENDING_STOCK_KEY);
-        rememberCloudSync(json.version, json.serverTime);
-        const serverStocks = new Map((Array.isArray(json.stockValues) ? json.stockValues : []).map(x => [String(x.id), Number(x.stock)]));
-        const touchedIds = new Set([
-          ...pending.stockSnapshots.map(x => String(x.id)),
-          ...pending.stockDeltas.map(x => String(x.id))
-        ]);
-        touchedIds.forEach(id => {
-          const localItem = (config.ingredients || []).find(item => String(item.id) === id);
-          if (!localItem) return;
-          if (serverStocks.has(id) && Number.isFinite(serverStocks.get(id))) localItem.stock = serverStocks.get(id);
-          updatePublishedIngredientStock(id, localItem.stock);
-        });
+        // Send each item separately. One item with a missing baseline must not
+        // block saving the other balances. Never discard unacknowledged changes.
+        const initial = readPendingStockChanges();
+        const work = [
+          ...initial.stockSnapshots.map(x => ({ type: 'stockSnapshots', change: x })),
+          ...initial.stockDeltas.map(x => ({ type: 'stockDeltas', change: x }))
+        ];
+        for (const item of work) {
+          const id = String(item.change.id);
+          const body = { pin: config.pin, action: 'updateStock', stockSnapshots: [], stockDeltas: [] };
+          body[item.type].push(item.change);
+          try {
+            const response = await fetch(config.scriptUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+              body: JSON.stringify(body)
+            });
+            const json = await response.json();
+            if (!json.ok || Number(json.stockUpdated || 0) < 1) {
+              hadError = true;
+              lastStockSyncError = `${json.error || 'STOCK_SYNC_FAILED'}: ${json.message || 'Cloud rejected the stock update'}`;
+              continue;
+            }
+            completedCount++;
+            rememberCloudSync(json.version, json.serverTime);
+            const nowPending = readPendingStockChanges();
+            if (item.type === 'stockSnapshots') {
+              nowPending.stockSnapshots = nowPending.stockSnapshots.filter(x =>
+                String(x.id) !== id || Number(x.stock) !== Number(item.change.stock));
+            } else {
+              nowPending.stockDeltas = nowPending.stockDeltas.flatMap(x => {
+                if (String(x.id) !== id) return [x];
+                const remaining = Number(x.delta) - Number(item.change.delta);
+                return Number.isFinite(remaining) && remaining !== 0 ? [{ id, delta: remaining }] : [];
+              });
+            }
+            if (nowPending.stockSnapshots.length || nowPending.stockDeltas.length)
+              localStorage.setItem(PENDING_STOCK_KEY, JSON.stringify(nowPending));
+            else localStorage.removeItem(PENDING_STOCK_KEY);
+            const fromServer = (json.stockValues || []).find(x => String(x.id) === id);
+            const localItem = (config.ingredients || []).find(x => String(x.id) === id);
+            if (localItem && !isPendingChangeForId(id)) {
+              if (fromServer && Number.isFinite(Number(fromServer.stock))) localItem.stock = Number(fromServer.stock);
+              updatePublishedIngredientStock(id, localItem.stock);
+            }
+          } catch (e) {
+            hadError = true;
+            lastStockSyncError = 'Network or deployment error: ' + String(e.message || e);
+          }
+        }
         saveLocalConfig();
-        updateSyncHeaderBadge(true, 'Inventory saved to cloud');
-        return true;
-      } catch (e) {
-        return false;
+        if (completedCount) updateSyncHeaderBadge(true, 'Inventory saved to cloud');
+        if (hadError) updateSyncHeaderBadge(false, 'Some inventory balances need attention');
+        return !hadError && !hasPendingStockChanges();
       } finally {
         isFlushingPendingStock = false;
         scheduleDeferredCloudSync();
@@ -2037,23 +2075,15 @@
 
     async function syncOperationalStockToCloud(stockChanges = null) {
       if (!stockChanges) return null;
-      // Queue first, before any network request. This protects the local value
-      // from a concurrent background download while the write is in flight.
       queuePendingStockChanges(stockChanges);
       if (!config.scriptUrl) return { ok: false, queued: true, error: 'NO_CLOUD_URL' };
-      const flushed = await flushPendingStockChanges();
-      if (flushed) {
-        const ids = new Set([
-          ...(stockChanges.stockSnapshots || []).map(x => String(x.id)),
-          ...(stockChanges.stockDeltas || []).map(x => String(x.id))
-        ]);
-        ids.forEach(id => {
-          const localItem = (config.ingredients || []).find(item => String(item.id) === id);
-          if (localItem) updatePublishedIngredientStock(id, localItem.stock);
-        });
-        return { ok: true, changed: true };
-      }
-      return { ok: false, queued: true, error: 'STOCK_SYNC_FAILED' };
+      await flushPendingStockChanges();
+      const ids = [
+        ...(stockChanges.stockSnapshots || []).map(x => String(x.id)),
+        ...(stockChanges.stockDeltas || []).map(x => String(x.id))
+      ];
+      if (ids.every(id => !isPendingChangeForId(id))) return { ok: true, changed: true };
+      return { ok: false, queued: true, error: lastStockSyncError || 'STOCK_SYNC_FAILED' };
     }
 
     async function publishConfigToCloud() {
@@ -2073,6 +2103,14 @@
       if (btn) { btn.disabled = true; btn.innerHTML = '<i data-lucide="loader-circle" class="w-3.5 h-3.5 animate-spin"></i><span>Publishing...</span>'; }
       if (window.lucide) lucide.createIcons();
 
+      if (hasPendingStockChanges()) {
+        const flushed = await flushPendingStockChanges();
+        if (!flushed) {
+          showToast(`Publish paused: ${lastStockSyncError || 'some inventory changes are not confirmed in Google Sheets'}.`, true);
+          if (btn) { btn.disabled = false; btn.innerHTML = '<i data-lucide=\"cloud-upload\" class=\"w-3.5 h-3.5\"></i><span>Save to All Devices</span>'; }
+          return;
+        }
+      }
       const cloudConfig = clonePlainObject(config);
       delete cloudConfig.pin;
       const result = await pushCloudAction({ action: 'saveConfig', config: cloudConfig });
@@ -2436,76 +2474,83 @@
       renderOrdersSection();
     }
 
-    // Multi-select: selections within a group use OR; groups combine with AND.
-    function toggleOrderFilterSelection(field, value, choices, prefix, activeClass) {
-      const current = Array.isArray(ordersListFilter[field]) ? ordersListFilter[field] : [];
-      ordersListFilter[field] = value === 'all' ? [] :
-        (current.includes(value) ? current.filter(x => x !== value) : [...current, value]);
-      const selected = ordersListFilter[field];
-      choices.forEach(k => {
-        const el = document.getElementById(`${prefix}${k}`);
+    // v11.2: all filter groups start BLANK. "All" is an explicit toggle, not a default.
+    // Within a group use OR. Across groups use AND. Date pills support OR too.
+    function paintOrderFilterButtons(prefix, choices, selected, activeClass) {
+      choices.forEach(value => {
+        const el = document.getElementById(prefix + value);
         if (!el) return;
-        const isActive = k === 'all' ? selected.length === 0 : selected.includes(k);
+        const isActive = selected.includes(value);
         el.className = isActive
           ? `px-2.5 py-1 rounded-lg text-[10px] font-bold ${activeClass} shrink-0`
           : 'px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0';
         el.setAttribute('aria-pressed', String(isActive));
       });
+    }
+
+    function toggleOrderFilterSelection(field, value, choices, prefix, activeClass) {
+      const old = Array.isArray(ordersListFilter[field]) ? ordersListFilter[field] : [];
+      if (value === 'all') {
+        ordersListFilter[field] = old.includes('all') ? [] : ['all'];
+      } else {
+        const withoutAll = old.filter(x => x !== 'all');
+        ordersListFilter[field] = withoutAll.includes(value)
+          ? withoutAll.filter(x => x !== value) : [...withoutAll, value];
+      }
+      paintOrderFilterButtons(prefix, choices, ordersListFilter[field], activeClass);
       renderOrdersSection();
     }
 
-    function setOrdersListStatus(st) {
-      toggleOrderFilterSelection('status', st, ['all', 'Active', 'Completed', 'Deposit', 'Paid'], 'olist-st-', 'bg-stone-900 text-white');
+    function setOrdersListStatus(value) {
+      toggleOrderFilterSelection('status', value, ['all', 'Active', 'Completed', 'Deposit', 'Paid'], 'olist-st-', 'bg-stone-900 text-white');
     }
-
-    function setOrdersListPayMethod(pm) {
-      toggleOrderFilterSelection('payMethod', pm, ['all', 'Online', 'Cash'], 'olist-pm-', 'bg-emerald-700 text-white');
+    function setOrdersListPayMethod(value) {
+      toggleOrderFilterSelection('payMethod', value, ['all', 'Online', 'Cash'], 'olist-pm-', 'bg-emerald-700 text-white');
     }
-
-    function setOrdersListDelivery(dl) {
-      toggleOrderFilterSelection('delivery', dl, ['all', 'Pickup', 'COD'], 'olist-dl-', 'bg-sky-700 text-white');
+    function setOrdersListDelivery(value) {
+      toggleOrderFilterSelection('delivery', value, ['all', 'Pickup', 'COD'], 'olist-dl-', 'bg-sky-700 text-white');
     }
-
     function setOrdersSort(sortMode) {
       ordersListFilter.sort = sortMode || 'upcoming';
       renderOrdersSection();
     }
-
-    function setOrdersListDatePreset(preset) {
-      ordersListFilter.preset = preset;
-      ['all', 'today', 'upcoming', 'week', 'month', 'custom'].forEach(p => {
-        const el = document.getElementById(`olist-dt-${p}`);
-        if (el) {
-          el.className = (p === preset && p !== 'all')
-            ? 'px-2.5 py-1 rounded-lg text-[10px] font-bold bg-amber-500 text-white shrink-0'
-            : 'px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0';
-        }
-      });
-      const customRange = document.getElementById('orders-list-custom-range');
-      if (preset === 'custom') {
-        customRange.classList.remove('hidden');
-        const fInp = document.getElementById('orders-list-from');
-        const tInp = document.getElementById('orders-list-to');
-        if (!fInp.value) fInp.value = getTodayISO();
-        if (!tInp.value) tInp.value = getTodayISO();
-        ordersListFilter.from = fInp.value;
-        ordersListFilter.to = tInp.value;
+    function setOrdersListDatePreset(value) {
+      const old = ordersListFilter.datePresets || [];
+      if (value === 'all') {
+        ordersListFilter.datePresets = old.includes('all') ? [] : ['all'];
       } else {
-        customRange.classList.add('hidden');
+        const selected = old.filter(x => x !== 'all');
+        ordersListFilter.datePresets = selected.includes(value)
+          ? selected.filter(x => x !== value) : [...selected, value];
+      }
+      paintOrderFilterButtons('olist-dt-', ['all','today','upcoming','week','month','custom'],
+        ordersListFilter.datePresets, 'bg-amber-500 text-white');
+      const selectedCustom = ordersListFilter.datePresets.includes('custom');
+      const range = document.getElementById('orders-list-custom-range');
+      range.classList.toggle('hidden', !selectedCustom);
+      if (selectedCustom) {
+        const fromInput = document.getElementById('orders-list-from');
+        const toInput = document.getElementById('orders-list-to');
+        if (!fromInput.value) fromInput.value = getTodayISO();
+        if (!toInput.value) toInput.value = getTodayISO();
+        ordersListFilter.from = fromInput.value;
+        ordersListFilter.to = toInput.value;
       }
       renderOrdersSection();
     }
-
     function resetOrdersListFilter() {
-      ordersListFilter = { preset: 'all', from: '', to: '', status: [], payMethod: [], delivery: [], search: '', sort: 'upcoming' };
+      ordersListFilter = { datePresets: [], from: '', to: '', status: [], payMethod: [], delivery: [], search: '', sort: 'upcoming' };
       document.getElementById('orders-search-input').value = '';
       document.getElementById('orders-list-from').value = '';
       document.getElementById('orders-list-to').value = '';
+      document.getElementById('orders-list-custom-range').classList.add('hidden');
       const sortSelect = document.getElementById('orders-sort-select');
       if (sortSelect) sortSelect.value = 'upcoming';
-      ['olist-st-all', 'olist-pm-all', 'olist-dl-all'].forEach(id => { const el = document.getElementById(id); if (el) { el.className = 'px-2.5 py-1 rounded-lg text-[10px] font-bold bg-stone-900 text-white shrink-0'; el.setAttribute('aria-pressed', 'true'); } });
-      [['olist-st-', ['Active','Completed','Deposit','Paid']], ['olist-pm-', ['Online','Cash']], ['olist-dl-', ['Pickup','COD']]].forEach(([prefix, values]) => values.forEach(v => { const el = document.getElementById(prefix + v); if (el) { el.className = 'px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0'; el.setAttribute('aria-pressed', 'false'); } }));
-      setOrdersListDatePreset('all');
+      paintOrderFilterButtons('olist-st-', ['all','Active','Completed','Deposit','Paid'], [], 'bg-stone-900 text-white');
+      paintOrderFilterButtons('olist-pm-', ['all','Online','Cash'], [], 'bg-emerald-700 text-white');
+      paintOrderFilterButtons('olist-dl-', ['all','Pickup','COD'], [], 'bg-sky-700 text-white');
+      paintOrderFilterButtons('olist-dt-', ['all','today','upcoming','week','month','custom'], [], 'bg-amber-500 text-white');
+      renderOrdersSection();
     }
 
     // =========================================================
@@ -3054,7 +3099,7 @@
 
               <div>
                 <label class="block text-[10px] font-bold text-stone-500 mb-0.5">Current Stock (${getUnitDisplayLabel(ing.unit)})</label>
-                <input type="number" step="any" value="${ing.stock}"
+                <input type="number" step="any" value="${ing.stock == null ? '' : ing.stock}"
                   onchange="updateSetupIngredientStock(${idx}, this.value)"
                   class="w-full px-2.5 py-1.5 text-xs font-mono-num font-bold bg-white rounded-xl border border-stone-200" />
               </div>
@@ -3081,7 +3126,10 @@
     async function updateSetupIngredientStock(index, value) {
       const ingredient = config.ingredients[index];
       if (!ingredient) return;
-      const stock = Math.max(0, Number(value) || 0);
+      if (String(value).trim() === '' || !Number.isFinite(Number(value)) || Number(value) < 0) {
+        showToast('Please enter a valid current balance (0 is allowed).', true); return;
+      }
+      const stock = Number(value);
       ingredient.stock = stock;
       saveLocalConfig();
       renderHomeLowStockNotifications();
@@ -3099,7 +3147,7 @@
         renderStockList();
         showToast(`${ingredient.name} stock quantity saved to the cloud.`);
       } else {
-        showToast(`${ingredient.name} saved on this device and queued for cloud sync. The app will retry before downloading newer stock data.`, true);
+        showToast(`Stock not confirmed in cloud: ${result?.error || 'Check deployment'}. Your local value remains queued.`, true);
       }
     }
 
@@ -3614,7 +3662,7 @@
       const hasStatusFilter = ordersListFilter.status.length > 0;
       const hasPaymentFilter = ordersListFilter.payMethod.length > 0;
       const hasDeliveryFilter = ordersListFilter.delivery.length > 0;
-      const hasDateFilter = (ordersListFilter.preset || 'all') !== 'all';
+      const hasDateFilter = ordersListFilter.datePresets.length > 0;
       const hasSearchFilter = Boolean((ordersListFilter.search || '').trim());
       const hasAnyFilter = hasStatusFilter || hasPaymentFilter || hasDeliveryFilter || hasDateFilter || hasSearchFilter;
 
@@ -3629,10 +3677,12 @@
       const criteria = [];
 
       if (hasDateFilter) {
-        criteria.push(o => filterOrdersBySpec([o], ordersListFilter).length > 0);
+        criteria.push(o => ordersListFilter.datePresets.includes('all') || ordersListFilter.datePresets.some(preset =>
+          filterOrdersBySpec([o], { preset, from: ordersListFilter.from, to: ordersListFilter.to }).length > 0));
       }
       if (hasStatusFilter) {
         criteria.push(o => ordersListFilter.status.some(st => {
+          if (st === 'all') return true;
           if (st === 'Active') return o.status === 'Active';
           if (st === 'Completed') return o.status === 'Completed';
           if (st === 'Deposit') return (Number(o.total || 0) - Number(o.paidAmount || 0)) > 0;
@@ -3641,10 +3691,10 @@
         }));
       }
       if (hasPaymentFilter) {
-        criteria.push(o => ordersListFilter.payMethod.includes(o.paymentMethod || 'Online'));
+        criteria.push(o => ordersListFilter.payMethod.includes('all') || ordersListFilter.payMethod.includes(o.paymentMethod || 'Online'));
       }
       if (hasDeliveryFilter) {
-        criteria.push(o => ordersListFilter.delivery.includes(o.deliveryMethod || 'Pickup'));
+        criteria.push(o => ordersListFilter.delivery.includes('all') || ordersListFilter.delivery.includes(o.deliveryMethod || 'Pickup'));
       }
 
       // A record must satisfy every selected filter. Unselected groups do not restrict results.
@@ -3872,14 +3922,15 @@
         ['ID', 'Item Name', 'Category', 'Stock Balance', 'Unit', 'Alert Threshold', 'Quantity per Pack', 'Price per Pack', 'Unit Cost', 'Stock Value', 'Status']
       ];
       config.ingredients.forEach(ing => {
-        const stock = Number(ing.stock || 0);
+        const unknown = ing.stock == null || ing.stock === '';
+        const stock = unknown ? '' : Number(ing.stock);
         const lowAlert = Number(ing.lowAlert || 0);
         const unitCost = getUnitCost(ing);
-        const status = stock <= 0 ? 'Out of stock' : (stock <= lowAlert ? 'Low' : 'Normal');
+        const status = unknown ? 'Unconfirmed' : (stock <= 0 ? 'Out of stock' : (stock <= lowAlert ? 'Low' : 'Normal'));
         rows.push([
           ing.id || '', ing.name || '', getCategoryDisplayName(ing.category), stock, getUnitDisplayLabel(ing.unit), lowAlert,
           Number(ing.packQty || 0), Number(ing.packPrice || 0), unitCost,
-          stock * unitCost, status
+          unknown ? '' : stock * unitCost, status
         ]);
       });
       const csv = '\uFEFF' + rows.map(row => row.map(value => `"${String(value).replace(/"/g, '""')}"`).join(',')).join('\r\n');
@@ -3905,8 +3956,10 @@
       const itemsEl = document.getElementById('home-low-stock-items');
       const footer = document.getElementById('home-low-stock-footer');
       const ingredients = Array.isArray(config.ingredients) ? config.ingredients : [];
+      const unconfirmedCount = ingredients.filter(ing => ing.stock == null || ing.stock === '').length;
       const lowItems = ingredients
-        .map((ing, index) => ({ ing, index, stock: Math.max(0, Number(ing.stock || 0)), threshold: Math.max(0, Number(ing.lowAlert || 0)) }))
+        .filter(ing => ing.stock != null && ing.stock !== '')
+        .map((ing, index) => ({ ing, index, stock: Math.max(0, Number(ing.stock)), threshold: Math.max(0, Number(ing.lowAlert || 0)) }))
         .filter(item => item.stock <= item.threshold)
         .sort((a, b) => {
           const aOut = a.stock <= 0 ? 0 : 1;
@@ -3924,6 +3977,16 @@
         icon.setAttribute('data-lucide', 'package');
         itemsEl.innerHTML = `<div class="rounded-xl bg-stone-50 border border-stone-100 px-3 py-2.5 text-[11px] text-stone-600">Your inventory list is currently empty.</div>`;
         footer.classList.add('hidden');
+      } else if (!lowItems.length && unconfirmedCount) {
+        card.className = 'card-soft rounded-2xl p-4 space-y-3 border border-amber-200 bg-amber-50/50';
+        title.textContent = 'Stock Balances Need Confirmation';
+        subtitle.textContent = `${unconfirmedCount} item(s) do not have verified quantities yet.`;
+        count.className = 'text-[9px] font-extrabold tracking-wide rounded-full px-2 py-1 bg-amber-100 text-amber-900 shrink-0';
+        count.textContent = `${unconfirmedCount} NOT SET`;
+        iconWrap.className = 'w-9 h-9 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0';
+        icon.setAttribute('data-lucide','alert-circle');
+        itemsEl.innerHTML = '<div class="rounded-xl border border-amber-200 bg-white px-3 py-2 text-[11px] text-amber-900">Go to Inventory > Edit and enter the actual balance. Unconfirmed is not zero.</div>';
+        footer.classList.add('hidden');
       } else if (!lowItems.length) {
         card.className = 'card-soft rounded-2xl p-4 space-y-3 border border-emerald-200/80 bg-gradient-to-br from-emerald-50/70 to-white';
         title.textContent = 'Stock Levels Healthy';
@@ -3937,7 +4000,7 @@
       } else {
         card.className = 'card-soft rounded-2xl p-4 space-y-3 border border-rose-200/80 bg-gradient-to-br from-rose-50/70 to-white';
         title.textContent = 'Inventory Alerts';
-        subtitle.textContent = `${lowItems.length} ${lowItems.length === 1 ? 'item needs' : 'items need'} restocking.`;
+        subtitle.textContent = `${lowItems.length} item(s) need restocking${unconfirmedCount ? `; ${unconfirmedCount} more balance(s) remain unconfirmed` : ''}.`;
         count.className = 'text-[9px] font-extrabold tracking-wide rounded-full px-2 py-1 bg-rose-100 text-rose-800 shrink-0';
         count.textContent = `${lowItems.length} TO RESTOCK`;
         iconWrap.className = 'w-9 h-9 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center shrink-0';
@@ -3986,17 +4049,23 @@
 
     function renderStockList() {
       const totalItems = config.ingredients.length;
-      const lowItems = config.ingredients.filter(i => Number(i.stock || 0) <= Number(i.lowAlert || 0)).length;
+      const unconfirmedCount = config.ingredients.filter(i => i.stock == null || i.stock === '').length;
+      const lowItems = config.ingredients.filter(i => i.stock != null && i.stock !== '' && Number(i.stock) <= Number(i.lowAlert || 0)).length;
       renderHomeLowStockNotifications();
-      const okItems = Math.max(0, totalItems - lowItems);
+      const confirmedCount = totalItems - unconfirmedCount;
+      const okItems = Math.max(0, confirmedCount - lowItems);
+      const missingNotice = document.getElementById('inventory-unconfirmed-banner');
+      if (missingNotice) missingNotice.classList.toggle('hidden', unconfirmedCount === 0);
       const totalCapitalVal = config.ingredients.reduce((sum, i) => sum + (Number(i.stock || 0) * getUnitCost(i)), 0);
 
-      document.getElementById('stk-kpi-total').textContent = totalItems;
+      document.getElementById('stk-kpi-total').textContent = unconfirmedCount ? `${totalItems} (${unconfirmedCount} unconfirmed)` : totalItems;
       document.getElementById('stk-kpi-low').textContent = lowItems;
       document.getElementById('stk-kpi-value').textContent = fmtMoney(totalCapitalVal);
 
-      const healthPct = totalItems > 0 ? Math.round((okItems / totalItems) * 100) : 100;
-      document.getElementById('stk-health-pct-label').textContent = `${healthPct}% Healthy (${okItems}/${totalItems})`;
+      const healthPct = confirmedCount > 0 ? Math.round((okItems / confirmedCount) * 100) : 0;
+      document.getElementById('stk-health-pct-label').textContent = confirmedCount
+        ? `${healthPct}% Healthy (${okItems}/${confirmedCount} confirmed)`
+        : 'Not yet confirmed';
       document.getElementById('stk-health-pct-label').className = `font-mono-num font-extrabold ${healthPct >= 75 ? 'text-emerald-700' : (healthPct >= 45 ? 'text-amber-700' : 'text-rose-700')}`;
       document.getElementById('stk-health-bar-ok').style.width = `${healthPct}%`;
       document.getElementById('stk-health-bar-low').style.width = `${100 - healthPct}%`;
@@ -4006,7 +4075,7 @@
         .map((ing, realIdx) => ({ ing, realIdx }))
         .filter(({ ing }) => {
           if (stockFilter.category === 'low') {
-            if (Number(ing.stock || 0) > Number(ing.lowAlert || 0)) return false;
+            if (ing.stock == null || ing.stock === '' || Number(ing.stock) > Number(ing.lowAlert || 0)) return false;
           } else if (stockFilter.category !== 'all') {
             if (ing.category !== stockFilter.category) return false;
           }
@@ -4032,7 +4101,8 @@
       }
 
       el.innerHTML = filtered.map(({ ing, realIdx }) => {
-        const curStock = Number(ing.stock || 0);
+        const unconfirmedStock = ing.stock === null || ing.stock === undefined || ing.stock === '';
+        const curStock = unconfirmedStock ? 0 : Number(ing.stock);
         const lowAlert = Number(ing.lowAlert || 0);
         const packQty = Math.max(1, Number(ing.packQty || 1));
         const targetCap = Math.max(lowAlert * 3, packQty * 2, 1);
@@ -4042,10 +4112,10 @@
         const isOut = curStock <= 0;
         const isLow = curStock <= lowAlert;
         const isWarn = !isLow && curStock <= lowAlert * 1.5;
-        const statusText = isOut ? 'Out of stock' : (isLow ? 'Restock required' : (isWarn ? 'Low stock warning' : 'Stock sufficient'));
+        const statusText = unconfirmedStock ? 'Balance not confirmed' : (isOut ? 'Out of stock' : (isLow ? 'Restock required' : (isWarn ? 'Low stock warning' : 'Stock sufficient')));
         const barColor = isLow ? 'bg-rose-500' : (isWarn ? 'bg-amber-500' : 'bg-emerald-500');
         const categoryIcon = ing.category === 'Pembungkusan' ? 'package' : (ing.category === 'Perisa & Topping' ? 'droplet' : 'wheat');
-        const statusClass = isOut ? 'bg-rose-100 text-rose-700' : (isLow ? 'bg-rose-50 text-rose-700' : (isWarn ? 'bg-amber-50 text-amber-800' : 'bg-emerald-50 text-emerald-700'));
+        const statusClass = unconfirmedStock ? 'bg-amber-100 text-amber-900' : (isOut ? 'bg-rose-100 text-rose-700' : (isLow ? 'bg-rose-50 text-rose-700' : (isWarn ? 'bg-amber-50 text-amber-800' : 'bg-emerald-50 text-emerald-700')));
         const stepDelta = ing.unit === 'g' || ing.unit === 'ml' ? 50 : 1;
 
         return `
@@ -4064,7 +4134,7 @@
                 </div>
               </div>
               <div class="text-right shrink-0">
-                <div class="text-sm font-mono-num font-extrabold ${isLow ? 'text-rose-700' : 'text-stone-900'}">${curStock.toLocaleString('en-US', { maximumFractionDigits: 2 })} <span class="text-[10px]">${getUnitDisplayLabel(ing.unit)}</span></div>
+                <div class="text-sm font-mono-num font-extrabold ${isLow ? 'text-rose-700' : 'text-stone-900'}">${unconfirmedStock ? 'Not set' : curStock.toLocaleString('en-US', { maximumFractionDigits: 2 })} <span class="text-[10px]">${getUnitDisplayLabel(ing.unit)}</span></div>
                 <div class="text-[10px] text-stone-400">${pct}% of target</div>
               </div>
             </div>
@@ -4102,6 +4172,11 @@
     async function adjustStock(idx, delta) {
       const ingredient = config.ingredients[idx];
       if (!ingredient) return;
+      if (ingredient.stock === null || ingredient.stock === undefined || ingredient.stock === '') {
+        showToast(`${ingredient.name}: use Edit to enter the actual balance before using + / −.`, true);
+        openStockModal(idx);
+        return;
+      }
       ingredient.stock = Math.max(0, Number(ingredient.stock) + delta);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
       renderStockList();
@@ -4109,7 +4184,7 @@
       if (ingredient.id) {
         const result = await syncOperationalStockToCloud({ stockDeltas: [{ id: String(ingredient.id), delta: Number(delta) }] });
         if (result?.ok) updatePublishedIngredientStock(ingredient.id, ingredient.stock);
-        else showToast(`${ingredient.name} quantity saved locally and queued for cloud sync.`, true);
+        else showToast(`Stock not saved in cloud: ${result?.error || 'Check backend deployment'}. Local change is queued.`, true);
       }
     }
 
@@ -4124,7 +4199,8 @@
         document.getElementById('stk-m-unit').value = ing.unit || 'g';
         document.getElementById('stk-m-packqty').value = ing.packQty || 1;
         document.getElementById('stk-m-packprice').value = ing.packPrice || 0;
-        document.getElementById('stk-m-stock').value = ing.stock || 0;
+        document.getElementById('stk-m-stock').value = ing.stock == null ? '' : ing.stock;
+        if (ing.stock == null) showToast('Current stock is not confirmed. Enter the real balance in Edit (0 only if actually empty).', true);
         document.getElementById('stk-m-alert').value = ing.lowAlert || 0;
         delBtn.classList.remove('hidden');
       } else {
@@ -4162,13 +4238,18 @@
         showToast('Please enter an item name.', true);
         return;
       }
+      const balanceInput = document.getElementById('stk-m-stock').value.trim();
+      if (balanceInput === '' || !Number.isFinite(Number(balanceInput)) || Number(balanceInput) < 0) {
+        showToast('Enter your actual stock balance first (enter 0 only if there is no stock).', true);
+        return;
+      }
       const itemData = {
         name,
         category: document.getElementById('stk-m-cat').value,
         unit: document.getElementById('stk-m-unit').value,
         packQty: Math.max(0.01, parseFloat(document.getElementById('stk-m-packqty').value) || 1),
         packPrice: Math.max(0, parseFloat(document.getElementById('stk-m-packprice').value) || 0),
-        stock: Math.max(0, parseFloat(document.getElementById('stk-m-stock').value) || 0),
+        stock: Number(balanceInput),
         lowAlert: Math.max(0, parseFloat(document.getElementById('stk-m-alert').value) || 0)
       };
 
@@ -4181,11 +4262,14 @@
         definitionChanged = ['name', 'category', 'unit', 'packQty', 'packPrice', 'lowAlert'].some(key =>
           String(existing[key] ?? '') !== String(itemData[key] ?? '')
         );
-        const stockChanged = Number(existing.stock || 0) !== Number(itemData.stock || 0);
+        const stockChanged = existing.stock == null || Number(existing.stock) !== Number(itemData.stock);
         config.ingredients[editingStockIndex] = Object.assign({}, existing, itemData);
         const publishedIds = new Set((publishedConfig?.ingredients || []).map(ing => String(ing.id)));
-        if (stockChanged && publishedIds.has(editedIngredientId)) stockSnapshot = { id: editedIngredientId, stock: itemData.stock };
-        if (definitionChanged || !publishedIds.has(editedIngredientId)) markConfigDraft();
+        // A historical cloud definition may exist even if Ingredients was empty.
+        // The backend will restore only metadata and write this user-confirmed balance.
+        const isCloudDefined = publishedIds.has(editedIngredientId);
+        if (isCloudDefined) stockSnapshot = { id: editedIngredientId, stock: itemData.stock }; // Explicit Edit + Save confirms this balance, even if unchanged locally.
+        if (definitionChanged || !isCloudDefined) markConfigDraft();
         else saveLocalConfig();
       } else {
         config.ingredients.push(Object.assign({ id: 'ing_' + Date.now() }, itemData));
@@ -4202,7 +4286,7 @@
           updatePublishedIngredientStock(editedIngredientId, itemData.stock);
           showToast(`${name} inventory details saved. Stock quantity synced to the cloud.`);
         } else {
-          showToast(`${name} saved locally. Stock quantity is queued and will sync when the cloud is available.`, true);
+          showToast(`${name}: cloud save not confirmed — ${result?.error || 'Check backend deployment'}. Local value remains queued.`, true);
         }
       } else {
         showToast(definitionChanged ? `${name} saved as a local settings draft.` : `${name} inventory updated.`);
@@ -4626,7 +4710,7 @@
             } else if (res?.error === 'CONFLICT') {
               showToast('This order changed on another device. The latest cloud version is being loaded.', true);
               await syncFromCloud(true, true);
-            } else showToast('Updated on this device (cloud sync failed).', true);
+            } else showToast(`Order updated locally only: ${res?.message || res?.error || 'Cloud not reachable'}. Verify cloud sync.`, true);
           } else showToast('Order updated and ingredient stock adjusted!');
         }
       } else {
@@ -4652,7 +4736,7 @@
               ? 'Order saved, inventory updated and Calendar reminder created!'
               : 'Order saved to Google Sheets and inventory updated!');
             renderDashboardAll();
-          } else showToast('Saved on this device (cloud sync failed).', true);
+          } else showToast(`Order saved locally only: ${res?.message || res?.error || 'Cloud not reachable'}. Please verify before continuing.`, true);
         } else showToast('Order saved and ingredient quantities deducted from inventory!');
       }
 
