@@ -6,7 +6,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="theme-color" content="#1c1917" />
-  <title>AF Kitchen Command Center — English UI v11.0</title>
+  <title>AF Kitchen Command Center — English UI v11.1</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -690,7 +690,7 @@
 
           <!-- Status Filter Pills -->
           <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-            <button type="button" onclick="setOrdersListStatus('all')" id="olist-st-all" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0">All Statuses</button>
+            <button type="button" onclick="setOrdersListStatus('all')" id="olist-st-all" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-stone-900 text-white shrink-0">All Statuses</button>
             <button type="button" onclick="setOrdersListStatus('Active')" id="olist-st-Active" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0">Active</button>
             <button type="button" onclick="setOrdersListStatus('Completed')" id="olist-st-Completed" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0">Completed</button>
             <button type="button" onclick="setOrdersListStatus('Deposit')" id="olist-st-Deposit" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0">Deposit / Balance</button>
@@ -699,11 +699,11 @@
 
           <!-- Payment Method (Online / Cash) & Delivery Method (Pickup / COD) Pills -->
           <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-            <button type="button" onclick="setOrdersListPayMethod('all')" id="olist-pm-all" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0">All Payments</button>
+            <button type="button" onclick="setOrdersListPayMethod('all')" id="olist-pm-all" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-stone-900 text-white shrink-0">All Payments</button>
             <button type="button" onclick="setOrdersListPayMethod('Online')" id="olist-pm-Online" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0">Online</button>
             <button type="button" onclick="setOrdersListPayMethod('Cash')" id="olist-pm-Cash" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0">Cash</button>
             <span class="text-stone-300">|</span>
-            <button type="button" onclick="setOrdersListDelivery('all')" id="olist-dl-all" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0">Pickup &amp; COD</button>
+            <button type="button" onclick="setOrdersListDelivery('all')" id="olist-dl-all" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-stone-900 text-white shrink-0">Pickup &amp; COD</button>
             <button type="button" onclick="setOrdersListDelivery('Pickup')" id="olist-dl-Pickup" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0">Pickup</button>
             <button type="button" onclick="setOrdersListDelivery('COD')" id="olist-dl-COD" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0">COD</button>
           </div>
@@ -1678,7 +1678,7 @@
     let ordersFilterPanelOpen = false;
     let nextOrderIndex = 0;
     let ordersListFilter = {
-      preset: 'all', from: '', to: '', status: 'all', payMethod: 'all', delivery: 'all', search: '', sort: 'upcoming'
+      preset: 'all', from: '', to: '', status: [], payMethod: [], delivery: [], search: '', sort: 'upcoming'
     };
 
     let stockFilter = { category: 'all', search: '', sort: 'low' };
@@ -2436,43 +2436,34 @@
       renderOrdersSection();
     }
 
-    function setOrdersListStatus(st) {
-      ordersListFilter.status = st;
-      ['all', 'Active', 'Completed', 'Deposit', 'Paid'].forEach(k => {
-        const el = document.getElementById(`olist-st-${k}`);
-        if (el) {
-          el.className = (k === st && k !== 'all')
-            ? 'px-2.5 py-1 rounded-lg text-[10px] font-bold bg-stone-900 text-white shrink-0'
-            : 'px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0';
-        }
+    // Multi-select: selections within a group use OR; groups combine with AND.
+    function toggleOrderFilterSelection(field, value, choices, prefix, activeClass) {
+      const current = Array.isArray(ordersListFilter[field]) ? ordersListFilter[field] : [];
+      ordersListFilter[field] = value === 'all' ? [] :
+        (current.includes(value) ? current.filter(x => x !== value) : [...current, value]);
+      const selected = ordersListFilter[field];
+      choices.forEach(k => {
+        const el = document.getElementById(`${prefix}${k}`);
+        if (!el) return;
+        const isActive = k === 'all' ? selected.length === 0 : selected.includes(k);
+        el.className = isActive
+          ? `px-2.5 py-1 rounded-lg text-[10px] font-bold ${activeClass} shrink-0`
+          : 'px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0';
+        el.setAttribute('aria-pressed', String(isActive));
       });
       renderOrdersSection();
+    }
+
+    function setOrdersListStatus(st) {
+      toggleOrderFilterSelection('status', st, ['all', 'Active', 'Completed', 'Deposit', 'Paid'], 'olist-st-', 'bg-stone-900 text-white');
     }
 
     function setOrdersListPayMethod(pm) {
-      ordersListFilter.payMethod = pm;
-      ['all', 'Online', 'Cash'].forEach(k => {
-        const el = document.getElementById(`olist-pm-${k}`);
-        if (el) {
-          el.className = (k === pm && k !== 'all')
-            ? 'px-2.5 py-1 rounded-lg text-[10px] font-bold bg-emerald-700 text-white shrink-0'
-            : 'px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0';
-        }
-      });
-      renderOrdersSection();
+      toggleOrderFilterSelection('payMethod', pm, ['all', 'Online', 'Cash'], 'olist-pm-', 'bg-emerald-700 text-white');
     }
 
     function setOrdersListDelivery(dl) {
-      ordersListFilter.delivery = dl;
-      ['all', 'Pickup', 'COD'].forEach(k => {
-        const el = document.getElementById(`olist-dl-${k}`);
-        if (el) {
-          el.className = (k === dl && k !== 'all')
-            ? 'px-2.5 py-1 rounded-lg text-[10px] font-bold bg-sky-700 text-white shrink-0'
-            : 'px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0';
-        }
-      });
-      renderOrdersSection();
+      toggleOrderFilterSelection('delivery', dl, ['all', 'Pickup', 'COD'], 'olist-dl-', 'bg-sky-700 text-white');
     }
 
     function setOrdersSort(sortMode) {
@@ -2506,15 +2497,14 @@
     }
 
     function resetOrdersListFilter() {
-      ordersListFilter = { preset: 'all', from: '', to: '', status: 'all', payMethod: 'all', delivery: 'all', search: '', sort: 'upcoming' };
+      ordersListFilter = { preset: 'all', from: '', to: '', status: [], payMethod: [], delivery: [], search: '', sort: 'upcoming' };
       document.getElementById('orders-search-input').value = '';
       document.getElementById('orders-list-from').value = '';
       document.getElementById('orders-list-to').value = '';
       const sortSelect = document.getElementById('orders-sort-select');
       if (sortSelect) sortSelect.value = 'upcoming';
-      setOrdersListStatus('all');
-      setOrdersListPayMethod('all');
-      setOrdersListDelivery('all');
+      ['olist-st-all', 'olist-pm-all', 'olist-dl-all'].forEach(id => { const el = document.getElementById(id); if (el) { el.className = 'px-2.5 py-1 rounded-lg text-[10px] font-bold bg-stone-900 text-white shrink-0'; el.setAttribute('aria-pressed', 'true'); } });
+      [['olist-st-', ['Active','Completed','Deposit','Paid']], ['olist-pm-', ['Online','Cash']], ['olist-dl-', ['Pickup','COD']]].forEach(([prefix, values]) => values.forEach(v => { const el = document.getElementById(prefix + v); if (el) { el.className = 'px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0'; el.setAttribute('aria-pressed', 'false'); } }));
       setOrdersListDatePreset('all');
     }
 
@@ -3621,9 +3611,9 @@
       const footerEl = document.getElementById('orders-list-footer');
       const badgeEl = document.getElementById('orders-count-badge');
 
-      const hasStatusFilter = ordersListFilter.status !== 'all';
-      const hasPaymentFilter = ordersListFilter.payMethod !== 'all';
-      const hasDeliveryFilter = ordersListFilter.delivery !== 'all';
+      const hasStatusFilter = ordersListFilter.status.length > 0;
+      const hasPaymentFilter = ordersListFilter.payMethod.length > 0;
+      const hasDeliveryFilter = ordersListFilter.delivery.length > 0;
       const hasDateFilter = (ordersListFilter.preset || 'all') !== 'all';
       const hasSearchFilter = Boolean((ordersListFilter.search || '').trim());
       const hasAnyFilter = hasStatusFilter || hasPaymentFilter || hasDeliveryFilter || hasDateFilter || hasSearchFilter;
@@ -3642,19 +3632,19 @@
         criteria.push(o => filterOrdersBySpec([o], ordersListFilter).length > 0);
       }
       if (hasStatusFilter) {
-        criteria.push(o => {
-          if (ordersListFilter.status === 'Active') return o.status === 'Active';
-          if (ordersListFilter.status === 'Completed') return o.status === 'Completed';
-          if (ordersListFilter.status === 'Deposit') return (Number(o.total || 0) - Number(o.paidAmount || 0)) > 0;
-          if (ordersListFilter.status === 'Paid') return (Number(o.total || 0) - Number(o.paidAmount || 0)) <= 0;
-          return true;
-        });
+        criteria.push(o => ordersListFilter.status.some(st => {
+          if (st === 'Active') return o.status === 'Active';
+          if (st === 'Completed') return o.status === 'Completed';
+          if (st === 'Deposit') return (Number(o.total || 0) - Number(o.paidAmount || 0)) > 0;
+          if (st === 'Paid') return (Number(o.total || 0) - Number(o.paidAmount || 0)) <= 0;
+          return false;
+        }));
       }
       if (hasPaymentFilter) {
-        criteria.push(o => (o.paymentMethod || 'Online') === ordersListFilter.payMethod);
+        criteria.push(o => ordersListFilter.payMethod.includes(o.paymentMethod || 'Online'));
       }
       if (hasDeliveryFilter) {
-        criteria.push(o => (o.deliveryMethod || 'Pickup') === ordersListFilter.delivery);
+        criteria.push(o => ordersListFilter.delivery.includes(o.deliveryMethod || 'Pickup'));
       }
 
       // A record must satisfy every selected filter. Unselected groups do not restrict results.
