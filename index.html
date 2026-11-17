@@ -6,7 +6,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="theme-color" content="#1c1917" />
-  <title>AF Kitchen Command Center — English UI v10.0</title>
+  <title>AF Kitchen Command Center — English UI v11.0</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -469,7 +469,7 @@
           <i id="sync-spin-icon" data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
           <span class="hidden sm:inline">Sync</span>
         </button>
-        <button type="button" onclick="openSetupWizard(1)" class="text-xs font-bold text-stone-700 bg-white hover:bg-stone-100 border border-stone-200 px-2.5 py-2 rounded-xl flex items-center gap-1 shadow-sm">
+        <button type="button" onclick="openSetupWizard()" class="text-xs font-bold text-stone-700 bg-white hover:bg-stone-100 border border-stone-200 px-2.5 py-2 rounded-xl flex items-center gap-1 shadow-sm">
           <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5 text-amber-600"></i>
           <span class="hidden sm:inline">Setup</span>
         </button>
@@ -690,7 +690,7 @@
 
           <!-- Status Filter Pills -->
           <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-            <button type="button" onclick="setOrdersListStatus('all')" id="olist-st-all" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-stone-900 text-white shrink-0">All Statuses</button>
+            <button type="button" onclick="setOrdersListStatus('all')" id="olist-st-all" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0">All Statuses</button>
             <button type="button" onclick="setOrdersListStatus('Active')" id="olist-st-Active" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0">Active</button>
             <button type="button" onclick="setOrdersListStatus('Completed')" id="olist-st-Completed" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0">Completed</button>
             <button type="button" onclick="setOrdersListStatus('Deposit')" id="olist-st-Deposit" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0">Deposit / Balance</button>
@@ -699,18 +699,18 @@
 
           <!-- Payment Method (Online / Cash) & Delivery Method (Pickup / COD) Pills -->
           <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-            <button type="button" onclick="setOrdersListPayMethod('all')" id="olist-pm-all" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-emerald-700 text-white shrink-0">All Payments</button>
+            <button type="button" onclick="setOrdersListPayMethod('all')" id="olist-pm-all" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0">All Payments</button>
             <button type="button" onclick="setOrdersListPayMethod('Online')" id="olist-pm-Online" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0">Online</button>
             <button type="button" onclick="setOrdersListPayMethod('Cash')" id="olist-pm-Cash" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0">Cash</button>
             <span class="text-stone-300">|</span>
-            <button type="button" onclick="setOrdersListDelivery('all')" id="olist-dl-all" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-sky-700 text-white shrink-0">Pickup &amp; COD</button>
+            <button type="button" onclick="setOrdersListDelivery('all')" id="olist-dl-all" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0">Pickup &amp; COD</button>
             <button type="button" onclick="setOrdersListDelivery('Pickup')" id="olist-dl-Pickup" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0">Pickup</button>
             <button type="button" onclick="setOrdersListDelivery('COD')" id="olist-dl-COD" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0">COD</button>
           </div>
 
           <!-- Date Filter Pills -->
           <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-            <button type="button" onclick="setOrdersListDatePreset('all')" id="olist-dt-all" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-amber-500 text-white shrink-0">All Dates</button>
+            <button type="button" onclick="setOrdersListDatePreset('all')" id="olist-dt-all" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0">All Dates</button>
             <button type="button" onclick="setOrdersListDatePreset('today')" id="olist-dt-today" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0">Today</button>
             <button type="button" onclick="setOrdersListDatePreset('upcoming')" id="olist-dt-upcoming" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0">Today onwards</button>
             <button type="button" onclick="setOrdersListDatePreset('week')" id="olist-dt-week" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0">This Week</button>
@@ -1462,6 +1462,7 @@
     const CONFIG_DRAFT_KEY = 'cloud_command_center_config_draft_v1';
     const CLOUD_SYNC_META_KEY = 'af_kitchen_cloud_sync_meta_v1';
     const PENDING_STOCK_KEY = 'af_kitchen_pending_stock_changes_v1';
+    const SETUP_STEP_KEY = 'af_kitchen_setup_last_step_v1';
     const AUTO_SYNC_INTERVAL_MS = 15000;
 
     function getTodayISO() {
@@ -1647,7 +1648,7 @@
     config.appearance = Object.assign({}, getDefaultAppearance(), config.appearance || {});
     let orders = JSON.parse(localStorage.getItem(ORDERS_KEY) || 'null') || getDefaultOrders();
     normalizeOrderStatuses();
-    let activeSetupStep = 1;
+    let activeSetupStep = Math.max(1, Math.min(4, Number(localStorage.getItem(SETUP_STEP_KEY) || 1)));
     let activeRecipeTarget = config.sizes[0]?.id || 'size_6';
     let selectedCalDate = getTodayISO();
     let calYear = new Date().getFullYear();
@@ -1659,6 +1660,9 @@
     let pendingCloudActionCount = 0;
     let autoSyncTimer = null;
     let isFlushingPendingStock = false;
+    let cloudMutationEpoch = 0;
+    let syncRefreshNeeded = false;
+    let deferredSyncTimer = null;
     let hasConfigDraft = localStorage.getItem(CONFIG_DRAFT_KEY) === '1';
     let publishedConfig = null;
     try { publishedConfig = JSON.parse(localStorage.getItem(PUBLISHED_CONFIG_KEY) || 'null'); } catch (e) { publishedConfig = null; }
@@ -1995,6 +1999,9 @@
       if (!config.scriptUrl || !config.pin || navigator.onLine === false) return false;
 
       isFlushingPendingStock = true;
+      // Invalidate any GET that started before this inventory write. Its older
+      // response must never be allowed to restore a stale stock snapshot.
+      cloudMutationEpoch++;
       try {
         const response = await fetch(config.scriptUrl, {
           method: 'POST',
@@ -2006,39 +2013,36 @@
 
         localStorage.removeItem(PENDING_STOCK_KEY);
         rememberCloudSync(json.version, json.serverTime);
+        const serverStocks = new Map((Array.isArray(json.stockValues) ? json.stockValues : []).map(x => [String(x.id), Number(x.stock)]));
         const touchedIds = new Set([
           ...pending.stockSnapshots.map(x => String(x.id)),
           ...pending.stockDeltas.map(x => String(x.id))
         ]);
         touchedIds.forEach(id => {
           const localItem = (config.ingredients || []).find(item => String(item.id) === id);
-          if (localItem) updatePublishedIngredientStock(id, localItem.stock);
+          if (!localItem) return;
+          if (serverStocks.has(id) && Number.isFinite(serverStocks.get(id))) localItem.stock = serverStocks.get(id);
+          updatePublishedIngredientStock(id, localItem.stock);
         });
-        updateSyncHeaderBadge(true, 'Pending stock changes synced');
+        saveLocalConfig();
+        updateSyncHeaderBadge(true, 'Inventory saved to cloud');
         return true;
       } catch (e) {
         return false;
       } finally {
         isFlushingPendingStock = false;
+        scheduleDeferredCloudSync();
       }
     }
 
     async function syncOperationalStockToCloud(stockChanges = null) {
       if (!stockChanges) return null;
-      if (hasPendingStockChanges()) {
-        const flushed = await flushPendingStockChanges();
-        if (!flushed) {
-          queuePendingStockChanges(stockChanges);
-          return { ok: false, queued: true, error: 'PENDING_STOCK_SYNC_FAILED' };
-        }
-      }
-      if (!config.scriptUrl) {
-        queuePendingStockChanges(stockChanges);
-        return { ok: false, queued: true, error: 'NO_CLOUD_URL' };
-      }
-
-      const result = await pushCloudAction(Object.assign({ action: 'updateStock' }, stockChanges));
-      if (result?.ok) {
+      // Queue first, before any network request. This protects the local value
+      // from a concurrent background download while the write is in flight.
+      queuePendingStockChanges(stockChanges);
+      if (!config.scriptUrl) return { ok: false, queued: true, error: 'NO_CLOUD_URL' };
+      const flushed = await flushPendingStockChanges();
+      if (flushed) {
         const ids = new Set([
           ...(stockChanges.stockSnapshots || []).map(x => String(x.id)),
           ...(stockChanges.stockDeltas || []).map(x => String(x.id))
@@ -2047,10 +2051,9 @@
           const localItem = (config.ingredients || []).find(item => String(item.id) === id);
           if (localItem) updatePublishedIngredientStock(id, localItem.stock);
         });
-      } else {
-        queuePendingStockChanges(stockChanges);
+        return { ok: true, changed: true };
       }
-      return result;
+      return { ok: false, queued: true, error: 'STOCK_SYNC_FAILED' };
     }
 
     async function publishConfigToCloud() {
@@ -2438,7 +2441,7 @@
       ['all', 'Active', 'Completed', 'Deposit', 'Paid'].forEach(k => {
         const el = document.getElementById(`olist-st-${k}`);
         if (el) {
-          el.className = k === st
+          el.className = (k === st && k !== 'all')
             ? 'px-2.5 py-1 rounded-lg text-[10px] font-bold bg-stone-900 text-white shrink-0'
             : 'px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0';
         }
@@ -2451,7 +2454,7 @@
       ['all', 'Online', 'Cash'].forEach(k => {
         const el = document.getElementById(`olist-pm-${k}`);
         if (el) {
-          el.className = k === pm
+          el.className = (k === pm && k !== 'all')
             ? 'px-2.5 py-1 rounded-lg text-[10px] font-bold bg-emerald-700 text-white shrink-0'
             : 'px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0';
         }
@@ -2464,7 +2467,7 @@
       ['all', 'Pickup', 'COD'].forEach(k => {
         const el = document.getElementById(`olist-dl-${k}`);
         if (el) {
-          el.className = k === dl
+          el.className = (k === dl && k !== 'all')
             ? 'px-2.5 py-1 rounded-lg text-[10px] font-bold bg-sky-700 text-white shrink-0'
             : 'px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0';
         }
@@ -2482,7 +2485,7 @@
       ['all', 'today', 'upcoming', 'week', 'month', 'custom'].forEach(p => {
         const el = document.getElementById(`olist-dt-${p}`);
         if (el) {
-          el.className = p === preset
+          el.className = (p === preset && p !== 'all')
             ? 'px-2.5 py-1 rounded-lg text-[10px] font-bold bg-amber-500 text-white shrink-0'
             : 'px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-stone-200 text-stone-600 shrink-0';
         }
@@ -2700,10 +2703,17 @@
           }
         }
         const meta = getCloudSyncMeta();
+        const requestMutationEpoch = cloudMutationEpoch;
         const since = !forceFull && meta.version ? `&since=${encodeURIComponent(meta.version)}` : '';
         const full = forceFull ? '&full=1' : '';
         const res = await fetch(`${config.scriptUrl}?pin=${encodeURIComponent(config.pin)}${since}${full}`, { cache: 'no-store' });
         const json = await res.json();
+        // A write may have completed while this GET was in flight. Discard the
+        // older snapshot and perform a fresh check after writes have settled.
+        if (requestMutationEpoch !== cloudMutationEpoch || pendingCloudActionCount > 0 || hasPendingStockChanges()) {
+          syncRefreshNeeded = true;
+          return;
+        }
         if (json.ok && json.changed === false) {
           rememberCloudSync(json.version, json.serverTime);
           if (!silent) showToast('Everything is up to date.');
@@ -2744,6 +2754,7 @@
       } finally {
         isSyncing = false;
         if (spin) spin.classList.remove('animate-spin');
+        scheduleDeferredCloudSync();
       }
     }
 
@@ -2754,6 +2765,7 @@
         if (!flushed) return { ok: false, error: 'PENDING_STOCK_SYNC_FAILED', message: 'Pending inventory changes could not be synced first.' };
       }
       const spin = document.getElementById('sync-spin-icon');
+      cloudMutationEpoch++;
       pendingCloudActionCount++;
       if (spin) spin.classList.add('animate-spin');
 
@@ -2807,7 +2819,20 @@
       } finally {
         pendingCloudActionCount = Math.max(0, pendingCloudActionCount - 1);
         if (spin) spin.classList.remove('animate-spin');
+        scheduleDeferredCloudSync();
       }
+    }
+
+    function scheduleDeferredCloudSync() {
+      if (!syncRefreshNeeded || deferredSyncTimer || isSyncing || pendingCloudActionCount > 0 || isFlushingPendingStock || hasPendingStockChanges()) return;
+      deferredSyncTimer = window.setTimeout(() => {
+        deferredSyncTimer = null;
+        if (!syncRefreshNeeded || isSyncing || pendingCloudActionCount > 0 || hasPendingStockChanges()) return;
+        syncRefreshNeeded = false;
+        if (document.visibilityState === 'visible' && sessionStorage.getItem(SESSION_UNLOCK_KEY) === '1' && config.scriptUrl) {
+          syncFromCloud(true, false);
+        }
+      }, 250);
     }
 
     function startAutoSync() {
@@ -2849,8 +2874,13 @@
     // SETUP WIZARD RENDERING & LOGIC
     // =========================================================
     function goSetupStep(step) {
-      syncStep1Inputs();
-      activeSetupStep = step;
+      // Only read Step 1 controls when the user is actually leaving Step 1.
+      // Hidden stale controls must never overwrite the saved configuration.
+      const setupIsVisible = !document.getElementById('setup-view')?.classList.contains('hidden');
+      if (setupIsVisible && activeSetupStep === 1) syncStep1Inputs();
+      activeSetupStep = Math.max(1, Math.min(4, Number(step) || 1));
+      localStorage.setItem(SETUP_STEP_KEY, String(activeSetupStep));
+      step = activeSetupStep;
       [1, 2, 3, 4].forEach(s => {
         document.getElementById(`setup-step-${s}`).classList.toggle('hidden', s !== step);
         const tab = document.getElementById(`step-tab-${s}`);
@@ -2867,6 +2897,7 @@
     function syncStep1Inputs() {
       const biz = document.getElementById('cfg-biz-name');
       if (!biz) return;
+      const before = JSON.stringify([config.bizName, config.ownerName, config.tagline, config.currency, config.maxFlavours]);
       config.bizName = biz.value.trim() || 'My Business';
       config.ownerName = document.getElementById('cfg-owner-name').value.trim();
       config.tagline = document.getElementById('cfg-tagline').value.trim();
@@ -2875,6 +2906,9 @@
       config.scriptUrl = document.getElementById('cfg-script-url').value.trim();
       const maxF = parseInt(document.getElementById('cfg-max-flavours')?.value || '2', 10);
       config.maxFlavours = isNaN(maxF) ? 2 : Math.max(1, maxF);
+      const after = JSON.stringify([config.bizName, config.ownerName, config.tagline, config.currency, config.maxFlavours]);
+      saveLocalConfig();
+      if (before !== after) markConfigDraft();
     }
 
     function renderStep1() {
@@ -3239,7 +3273,7 @@
     }
 
     function completeSetupAndLaunch() {
-      syncStep1Inputs();
+      if (activeSetupStep === 1) syncStep1Inputs();
       config.isConfigured = true;
       markConfigDraft();
       sessionStorage.setItem(SESSION_UNLOCK_KEY, '1');
@@ -3250,7 +3284,7 @@
     }
 
     function exportConfigJSON() {
-      syncStep1Inputs();
+      if (activeSetupStep === 1) syncStep1Inputs();
       const exportObj = Object.assign({}, config);
       delete exportObj.pin;
       const blob = new Blob([JSON.stringify(exportObj, null, 2)], { type: 'application/json' });
@@ -3287,16 +3321,25 @@
     // =========================================================
     // DASHBOARD NAVIGATION & RENDERING
     // =========================================================
-    function openSetupWizard(step = 1) {
+    function openSetupWizard(step = null) {
+      // Reopen the last active step. Refresh Step 1 controls from the latest
+      // saved config before showing the wizard so hidden stale values cannot
+      // overwrite data received from cloud on another device.
+      const requestedStep = step == null ? activeSetupStep : step;
+      renderStep1();
       document.getElementById('lock-view').classList.add('hidden');
       document.getElementById('dashboard-view').classList.add('hidden');
       document.getElementById('setup-view').classList.remove('hidden');
       document.getElementById('btn-back-dashboard').classList.remove('hidden');
       document.getElementById('btn-back-dashboard').classList.add('flex');
-      goSetupStep(step);
+      goSetupStep(requestedStep);
     }
 
     function switchToDashboard() {
+      if (!document.getElementById('setup-view')?.classList.contains('hidden')) {
+        if (activeSetupStep === 1) syncStep1Inputs();
+        saveLocalConfig();
+      }
       document.getElementById('lock-view').classList.add('hidden');
       document.getElementById('setup-view').classList.add('hidden');
       document.getElementById('dashboard-view').classList.remove('hidden');
@@ -3585,9 +3628,14 @@
       const hasSearchFilter = Boolean((ordersListFilter.search || '').trim());
       const hasAnyFilter = hasStatusFilter || hasPaymentFilter || hasDeliveryFilter || hasDateFilter || hasSearchFilter;
 
-      // If a filter is selected, search across the entire order history (not just the default five).
+      // With no active filters, show the next five dated orders from today onward.
+      // Past and undated records are not mixed into the default upcoming view.
+      const todayISO = getTodayISO();
+      const upcomingFromToday = orders
+        .filter(order => /^\d{4}-\d{2}-\d{2}$/.test(String(order.date || '')) && String(order.date) >= todayISO)
+        .sort((a, b) => getOrderDateTimeKey(a).localeCompare(getOrderDateTimeKey(b)));
       const prioritizedOrders = sortOrderRecords(orders, 'upcoming');
-      const baseOrders = (ordersListExpanded || hasAnyFilter) ? prioritizedOrders : prioritizedOrders.slice(0, 5);
+      const baseOrders = hasAnyFilter ? prioritizedOrders : (ordersListExpanded ? prioritizedOrders : upcomingFromToday.slice(0, 5));
       const criteria = [];
 
       if (hasDateFilter) {
@@ -3622,9 +3670,9 @@
         );
       }
       let displayOrders = sortOrderRecords(filtered, ordersListFilter.sort || 'upcoming');
-      badgeEl.textContent = (ordersListExpanded || hasAnyFilter)
+      badgeEl.textContent = hasAnyFilter
         ? `${displayOrders.length} of ${orders.length} records`
-        : `${displayOrders.length} of ${Math.min(5, orders.length)} upcoming orders`;
+        : (ordersListExpanded ? `${displayOrders.length} of ${orders.length} records` : `${displayOrders.length} upcoming from today`);
 
       if (!displayOrders.length) {
         listEl.innerHTML = `<div class="text-center py-6 text-xs text-stone-400">No matching orders found.</div>`;
@@ -4979,6 +5027,13 @@
       if (sessionStorage.getItem(SESSION_UNLOCK_KEY) === '1' && config.scriptUrl) syncFromCloud(true, false);
     });
 
+
+    document.addEventListener('input', event => {
+      const target = event.target;
+      if (!target || !['cfg-biz-name', 'cfg-owner-name', 'cfg-tagline', 'cfg-currency', 'cfg-pin', 'cfg-script-url', 'cfg-max-flavours'].includes(target.id)) return;
+      syncStep1Inputs();
+    });
+
     // Setup edits are local drafts. Cloud settings only change after explicit publish.
     document.addEventListener('change', event => {
       const target = event.target;
@@ -5013,7 +5068,8 @@
         }
       } else {
         document.getElementById('setup-view').classList.remove('hidden');
-        goSetupStep(1);
+        renderStep1();
+        goSetupStep(activeSetupStep);
       }
       if (window.lucide) lucide.createIcons();
     });
