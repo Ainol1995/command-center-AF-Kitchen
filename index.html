@@ -611,6 +611,30 @@
         </div>
       </div>
 
+      <!-- DAILY INGREDIENT ESTIMATE — READ ONLY, based on open orders by delivery date -->
+      <section id="home-daily-ingredient-estimate" class="card-soft rounded-2xl p-4 space-y-3 border border-stone-200" aria-label="Daily Ingredient Estimate">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+          <div class="flex items-start gap-2.5 min-w-0">
+            <span class="w-9 h-9 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0"><i data-lucide="chef-hat" class="w-4 h-4"></i></span>
+            <div>
+              <h2 class="text-sm font-extrabold text-stone-900">Daily Ingredient Estimate</h2>
+              <p class="text-[10px] text-stone-500 mt-0.5">Estimated recipe usage for open orders by delivery date.</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <label class="text-[10px] font-bold text-stone-500" for="daily-estimate-date">Date</label>
+            <input type="date" id="daily-estimate-date" onchange="onDailyEstimateDateChange(this.value)" class="text-[11px] rounded-lg px-2 py-1.5 border border-stone-200 bg-white font-mono-num" />
+          </div>
+        </div>
+        <div id="daily-estimate-summary" class="text-xs text-stone-500"></div>
+        <div id="daily-estimate-ingredients" class="space-y-1.5"></div>
+        <div class="border-t border-stone-100 pt-2">
+          <div class="text-[10px] font-extrabold uppercase tracking-wide text-stone-500 mb-1.5">Next 7 days (tap a day)</div>
+          <div id="daily-estimate-week" class="grid grid-cols-2 sm:grid-cols-4 gap-1.5"></div>
+        </div>
+        <p class="text-[10px] leading-relaxed text-amber-800 bg-amber-50 border border-amber-100 rounded-lg p-2">Planning estimate only. Current AF Kitchen deducts ingredients when an order is placed; this card does not deduct stock again. The shown stock balance may already reflect these orders, so do not subtract the estimate from it a second time. Delivery date may differ from your actual baking date.</p>
+      </section>
+
       <!-- INVENTORY LOW-STOCK NOTIFICATIONS: ONLY ITEMS THAT NEED RESTOCKING -->
       <div id="home-low-stock-card" class="card-soft rounded-2xl p-4 space-y-3 border border-emerald-200/80 bg-gradient-to-br from-emerald-50/70 to-white">
         <div class="flex items-start justify-between gap-3">
@@ -3429,7 +3453,89 @@
     function renderHome() {
       renderNextOrderCard();
       renderHomeKpis();
+      renderDailyIngredientEstimate();
       renderOrdersSection();
+      if (window.lucide) lucide.createIcons();
+    }
+
+    // Read-only daily planning estimate; never changes inventory or sends cloud requests.
+    // Uses the existing recipe-usage calculator so addons, flavours and quantities agree with order stock logic.
+    let dailyEstimateSelectedDate = getTodayISO();
+
+    function onDailyEstimateDateChange(dateValue) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(String(dateValue || ''))) return;
+      dailyEstimateSelectedDate = dateValue;
+      renderDailyIngredientEstimate();
+    }
+
+    function getDailyOpenOrders(dateValue) {
+      return orders.filter(o => String(o.date || '') === dateValue && !isOrderCompleted(o));
+    }
+
+    function getDailyEstimatedUsage(dateValue) {
+      const activeOrders = getDailyOpenOrders(dateValue);
+      const totals = new Map();
+      activeOrders.forEach(order => {
+        const usage = getOrderIngredientUsageMap(order);
+        Object.entries(usage).forEach(([id, value]) => {
+          const qty = Number(value);
+          if (!Number.isFinite(qty) || qty <= 0) return;
+          totals.set(String(id), (totals.get(String(id)) || 0) + qty);
+        });
+      });
+      return { activeOrders, totals };
+    }
+
+    function addDaysToIsoDate(dateStr, days) {
+      const [y, m, d] = dateStr.split('-').map(Number);
+      const utc = new Date(Date.UTC(y, m - 1, d + days));
+      return utc.toISOString().slice(0, 10);
+    }
+
+    function renderDailyIngredientEstimate() {
+      const dateInput = document.getElementById('daily-estimate-date');
+      const summary = document.getElementById('daily-estimate-summary');
+      const list = document.getElementById('daily-estimate-ingredients');
+      const week = document.getElementById('daily-estimate-week');
+      if (!dateInput || !summary || !list || !week) return;
+      dateInput.value = dailyEstimateSelectedDate;
+      const { activeOrders, totals } = getDailyEstimatedUsage(dailyEstimateSelectedDate);
+      const units = activeOrders.reduce((sum, order) => sum + getOrderTotalUnits(order), 0);
+      summary.textContent = `${activeOrders.length} open order(s) · ${units} item(s) · ${totals.size} ingredient(s) estimated`;
+      if (!activeOrders.length) {
+        list.innerHTML = '<div class="rounded-xl bg-stone-50 border border-stone-100 px-3 py-3 text-xs text-stone-500">No open orders on this delivery date.</div>';
+      } else if (!totals.size) {
+        list.innerHTML = '<div class="rounded-xl bg-amber-50 border border-amber-100 px-3 py-3 text-xs text-amber-900">Orders found, but no ingredient quantities could be calculated. Check the recipes assigned to their sizes, flavours and add-ons in Setup.</div>';
+      } else {
+        const byId = new Map((config.ingredients || []).map(ing => [String(ing.id), ing]));
+        list.innerHTML = [...totals.entries()].sort((a, b) => {
+          const an = (byId.get(a[0])?.name || a[0]).toLowerCase();
+          const bn = (byId.get(b[0])?.name || b[0]).toLowerCase();
+          return an.localeCompare(bn);
+        }).map(([id, qty]) => {
+          const ing = byId.get(id);
+          const name = escapeHtmlText(ing?.name || `Unknown ingredient (${id})`);
+          const unit = escapeHtmlText(getUnitDisplayLabel(ing?.unit || 'unit'));
+          const balance = ing && ing.stock != null && ing.stock !== '' && Number.isFinite(Number(ing.stock))
+            ? Number(ing.stock).toLocaleString('en-US', {maximumFractionDigits: 2}) + ' ' + unit
+            : 'Not confirmed';
+          return `<div class="rounded-xl border border-stone-100 bg-stone-50/70 px-3 py-2 flex items-center justify-between gap-2">
+            <div class="min-w-0"><div class="text-[11px] font-bold text-stone-800 truncate">${name}</div><div class="text-[9px] text-stone-400">Current recorded balance: ${balance}</div></div>
+            <div class="text-right shrink-0"><div class="text-[12px] font-mono-num font-extrabold text-stone-900">${qty.toLocaleString('en-US', {maximumFractionDigits: 2})} ${unit}</div><div class="text-[9px] text-stone-400">Estimated usage</div></div>
+          </div>`;
+        }).join('');
+      }
+      const today = getTodayISO();
+      week.innerHTML = Array.from({length: 7}, (_, index) => {
+        const dateStr = addDaysToIsoDate(today, index);
+        const day = getDailyOpenOrders(dateStr);
+        const selected = dateStr === dailyEstimateSelectedDate;
+        const label = index === 0 ? 'Today' : new Date(`${dateStr}T12:00:00`).toLocaleDateString('en-MY', {weekday:'short', day:'numeric', month:'short'});
+        return `<button type="button" onclick="onDailyEstimateDateChange('${dateStr}')" class="text-left rounded-xl border px-2.5 py-2 ${selected ? 'border-amber-400 bg-amber-50' : 'border-stone-200 bg-white hover:bg-stone-50'}">
+          <div class="text-[10px] font-extrabold ${selected ? 'text-amber-900' : 'text-stone-700'}">${escapeHtmlText(label)}</div>
+          <div class="text-[10px] text-stone-500">${day.length} open order(s)</div>
+        </button>`;
+      }).join('');
       if (window.lucide) lucide.createIcons();
     }
 
