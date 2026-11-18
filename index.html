@@ -621,13 +621,20 @@
               <p class="text-[10px] text-stone-500 mt-0.5">Estimated recipe usage for open orders by delivery date.</p>
             </div>
           </div>
-          <div class="flex items-center gap-2">
-            <label class="text-[10px] font-bold text-stone-500" for="daily-estimate-date">Date</label>
-            <input type="date" id="daily-estimate-date" onchange="onDailyEstimateDateChange(this.value)" class="text-[11px] rounded-lg px-2 py-1.5 border border-stone-200 bg-white font-mono-num" />
+          <div class="flex flex-col gap-1.5 w-full sm:w-auto sm:min-w-[220px]">
+            <label class="text-[10px] font-bold text-stone-500" for="daily-estimate-preset">Planning period</label>
+            <select id="daily-estimate-preset" onchange="onDailyEstimatePresetChange(this.value)" class="w-full px-2 py-2 rounded-lg text-xs border border-stone-200 bg-white">
+              <option value="today">Today</option><option value="tomorrow">Tomorrow</option><option value="next3">Next 3 Days</option><option value="next7">Next 7 Days</option><option value="custom">Custom Range</option>
+            </select>
+            <div id="daily-estimate-custom" class="hidden grid grid-cols-2 gap-2">
+              <label class="text-[10px] text-stone-500">From<input type="date" id="daily-estimate-from" onchange="onDailyEstimateCustomChange()" class="w-full min-w-0 text-[11px] rounded-lg p-2 border border-stone-200 bg-white" /></label>
+              <label class="text-[10px] text-stone-500">To<input type="date" id="daily-estimate-to" onchange="onDailyEstimateCustomChange()" class="w-full min-w-0 text-[11px] rounded-lg p-2 border border-stone-200 bg-white" /></label>
+            </div>
+            <div id="daily-estimate-single" class="hidden"><label class="text-[10px] text-stone-500" for="daily-estimate-date">Selected date</label><input type="date" id="daily-estimate-date" onchange="onDailyEstimateDateChange(this.value)" class="w-full text-xs rounded-lg p-2 border border-stone-200 bg-white" /></div>
           </div>
         </div>
         <div id="daily-estimate-summary" class="text-xs text-stone-500"></div>
-        <div id="daily-estimate-ingredients" class="space-y-1.5"></div>
+        <div id="daily-estimate-ingredients" class="space-y-2"></div>
         <div class="border-t border-stone-100 pt-2">
           <div class="text-[10px] font-extrabold uppercase tracking-wide text-stone-500 mb-1.5">Next 7 days (tap a day)</div>
           <div id="daily-estimate-week" class="grid grid-cols-2 sm:grid-cols-4 gap-1.5"></div>
@@ -895,6 +902,17 @@
           <div id="an-range-controls-profit"></div>
         </div>
       </div>
+
+      <!-- MATERIAL CONSUMPTION ANALYTICS — estimate from recipe and order data -->
+      <section class="card-soft rounded-2xl p-4 space-y-3" aria-label="Ingredient usage analysis">
+        <div class="flex flex-wrap items-start justify-between gap-2">
+          <div><h2 class="text-sm font-extrabold text-stone-900">Ingredient Usage &amp; Cost Analysis</h2><p class="text-[11px] text-stone-500">Estimated quantities and costs from orders and current recipes/prices.</p></div>
+          <div id="an-range-controls-ingredients" class="w-full sm:w-48"></div>
+        </div>
+        <div id="an-ingredients-summary" class="text-xs font-semibold text-stone-600"></div>
+        <div id="an-ingredients-breakdown" class="space-y-2"></div>
+        <p class="text-[10px] text-amber-800 bg-amber-50 p-2 rounded-lg border border-amber-100">Based on order delivery dates (all statuses), today's recipe quantities and today's pack prices. This is not a historical actual-stock-movement or purchase-cost report. No stock is deducted.</p>
+      </section>
 
       <!-- Smart Business Insights -->
       <div class="rounded-2xl bg-stone-900 text-white p-4 space-y-2.5 shadow-sm">
@@ -1254,7 +1272,7 @@
               <span class="text-xs font-bold text-stone-700">Quantity:</span>
               <div class="flex items-center bg-white border border-stone-300 rounded-xl overflow-hidden">
                 <button type="button" onclick="changeBuilderQty(-1)" class="w-8 h-8 font-extrabold text-stone-700 hover:bg-stone-100">-</button>
-                <span id="ord-builder-qty" class="w-8 text-center text-xs font-mono-num font-extrabold">1</span>
+                <input type="number" inputmode="numeric" pattern="[0-9]*" min="1" max="100000" step="1" value="1" id="ord-builder-qty" oninput="setBuilderQtyManual(this.value, false)" onchange="setBuilderQtyManual(this.value, true)" aria-label="Item quantity" class="w-16 h-8 text-center text-xs font-mono-num font-extrabold border-x border-stone-200 bg-white" />
                 <button type="button" onclick="changeBuilderQty(1)" class="w-8 h-8 font-extrabold text-stone-700 hover:bg-stone-100">+</button>
               </div>
             </div>
@@ -3248,21 +3266,25 @@
           const selectedIng = config.ingredients.find(i => i.id === r.ingId) || config.ingredients[0];
           const rowCost = getUnitCost(selectedIng) * Number(r.qty || 0);
           return `
-            <div class="flex items-center gap-2 bg-stone-50 border border-stone-200 p-2 rounded-xl">
-              <select onchange="config.recipes['${activeRecipeTarget}'][${rIdx}].ingId = this.value; renderStep4(); lucide.createIcons();; markConfigDraft()"
-                class="flex-1 px-2.5 py-2 text-xs font-bold bg-white rounded-lg border border-stone-200">
+            <div class="min-w-0 bg-stone-50 border border-stone-200 p-2.5 rounded-xl space-y-2">
+              <select onchange="config.recipes['${activeRecipeTarget}'][${rIdx}].ingId = this.value; renderStep4(); lucide.createIcons(); markConfigDraft()"
+                class="block w-full min-w-0 px-2.5 py-2 text-xs font-bold bg-white rounded-lg border border-stone-200">
                 ${config.ingredients.map(ing => `<option value="${ing.id}" ${ing.id === r.ingId ? 'selected' : ''}>${ing.name || 'Unnamed Ingredient'} (${getUnitDisplayLabel(ing.unit)})</option>`).join('')}
               </select>
-              <div class="flex items-center bg-white border border-stone-200 rounded-lg px-2 py-1.5">
-                <input type="number" step="any" value="${r.qty}" placeholder="Weight / Quantity"
-                  onchange="config.recipes['${activeRecipeTarget}'][${rIdx}].qty = parseFloat(this.value) || 0; renderStep4(); lucide.createIcons();; markConfigDraft()"
-                  class="w-16 text-xs font-mono-num font-bold text-right focus:shadow-none" />
-                <span class="text-[11px] font-bold text-stone-400 ml-1">${selectedIng ? getUnitDisplayLabel(selectedIng.unit) : 'g'}</span>
+              <div class="flex items-center justify-between gap-2 min-w-0">
+                <div class="flex items-center min-w-0 bg-white border border-stone-200 rounded-lg px-2 py-1.5">
+                  <input type="number" min="0" step="any" value="${r.qty}" placeholder="Quantity"
+                    onchange="config.recipes['${activeRecipeTarget}'][${rIdx}].qty = parseFloat(this.value) || 0; renderStep4(); lucide.createIcons(); markConfigDraft()"
+                    class="w-20 max-w-[25vw] min-w-0 text-xs font-mono-num font-bold text-right focus:shadow-none" />
+                  <span class="text-[11px] font-bold text-stone-400 ml-1 shrink-0">${selectedIng ? getUnitDisplayLabel(selectedIng.unit) : 'g'}</span>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                  <div class="min-w-[82px] px-2 py-2 bg-white border border-stone-200 rounded-lg text-right text-[11px] font-mono-num font-bold text-stone-700">${fmtMoney(rowCost)}</div>
+                  <button type="button" aria-label="Remove ingredient" onclick="config.recipes['${activeRecipeTarget}'].splice(${rIdx}, 1); renderStep4(); lucide.createIcons(); markConfigDraft()" class="w-9 h-9 flex items-center justify-center border border-rose-200 bg-white text-rose-600 hover:bg-rose-50 rounded-lg">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                  </button>
+                </div>
               </div>
-              <span class="text-[11px] font-mono-num font-bold text-stone-600 w-16 text-right">${fmtMoney(rowCost)}</span>
-              <button type="button" onclick="config.recipes['${activeRecipeTarget}'].splice(${rIdx}, 1); renderStep4(); lucide.createIcons();; markConfigDraft()" class="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg">
-                <i data-lucide="x" class="w-3.5 h-3.5"></i>
-              </button>
             </div>
           `;
         }).join('');
@@ -3465,6 +3487,9 @@
     function onDailyEstimateDateChange(dateValue) {
       if (!/^\d{4}-\d{2}-\d{2}$/.test(String(dateValue || ''))) return;
       dailyEstimateSelectedDate = dateValue;
+      dailyEstimatePreset = 'custom';
+      dailyEstimateFrom = dateValue;
+      dailyEstimateTo = dateValue;
       renderDailyIngredientEstimate();
     }
 
@@ -3492,49 +3517,123 @@
       return utc.toISOString().slice(0, 10);
     }
 
+    let dailyEstimatePreset = 'today';
+    let dailyEstimateFrom = getTodayISO();
+    let dailyEstimateTo = getTodayISO();
+
+    function getDailyEstimateRange() {
+      const today = getTodayISO();
+      if (dailyEstimatePreset === 'tomorrow') return [addDaysToIsoDate(today, 1), addDaysToIsoDate(today, 1)];
+      if (dailyEstimatePreset === 'next3') return [today, addDaysToIsoDate(today, 2)];
+      if (dailyEstimatePreset === 'next7') return [today, addDaysToIsoDate(today, 6)];
+      if (dailyEstimatePreset === 'custom') return [dailyEstimateFrom, dailyEstimateTo];
+      return [today, today];
+    }
+
+    function onDailyEstimatePresetChange(preset) {
+      if (!['today','tomorrow','next3','next7','custom'].includes(preset)) return;
+      dailyEstimatePreset = preset;
+      if (preset === 'custom' && dailyEstimateSelectedDate) {
+        dailyEstimateFrom = dailyEstimateSelectedDate;
+        dailyEstimateTo = dailyEstimateSelectedDate;
+      }
+      renderDailyIngredientEstimate();
+    }
+
+    function onDailyEstimateCustomChange() {
+      dailyEstimateFrom = document.getElementById('daily-estimate-from')?.value || dailyEstimateFrom;
+      dailyEstimateTo = document.getElementById('daily-estimate-to')?.value || dailyEstimateTo;
+      renderDailyIngredientEstimate();
+    }
+
+    function categorizeEstimateIngredient(ing) {
+      const category = String(ing?.category || '').toLowerCase();
+      const name = String(ing?.name || '').toLowerCase();
+      if (/pack|bungkus|kotak|papan|box|board|bekas|label/.test(category + ' ' + name)) return 'Packaging';
+      if (/perisa|flavour|flavor|topping|emulco|essence|pes |paste/.test(category + ' ' + name)) return 'Flavour & Topping';
+      return 'Baking Ingredients';
+    }
+
+    function materialUsageByOrders(selectedOrders) {
+      const totals = new Map();
+      selectedOrders.forEach(order => Object.entries(getOrderIngredientUsageMap(order)).forEach(([id,val]) => {
+        const q = Number(val);
+        if (Number.isFinite(q) && q > 0) totals.set(String(id), (totals.get(String(id)) || 0) + q);
+      }));
+      return totals;
+    }
+
+    function buildMaterialGroups(totals, showCost) {
+      const byId = new Map((config.ingredients || []).map(ing => [String(ing.id), ing]));
+      const groups = {'Baking Ingredients':[], 'Flavour & Topping':[], 'Packaging':[]};
+      totals.forEach((qty,id) => {
+        const ing = byId.get(String(id));
+        const unit = escapeHtmlText(getUnitDisplayLabel(ing?.unit || 'unit'));
+        const cost = qty * getUnitCost(ing);
+        const balance = ing && ing.stock != null && ing.stock !== '' && Number.isFinite(Number(ing.stock))
+          ? Number(ing.stock).toLocaleString('en-US',{maximumFractionDigits:2}) + ' ' + unit : 'Not confirmed';
+        groups[categorizeEstimateIngredient(ing)].push({
+          name: String(ing?.name || `Unknown ingredient (${id})`), qty, unit, cost, balance
+        });
+      });
+      const html = Object.entries(groups).map(([title,items]) => {
+        if (!items.length) return '';
+        items.sort((a,b)=>a.name.localeCompare(b.name));
+        const groupCost = items.reduce((sum,x)=>sum+x.cost,0);
+        return `<div class="rounded-xl border border-stone-200 overflow-hidden">
+          <div class="bg-stone-100 px-3 py-2 flex items-center justify-between gap-2"><span class="text-xs font-extrabold text-stone-800">${title} (${items.length})</span>${showCost ? `<span class="text-xs font-mono-num font-bold">${fmtMoney(groupCost)}</span>` : ''}</div>
+          <div class="divide-y divide-stone-100">${items.map(item=>`<div class="px-3 py-2 flex justify-between gap-2 items-center">
+             <div class="min-w-0"><div class="text-[11px] font-bold text-stone-800 break-words">${escapeHtmlText(item.name)}</div>${!showCost ? `<div class="text-[9px] text-stone-500">Recorded balance: ${item.balance}</div>` : ''}</div>
+             <div class="shrink-0 text-right"><div class="text-xs font-mono-num font-extrabold">${item.qty.toLocaleString('en-US',{maximumFractionDigits:2})} ${item.unit}</div>${showCost ? `<div class="text-[10px] text-emerald-700 font-bold">${fmtMoney(item.cost)}</div>` : ''}</div>
+          </div>`).join('')}</div></div>`;
+      }).join('');
+      return html || '<div class="p-3 text-xs text-stone-500 bg-stone-50 rounded-xl">No ingredient usage found for this date range.</div>';
+    }
+
+    function renderIngredientUsageAnalytics() {
+      const summary = document.getElementById('an-ingredients-summary');
+      const body = document.getElementById('an-ingredients-breakdown');
+      if (!summary || !body) return;
+      const selectedOrders = getAnalyticsOrders('ingredients');
+      const totals = materialUsageByOrders(selectedOrders);
+      const costs = [...totals].reduce((sum,[id,qty]) => sum+qty*getUnitCost((config.ingredients||[]).find(ing=>String(ing.id)===id)),0);
+      summary.textContent = `${selectedOrders.length} order(s) · ${totals.size} ingredient(s) · Estimated material cost ${fmtMoney(costs)}`;
+      body.innerHTML = buildMaterialGroups(totals,true);
+    }
+
     function renderDailyIngredientEstimate() {
-      const dateInput = document.getElementById('daily-estimate-date');
       const summary = document.getElementById('daily-estimate-summary');
       const list = document.getElementById('daily-estimate-ingredients');
       const week = document.getElementById('daily-estimate-week');
-      if (!dateInput || !summary || !list || !week) return;
-      dateInput.value = dailyEstimateSelectedDate;
-      const { activeOrders, totals } = getDailyEstimatedUsage(dailyEstimateSelectedDate);
-      const units = activeOrders.reduce((sum, order) => sum + getOrderTotalUnits(order), 0);
-      summary.textContent = `${activeOrders.length} open order(s) · ${units} item(s) · ${totals.size} ingredient(s) estimated`;
-      if (!activeOrders.length) {
-        list.innerHTML = '<div class="rounded-xl bg-stone-50 border border-stone-100 px-3 py-3 text-xs text-stone-500">No open orders on this delivery date.</div>';
-      } else if (!totals.size) {
-        list.innerHTML = '<div class="rounded-xl bg-amber-50 border border-amber-100 px-3 py-3 text-xs text-amber-900">Orders found, but no ingredient quantities could be calculated. Check the recipes assigned to their sizes, flavours and add-ons in Setup.</div>';
+      if (!summary || !list || !week) return;
+      const preset = document.getElementById('daily-estimate-preset');
+      if (preset) preset.value = dailyEstimatePreset;
+      const custom = document.getElementById('daily-estimate-custom');
+      if (custom) custom.classList.toggle('hidden', dailyEstimatePreset !== 'custom');
+      const fromEl = document.getElementById('daily-estimate-from');
+      const toEl = document.getElementById('daily-estimate-to');
+      if (fromEl && document.activeElement !== fromEl) fromEl.value = dailyEstimateFrom;
+      if (toEl && document.activeElement !== toEl) toEl.value = dailyEstimateTo;
+      const [from,to] = getDailyEstimateRange();
+      if (!from || !to || from > to) {
+        summary.textContent = 'Please choose a valid date range (From must not exceed To).';
+        list.innerHTML = '';
       } else {
-        const byId = new Map((config.ingredients || []).map(ing => [String(ing.id), ing]));
-        list.innerHTML = [...totals.entries()].sort((a, b) => {
-          const an = (byId.get(a[0])?.name || a[0]).toLowerCase();
-          const bn = (byId.get(b[0])?.name || b[0]).toLowerCase();
-          return an.localeCompare(bn);
-        }).map(([id, qty]) => {
-          const ing = byId.get(id);
-          const name = escapeHtmlText(ing?.name || `Unknown ingredient (${id})`);
-          const unit = escapeHtmlText(getUnitDisplayLabel(ing?.unit || 'unit'));
-          const balance = ing && ing.stock != null && ing.stock !== '' && Number.isFinite(Number(ing.stock))
-            ? Number(ing.stock).toLocaleString('en-US', {maximumFractionDigits: 2}) + ' ' + unit
-            : 'Not confirmed';
-          return `<div class="rounded-xl border border-stone-100 bg-stone-50/70 px-3 py-2 flex items-center justify-between gap-2">
-            <div class="min-w-0"><div class="text-[11px] font-bold text-stone-800 truncate">${name}</div><div class="text-[9px] text-stone-400">Current recorded balance: ${balance}</div></div>
-            <div class="text-right shrink-0"><div class="text-[12px] font-mono-num font-extrabold text-stone-900">${qty.toLocaleString('en-US', {maximumFractionDigits: 2})} ${unit}</div><div class="text-[9px] text-stone-400">Estimated usage</div></div>
-          </div>`;
-        }).join('');
+        const selectedOrders = orders.filter(order => !isOrderCompleted(order) && String(order.date||'') >= from && String(order.date||'') <= to);
+        const units = selectedOrders.reduce((sum,order)=>sum+getOrderTotalUnits(order),0);
+        const totals = materialUsageByOrders(selectedOrders);
+        summary.textContent = `${from}${from!==to?' to '+to:''} · ${selectedOrders.length} open order(s) · ${units} item(s) · ${totals.size} ingredient(s)`;
+        list.innerHTML = selectedOrders.length && !totals.size
+          ? '<div class="p-3 rounded-xl bg-amber-50 text-xs text-amber-900">Orders found but no ingredient quantities calculated. Check Recipe Weights and Flavour Rules in Setup.</div>'
+          : buildMaterialGroups(totals,false);
       }
       const today = getTodayISO();
-      week.innerHTML = Array.from({length: 7}, (_, index) => {
-        const dateStr = addDaysToIsoDate(today, index);
+      week.innerHTML = Array.from({length:7},(_,index)=>{
+        const dateStr = addDaysToIsoDate(today,index);
         const day = getDailyOpenOrders(dateStr);
-        const selected = dateStr === dailyEstimateSelectedDate;
-        const label = index === 0 ? 'Today' : new Date(`${dateStr}T12:00:00`).toLocaleDateString('en-MY', {weekday:'short', day:'numeric', month:'short'});
-        return `<button type="button" onclick="onDailyEstimateDateChange('${dateStr}')" class="text-left rounded-xl border px-2.5 py-2 ${selected ? 'border-amber-400 bg-amber-50' : 'border-stone-200 bg-white hover:bg-stone-50'}">
-          <div class="text-[10px] font-extrabold ${selected ? 'text-amber-900' : 'text-stone-700'}">${escapeHtmlText(label)}</div>
-          <div class="text-[10px] text-stone-500">${day.length} open order(s)</div>
-        </button>`;
+        const selected = from === dateStr && to === dateStr;
+        const label = index===0?'Today':new Date(`${dateStr}T12:00:00`).toLocaleDateString('en-MY',{weekday:'short',day:'numeric',month:'short'});
+        return `<button type="button" onclick="onDailyEstimateDateChange('${dateStr}')" class="text-left rounded-xl border px-2.5 py-2 ${selected?'border-amber-400 bg-amber-50':'border-stone-200 bg-white hover:bg-stone-50'}"><div class="text-[10px] font-extrabold">${escapeHtmlText(label)}</div><div class="text-[10px] text-stone-500">${day.length} open order(s)</div></button>`;
       }).join('');
       if (window.lucide) lucide.createIcons();
     }
@@ -4622,9 +4721,27 @@
       editingOrderId = null;
     }
 
+    function setBuilderQtyManual(raw, commit) {
+      // While typing, allow an empty field; validate when leaving the input.
+      if (String(raw).trim() === '' && !commit) return;
+      const value = Number(raw);
+      if (!Number.isSafeInteger(value) || value < 1 || value > 100000) {
+        if (commit) {
+          document.getElementById('ord-builder-qty').value = modalBuilderQty;
+          showToast('Enter a whole quantity from 1 to 100,000.');
+        }
+        return;
+      }
+      modalBuilderQty = value;
+      if (commit) document.getElementById('ord-builder-qty').value = value;
+      // Do not rerender options on each keystroke: preserve iPhone keyboard focus.
+    }
+
     function changeBuilderQty(delta) {
-      modalBuilderQty = Math.max(1, modalBuilderQty + delta);
-      document.getElementById('ord-builder-qty').textContent = modalBuilderQty;
+      const field = document.getElementById('ord-builder-qty');
+      if (field && field.value.trim() !== '') setBuilderQtyManual(field.value, false);
+      modalBuilderQty = Math.min(100000, Math.max(1, modalBuilderQty + delta));
+      if (field) field.value = modalBuilderQty;
       renderOrderModalOptions();
     }
 
@@ -4644,6 +4761,16 @@
     }
 
     function addItemToOrderCart() {
+      const qtyField = document.getElementById('ord-builder-qty');
+      if (qtyField) {
+        const requested = Number(qtyField.value);
+        if (!Number.isSafeInteger(requested) || requested < 1 || requested > 100000) {
+          showToast('Please enter a valid whole-number quantity.');
+          qtyField.focus();
+          return;
+        }
+        modalBuilderQty = requested;
+      }
       const newItem = buildCurrentSelectionItem();
       if (!newItem) return;
 
@@ -4657,9 +4784,21 @@
       else modalCartItems.push(newItem);
 
       modalBuilderQty = 1;
-      document.getElementById('ord-builder-qty').textContent = '1';
+      document.getElementById('ord-builder-qty').value = '1';
       renderOrderModalOptions();
       showToast(`${newItem.qty}x ${newItem.sizeName} added to the order!`);
+    }
+
+    function setCartItemQty(idx, raw) {
+      if (!modalCartItems[idx]) return;
+      const next = Number(raw);
+      if (!Number.isSafeInteger(next) || next < 1 || next > 100000) {
+        showToast('Enter a whole quantity from 1 to 100,000.');
+        renderOrderModalOptions();
+        return;
+      }
+      modalCartItems[idx].qty = next;
+      renderOrderModalOptions();
     }
 
     function adjustCartItemQty(idx, delta) {
@@ -4732,7 +4871,7 @@
               </div>
               <div class="flex items-center gap-1.5 shrink-0">
                 <button type="button" onclick="adjustCartItemQty(${idx}, -1)" class="w-7 h-7 rounded-lg bg-white border border-stone-200 font-extrabold text-stone-700 hover:bg-stone-100">-</button>
-                <span class="w-6 text-center text-xs font-mono-num font-extrabold">${it.qty}</span>
+                <input type="number" min="1" max="100000" step="1" inputmode="numeric" value="${it.qty}" aria-label="Cart quantity" onchange="setCartItemQty(${idx}, this.value)" class="w-14 h-7 text-center text-xs font-mono-num font-bold bg-white border border-stone-200 rounded-lg" />
                 <button type="button" onclick="adjustCartItemQty(${idx}, 1)" class="w-7 h-7 rounded-lg bg-stone-900 text-white font-extrabold hover:bg-stone-800">+</button>
                 <button type="button" onclick="removeCartItem(${idx})" class="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg ml-0.5">
                   <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
@@ -4921,7 +5060,7 @@
 
     const ANALYTICS_RANGE_KEYS = [
       'orderCount', 'sales', 'profit', 'insights', 'aov', 'margin',
-      'payment', 'delivery', 'salesChart', 'weekdays', 'flavours', 'productMargins'
+      'payment', 'delivery', 'salesChart', 'weekdays', 'flavours', 'productMargins', 'ingredients'
     ];
     const analyticsFilters = {};
     ANALYTICS_RANGE_KEYS.forEach(key => {
@@ -5006,6 +5145,7 @@
 
     function renderAnalytics() {
       initAnalyticsRangeControls();
+      renderIngredientUsageAnalytics();
 
       // Each displayed metric, insight and chart uses its own independent date range.
       const orderCountOrders = getAnalyticsOrders('orderCount');
