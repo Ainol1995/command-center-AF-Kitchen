@@ -1089,16 +1089,16 @@
     <div class="bg-white w-full max-w-xl max-h-[93vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl p-4 space-y-3">
       <div class="flex justify-between items-center"><h3 class="font-extrabold text-base">New Purchase Record</h3><button onclick="afClosePurchaseModal()" class="rounded-lg bg-stone-100 p-2" aria-label="Close">✕</button></div>
       <div class="grid grid-cols-2 gap-2">
-        <label class="text-xs">Purchase Date<input id="af-p-date" type="date" class="w-full border rounded-xl p-2 mt-1" /></label>
+        <label class="text-xs">Purchase Date <span class="text-rose-600">*</span><input id="af-p-date" type="date" class="w-full border rounded-xl p-2 mt-1" /></label>
         <label class="text-xs">Channel<select id="af-p-channel" class="w-full border rounded-xl p-2 mt-1"><option>Physical Store</option><option>Shopee</option><option>Lazada</option><option>Online Other</option><option>Supplier</option></select></label>
       </div>
-      <label class="block text-xs">Supplier / Shop Name<input id="af-p-supplier" class="block w-full border rounded-xl p-2 mt-1" placeholder="Shop or supplier" /></label>
+      <div class="space-y-1"><label class="block text-xs font-semibold" for="af-p-supplier">Supplier / Shop Name <span class="text-rose-600">*</span></label><div class="flex gap-2"><select id="af-p-supplier" class="min-w-0 flex-1 border rounded-xl p-2 bg-white text-xs" onchange="afClearPurchaseErrors()"><option value="">Select supplier</option></select><button type="button" onclick="afToggleSupplierAdd()" class="shrink-0 rounded-xl bg-amber-100 text-amber-900 px-3 text-xs font-bold">+ Supplier</button></div><p data-error-for="af-p-supplier" class="hidden text-rose-700 text-xs"></p><div id="af-supplier-new" class="hidden rounded-xl border border-amber-200 bg-amber-50 p-3 space-y-2"><label class="block text-xs font-semibold">New Supplier Name <span class="text-rose-600">*</span><input id="af-supplier-name" class="block mt-1 w-full border rounded-lg p-2 bg-white" placeholder="Supplier name" /></label><button type="button" onclick="afAddSupplier()" id="af-supplier-save" class="rounded-lg bg-stone-900 text-white text-xs font-bold px-3 py-2">Save Supplier</button></div></div>
       <div class="grid grid-cols-2 gap-2">
         <label class="text-xs">Payment Status<select id="af-p-payment" class="w-full border rounded-xl p-2 mt-1"><option>Paid</option><option>Unpaid</option><option>Partial</option><option>Unspecified</option></select></label>
         <label class="text-xs">Order / Tracking Reference<input id="af-p-tracking" class="w-full border rounded-xl p-2 mt-1" /></label>
       </div>
       <label class="block text-xs">Notes<input id="af-p-notes" class="block w-full border rounded-xl p-2 mt-1" /></label>
-      <div id="af-p-items" class="space-y-2"></div>
+      <p id="af-p-errors" class="hidden rounded-lg bg-rose-50 border border-rose-200 text-rose-800 text-xs p-2" role="alert">Please fill all required fields highlighted in red.</p><div id="af-p-items" class="space-y-2"></div>
       <button onclick="afAddPurchaseLine()" class="w-full rounded-xl border border-stone-200 px-3 py-2 text-xs font-bold">+ Add another ingredient</button>
       <div class="bg-stone-50 rounded-xl px-3 py-2 text-xs font-bold" id="af-p-total">Total: RM 0.00</div>
       <p class="text-[10px] text-stone-500">Saving a purchase does not update Inventory. You can record items purchased online before delivery.</p>
@@ -1110,8 +1110,8 @@
     <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl p-4 space-y-3 max-h-[90vh] overflow-y-auto">
       <div class="flex justify-between items-center"><h3 class="font-extrabold">Receive / Correct Stock</h3><button onclick="afCloseReceiveModal()" class="rounded-lg bg-stone-100 p-2">✕</button></div>
       <div id="af-r-info" class="text-xs text-stone-600"></div>
-      <label class="block text-xs">Date<input id="af-r-date" type="date" class="w-full mt-1 border rounded-xl p-2" /></label>
-      <label class="block text-xs">Quantity received now<input id="af-r-qty" type="number" step="any" min="0.000001" oninput="afShowReceivePreview()" class="w-full mt-1 border rounded-xl p-2" /></label>
+      <label class="block text-xs">Date <span class="text-rose-600">*</span><input id="af-r-date" type="date" class="w-full mt-1 border rounded-xl p-2" /></label>
+      <label class="block text-xs">Quantity received now <span class="text-rose-600">*</span><input id="af-r-qty" type="number" step="any" min="0.000001" oninput="afShowReceivePreview()" class="w-full mt-1 border rounded-xl p-2" /></label>
       <label class="block text-xs">Notes<input id="af-r-notes" class="w-full mt-1 border rounded-xl p-2" placeholder="Delivery or adjustment details" /></label>
       <p id="af-r-preview" class="rounded-xl bg-stone-50 p-2 text-xs"></p>
       <button id="af-r-save" onclick="afConfirmReceive()" class="w-full bg-emerald-700 text-white rounded-xl font-bold py-3">Confirm & Update Inventory</button>
@@ -5504,7 +5504,7 @@
     });
 
     /* AF Kitchen v12.3 Purchase Management front-end addition. */
-    let afPurchaseData={purchases:[],items:[],receipts:[],attachments:[]};
+    let afPurchaseData={purchases:[],items:[],receipts:[],attachments:[],suppliers:[]};
     let afPurchaseBusy=false,afPurchaseLoaded=false,afPurchaseLines=[],afPurchaseTarget='',afReceiveTarget=null,afReceivingCorrection=false;
     function afId(prefix){return prefix+'_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,12);}
     function afE(s){return escapeHtmlText(String(s==null?'':s));}
@@ -5558,8 +5558,8 @@
         const its=afPurchaseData.items.filter(x=>x.purchaseId===p.id),status=afPurchaseStatus(p);
         const receiptLinks=(afPurchaseData.attachments||[]).filter(x=>x.purchaseId===p.id).map(f=>`<a class="underline text-amber-700" rel="noopener" target="_blank" href="https://drive.google.com/file/d/${encodeURIComponent(f.fileId)}/view">${afE(f.name)}</a>`).join(' · ');
         const list=its.map(it=>{const q=afPurchaseRemaining(it),canReceive=q.remaining>0&&!['Closed Short','Cancelled'].includes(status);
-          return `<div class="rounded-xl bg-stone-50 p-2 space-y-1"><div class="flex justify-between gap-2"><span class="font-semibold">${afE(it.name)}</span><span class="font-mono-num">${q.received}/${it.qty} ${afE(it.unit)}</span></div><div class="text-[10px] text-stone-500">Pending ${+q.remaining.toFixed(4)} ${afE(it.unit)} · ${fmtMoney(it.total)}</div><div class="flex flex-wrap gap-2">${canReceive?`<button class="text-emerald-800 font-bold underline" onclick="afOpenReceive('${afE(p.id)}','${afE(it.id)}',false)">Receive items</button>`:''}${q.received>0&&!['Cancelled','Closed Short'].includes(status)?`<button class="text-amber-800 font-bold underline" onclick="afOpenReceive('${afE(p.id)}','${afE(it.id)}',true)">Correction</button>`:''}</div></div>`}).join('');
-        return `<div class="border border-stone-200 rounded-xl p-3 space-y-2"><div class="flex justify-between gap-2"><div class="min-w-0"><div class="font-extrabold text-stone-900">${afE(p.supplier)} <span class="text-[10px] text-stone-400">${afE(p.channel)}</span></div><div class="text-[10px] text-stone-500">${afE(p.date)} · ${afE(p.id)} · ${afE(p.tracking||'')}</div></div><div class="text-right shrink-0 font-bold">${fmtMoney(p.total)}<div class="text-[10px] text-amber-700">${afE(status)}</div></div></div><div class="space-y-1.5">${list}</div><div class="flex flex-wrap gap-2 text-[11px]"><button class="rounded-lg border px-2 py-1" onclick="afOpenUploadModal('${afE(p.id)}')">📎 Add Receipt / Photo</button>${status==='Ordered'?`<button class="rounded-lg border px-2 py-1" onclick="afEditPurchase('${afE(p.id)}')">Edit</button>`:''}${!['Cancelled','Closed Short','Fully Received'].includes(status)?`<button class="rounded-lg border px-2 py-1 text-rose-700" onclick="afClosePurchase('${afE(p.id)}')">${status==='Ordered'?'Cancel Purchase':'Close Remaining'}</button>`:''}</div>${receiptLinks?'<div class="text-[10px]">Files: '+receiptLinks+'</div>':''}</div>`;
+          return `<div class="rounded-xl bg-stone-50 p-2 space-y-1"><div class="flex justify-between gap-2"><span class="font-semibold">${afE(it.name)}</span><span class="font-mono-num">${q.received}/${it.qty} ${afE(it.unit)}</span></div><div class="text-[10px] text-stone-500">Pending ${+q.remaining.toFixed(4)} ${afE(it.unit)} · ${fmtMoney(it.total)}</div><div class="flex flex-wrap gap-2">${canReceive?`<button class="text-emerald-800 font-bold underline" onclick="afOpenReceive('${afE(p.id)}','${afE(it.id)}',false)">Receive items</button>`:''}${q.received>0&&!['Cancelled','Closed Short'].includes(status)?`<button class="text-amber-800 font-bold underline" onclick="afOpenReceive('${afE(p.id)}','${afE(it.id)}',true)">Correction</button>`:''}${q.received===0&&its.length>1?`<button class="text-rose-700 font-bold underline" onclick="afDeletePurchaseItem('${afE(p.id)}','${afE(it.id)}')">Delete Item</button>`:''}</div></div>`}).join('');
+        return `<div class="border border-stone-200 rounded-xl p-3 space-y-2"><div class="flex justify-between gap-2"><div class="min-w-0"><div class="font-extrabold text-stone-900">${afE(p.supplier)} <span class="text-[10px] text-stone-400">${afE(p.channel)}</span></div><div class="text-[10px] text-stone-500">${afE(p.date)} · ${afE(p.id)} · ${afE(p.tracking||'')}</div></div><div class="text-right shrink-0 font-bold">${fmtMoney(p.total)}<div class="text-[10px] text-amber-700">${afE(status)}</div></div></div><div class="space-y-1.5">${list}</div><div class="flex flex-wrap gap-2 text-[11px]"><button class="rounded-lg border px-2 py-1" onclick="afOpenUploadModal('${afE(p.id)}')">📎 Add Receipt / Photo</button>${status==='Ordered'?`<button class="rounded-lg border px-2 py-1" onclick="afEditPurchase('${afE(p.id)}')">Edit</button>`:''}${!['Cancelled','Closed Short','Fully Received'].includes(status)?`<button class="rounded-lg border px-2 py-1 text-rose-700" onclick="afClosePurchase('${afE(p.id)}')">${status==='Ordered'?'Delete Purchase':'Close Remaining'}</button>`:''}</div>${receiptLinks?'<div class="text-[10px]">Files: '+receiptLinks+'</div>':''}</div>`;
       }).join('');
     }
     function afAddPurchaseLine(initial){
@@ -5578,20 +5578,71 @@
     function afRenderPurchaseLines(){
       const target=document.getElementById('af-p-items');if(!target)return;
       const options=(config.ingredients||[]).map(i=>`<option value="${afE(i.id)}">${afE(i.name)} (${afE(i.unit)})</option>`).join('');
-      target.innerHTML=afPurchaseLines.map((l,i)=>`<div class="bg-stone-50 border border-stone-200 p-2 rounded-xl space-y-2" id="af-pl-${i}"><div class="flex justify-between"><span class="text-xs font-bold">Item ${i+1}</span><button class="text-rose-700 text-xs" onclick="afRemovePurchaseLine(${i})">Delete</button></div><select data-field="ingredient" onchange="afReadPurchaseInputs()" class="w-full border bg-white rounded-lg p-2 text-xs">${options}</select><div class="grid grid-cols-2 gap-2"><label class="text-xs">Quantity (stock unit)<input data-field="qty" type="number" min="0" step="any" oninput="afUpdatePurchaseTotal()" value="${afE(l.qty)}" class="w-full mt-1 border p-2 rounded-lg" /></label><label class="text-xs">Total Cost (RM)<input data-field="total" type="number" min="0" step="0.01" oninput="afUpdatePurchaseTotal()" value="${afE(l.total)}" class="w-full mt-1 border p-2 rounded-lg" /></label></div><input data-field="notes" value="${afE(l.notes||'')}" placeholder="Optional item notes" class="w-full border p-2 rounded-lg text-xs" /></div>`).join('');
+      target.innerHTML=afPurchaseLines.map((l,i)=>`<div class="bg-stone-50 border border-stone-200 p-2 rounded-xl space-y-2" id="af-pl-${i}"><div class="flex justify-between"><span class="text-xs font-bold">Item ${i+1}</span><button class="text-rose-700 text-xs" onclick="afRemovePurchaseLine(${i})">Delete</button></div><select data-field="ingredient" onchange="afReadPurchaseInputs()" class="w-full border bg-white rounded-lg p-2 text-xs">${options}</select><div class="grid grid-cols-2 gap-2"><label class="text-xs">Quantity (stock unit) <span class="text-rose-600">*</span><input data-field="qty" type="number" min="0" step="any" oninput="afUpdatePurchaseTotal()" value="${afE(l.qty)}" class="w-full mt-1 border p-2 rounded-lg" /></label><label class="text-xs">Total Cost (RM) <span class="text-rose-600">*</span><input data-field="total" type="number" min="0" step="0.01" oninput="afUpdatePurchaseTotal()" value="${afE(l.total)}" class="w-full mt-1 border p-2 rounded-lg" /></label></div><input data-field="notes" value="${afE(l.notes||'')}" placeholder="Optional item notes" class="w-full border p-2 rounded-lg text-xs" /></div>`).join('');
       afPurchaseLines.forEach((l,i)=>{const select=document.querySelector(`#af-pl-${i} select`);if(select)select.value=l.ingredientId;});
       afUpdatePurchaseTotal();
     }
     function afUpdatePurchaseTotal(){afReadPurchaseInputs();document.getElementById('af-p-total').textContent='Total: '+fmtMoney(afPurchaseLines.reduce((t,l)=>t+Math.max(0,Number(l.total)||0),0));}
     function afRemovePurchaseLine(i){afReadPurchaseInputs();if(afPurchaseLines.length<2){showToast('Keep at least one item.',true);return;}afPurchaseLines.splice(i,1);afRenderPurchaseLines();}
+    function afRenderSupplierOptions(selected=''){
+      const select=document.getElementById('af-p-supplier');if(!select)return;
+      const suppliers=[...(afPurchaseData.suppliers||[])];
+      if(selected&&!suppliers.some(n=>n===selected))suppliers.push(selected);
+      suppliers.sort((a,b)=>a.localeCompare(b));
+      select.innerHTML='<option value="">Select supplier</option>'+suppliers.map(s=>`<option value="${afE(s)}">${afE(s)}</option>`).join('');
+      select.value=selected||'';
+    }
+    function afToggleSupplierAdd(){document.getElementById('af-supplier-new').classList.toggle('hidden');}
+    async function afAddSupplier(){
+      const name=document.getElementById('af-supplier-name').value.trim();
+      if(!name){afInvalidField(document.getElementById('af-supplier-name'),'Please enter supplier name.');return;}
+      const btn=document.getElementById('af-supplier-save');btn.dataset.original=btn.textContent;
+      if(await afSubmitPurchaseAction({action:'supplierCreate',supplierId:afId('SUP'),supplierName:name},btn)){
+        afRenderSupplierOptions(name);document.getElementById('af-supplier-new').classList.add('hidden');document.getElementById('af-supplier-name').value='';
+      }
+    }
+    function afInvalidField(el,msg){
+      if(!el)return;
+      el.classList.add('border-rose-500','ring-2','ring-rose-100');el.setAttribute('aria-invalid','true');
+      let n=el.parentElement.querySelector('.af-field-error');
+      if(!n){n=document.createElement('p');n.className='af-field-error text-rose-700 text-[11px] mt-1';el.parentElement.appendChild(n);}n.textContent=msg;
+    }
+    function afClearPurchaseErrors(){
+      const modal=document.getElementById('af-purchase-modal');
+      modal.querySelectorAll('[aria-invalid="true"]').forEach(el=>{el.removeAttribute('aria-invalid');el.classList.remove('border-rose-500','ring-2','ring-rose-100');});
+      modal.querySelectorAll('.af-field-error').forEach(el=>el.remove());
+      document.getElementById('af-p-errors').classList.add('hidden');
+    }
+    function afValidatePurchase(){
+      afClearPurchaseErrors();afReadPurchaseInputs();let first=null;
+      const add=(el,msg)=>{afInvalidField(el,msg);if(!first)first=el;};
+      const date=document.getElementById('af-p-date'),supplier=document.getElementById('af-p-supplier');
+      if(!date.value)add(date,'Purchase date is required.');
+      if(!supplier.value)add(supplier,'Please select a supplier.');
+      afPurchaseLines.forEach((l,i)=>{
+        const node=document.getElementById('af-pl-'+i);if(!node)return;
+        if(!l.ingredientId)add(node.querySelector('[data-field="ingredient"]'),'Choose an ingredient.');
+        if(l.qty.trim()===''||!Number.isFinite(Number(l.qty))||Number(l.qty)<=0)add(node.querySelector('[data-field="qty"]'),'Quantity must be greater than 0.');
+        if(l.total.trim()===''||!Number.isFinite(Number(l.total))||Number(l.total)<0)add(node.querySelector('[data-field="total"]'),'Enter a valid total cost (0 is allowed).');
+      });
+      if(!afPurchaseLines.length){document.getElementById('af-p-errors').classList.remove('hidden');return false;}
+      if(first){document.getElementById('af-p-errors').classList.remove('hidden');first.scrollIntoView({behavior:'smooth',block:'center'});first.focus({preventScroll:true});showToast('Please fill the required fields highlighted in red.',true);return false;}
+      return true;
+    }
+    async function afDeletePurchaseItem(pid,iid){
+      const it=afPurchaseData.items.find(x=>x.id===iid&&x.purchaseId===pid);if(!it)return;
+      if(afPurchaseRemaining(it).received>0){showToast('This item has received stock. It cannot be deleted; retain its stock history.',true);return;}
+      if(!confirm('Delete '+it.name+' from this purchase? Other items remain.'))return;
+      await afSubmitPurchaseAction({action:'purchaseDeleteItem',purchaseId:pid,itemId:iid},null);
+    }
     function afOpenPurchaseModal(){
       afPurchaseTarget='';afPurchaseLines=[];
-      document.getElementById('af-p-date').value=getTodayISO();document.getElementById('af-p-supplier').value='';document.getElementById('af-p-notes').value='';document.getElementById('af-p-tracking').value='';document.getElementById('af-p-channel').value='Physical Store';
+      document.getElementById('af-p-date').value=getTodayISO();afRenderSupplierOptions('');afClearPurchaseErrors();document.getElementById('af-supplier-new').classList.add('hidden');document.getElementById('af-p-notes').value='';document.getElementById('af-p-tracking').value='';document.getElementById('af-p-channel').value='Physical Store';
       document.getElementById('af-purchase-modal').classList.remove('hidden');afAddPurchaseLine();
     }
     function afEditPurchase(id){
       const p=afPurchaseData.purchases.find(x=>x.id===id);if(!p)return;afOpenPurchaseModal();afPurchaseTarget=id;
-      document.getElementById('af-p-date').value=p.date;document.getElementById('af-p-supplier').value=p.supplier;document.getElementById('af-p-notes').value=p.notes||'';document.getElementById('af-p-tracking').value=p.tracking||'';document.getElementById('af-p-channel').value=p.channel;document.getElementById('af-p-payment').value=p.paymentStatus||'Unspecified';
+      document.getElementById('af-p-date').value=p.date;afRenderSupplierOptions(p.supplier);document.getElementById('af-p-notes').value=p.notes||'';document.getElementById('af-p-tracking').value=p.tracking||'';document.getElementById('af-p-channel').value=p.channel;document.getElementById('af-p-payment').value=p.paymentStatus||'Unspecified';
       afPurchaseLines=afPurchaseData.items.filter(i=>i.purchaseId===id).map(i=>({id:i.id,ingredientId:i.ingredientId,qty:i.qty,total:i.total,notes:i.notes}));afRenderPurchaseLines();
     }
     function afClosePurchaseModal(){document.getElementById('af-purchase-modal').classList.add('hidden');}
@@ -5608,7 +5659,7 @@
     }
     async function afSavePurchase(){
       afReadPurchaseInputs();
-      if(!afPurchaseLines.length||afPurchaseLines.some(l=>!l.ingredientId||!Number.isFinite(Number(l.qty))||Number(l.qty)<=0||l.total===''||Number(l.total)<0)){showToast('Enter a valid quantity and total cost for every item.',true);return;}
+      if(!afValidatePurchase())return;
       const btn=document.getElementById('af-p-save');btn.dataset.original=btn.textContent;
       const id=afPurchaseTarget||afId('PO');
       const purchase={id,date:document.getElementById('af-p-date').value,supplier:document.getElementById('af-p-supplier').value.trim(),channel:document.getElementById('af-p-channel').value,notes:document.getElementById('af-p-notes').value,tracking:document.getElementById('af-p-tracking').value,paymentStatus:document.getElementById('af-p-payment').value,items:afPurchaseLines.map(l=>({id:l.id,ingredientId:l.ingredientId,qty:Number(l.qty),total:Number(l.total),notes:l.notes}))};
@@ -5620,7 +5671,7 @@
       afReceiveTarget={pid,iid,item:it};afReceivingCorrection=Boolean(correction);
       const balance=afPurchaseRemaining(it);
       document.getElementById('af-r-info').textContent=it.name+' · '+(correction?'Already received: '+balance.received:'Pending: '+balance.remaining)+' '+it.unit;
-      document.getElementById('af-r-date').value=getTodayISO();document.getElementById('af-r-qty').value='';document.getElementById('af-r-notes').value='';document.getElementById('af-r-qty').max=correction?balance.received:balance.remaining;
+      document.getElementById('af-r-date').value=getTodayISO();document.querySelectorAll('#af-receive-modal .af-field-error').forEach(x=>x.remove());document.querySelectorAll('#af-receive-modal [aria-invalid]').forEach(x=>{x.removeAttribute('aria-invalid');x.classList.remove('border-rose-500','ring-2','ring-rose-100');});document.getElementById('af-r-qty').value=String(correction?balance.received:balance.remaining);document.getElementById('af-r-notes').value='';document.getElementById('af-r-qty').max=correction?balance.received:balance.remaining;
       document.getElementById('af-r-save').textContent=correction?'Confirm Negative Correction':'Confirm & Update Inventory';
       document.getElementById('af-receive-modal').classList.remove('hidden');afShowReceivePreview();
     }
@@ -5633,7 +5684,9 @@
     async function afConfirmReceive(){
       if(!afReceiveTarget)return;
       const q=Number(document.getElementById('af-r-qty').value),limit=afReceivingCorrection?afPurchaseRemaining(afReceiveTarget.item).received:afPurchaseRemaining(afReceiveTarget.item).remaining;
-      if(!Number.isFinite(q)||q<=0||q>limit||!document.getElementById('af-r-qty').value){showToast('Quantity must be more than zero and not exceed '+limit,true);return;}
+      const quantityInput=document.getElementById('af-r-qty'), dateInput=document.getElementById('af-r-date');
+      if(!dateInput.value){afInvalidField(dateInput,'Receiving date is required.');dateInput.focus();showToast('Please fill the required fields highlighted in red.',true);return;}
+      if(!Number.isFinite(q)||q<=0||q>limit||!quantityInput.value){afInvalidField(quantityInput,'Enter a quantity greater than 0 and no more than '+limit+'.');quantityInput.focus();showToast('Please fill the required fields highlighted in red.',true);return;}
       const btn=document.getElementById('af-r-save');btn.dataset.original=btn.textContent;
       const payload={action:afReceivingCorrection?'purchaseCorrect':'purchaseReceive',purchaseId:afReceiveTarget.pid,itemId:afReceiveTarget.iid,movementId:afId('MOV'),qty:afReceivingCorrection?-q:q,date:document.getElementById('af-r-date').value,notes:document.getElementById('af-r-notes').value};
       // A timeout is ambiguous: don't automatically generate another receiving ID.
@@ -5641,8 +5694,15 @@
       else showToast('If save timed out, refresh Purchase History before attempting again.',true);
     }
     async function afClosePurchase(pid){
-      if(!confirm('Close outstanding purchase quantities? No additional stock will be received for this purchase.'))return;
-      await afSubmitPurchaseAction({action:'purchaseClose',purchaseId:pid},null);
+      const p=afPurchaseData.purchases.find(x=>x.id===pid);if(!p)return;
+      const hasHistory=(afPurchaseData.receipts||[]).some(r=>r.purchaseId===pid);
+      if(!hasHistory){
+        if(!confirm('Delete this unreceived purchase permanently? It will disappear from Purchase History. Linked receipt files will be moved to Drive trash.'))return;
+        await afSubmitPurchaseAction({action:'purchaseDelete',purchaseId:pid},null);
+      }else{
+        if(!confirm('Some items have been received. Stock history must remain. Close remaining quantities and hide from active receiving?'))return;
+        await afSubmitPurchaseAction({action:'purchaseClose',purchaseId:pid},null);
+      }
     }
     function afOpenUploadModal(pid){afPurchaseTarget=pid;document.getElementById('af-u-file').value='';document.getElementById('af-upload-modal').classList.remove('hidden');}
     function afCloseUploadModal(){document.getElementById('af-upload-modal').classList.add('hidden');}
