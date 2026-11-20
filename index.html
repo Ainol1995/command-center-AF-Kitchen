@@ -877,6 +877,22 @@
         </div>
       </div>
 
+
+      <!-- AFK v12.3: Purchase & Receiving; isolated from existing Inventory edit/save -->
+      <section class="card-soft rounded-2xl p-4 space-y-3" id="purchase-management-card">
+        <div class="flex flex-wrap items-start justify-between gap-2">
+          <div><h2 class="text-sm font-extrabold text-stone-900">Purchase &amp; Restock Management</h2><p class="text-[11px] text-stone-500">Record purchases first. Stock increases only after you confirm goods received.</p></div>
+          <button type="button" onclick="afOpenPurchaseModal()" class="bg-stone-900 text-white rounded-xl px-3 py-2 text-xs font-bold">+ Record Purchase</button>
+        </div>
+        <div class="flex gap-2 items-center">
+          <input id="af-purchase-search" type="search" oninput="afRenderPurchases()" placeholder="Search purchase, supplier, item..." class="flex-1 min-w-0 bg-stone-50 border border-stone-200 rounded-xl p-2 text-xs" />
+          <button type="button" onclick="afLoadPurchases(true)" class="rounded-xl border border-stone-200 bg-white px-3 py-2 text-xs font-bold">Refresh</button>
+        </div>
+        <div class="grid grid-cols-2 gap-2"><select id="af-history-status" onchange="afRenderPurchases()" class="border border-stone-200 rounded-xl p-2 text-xs bg-white"><option value="all">All Statuses</option><option value="Ordered">Ordered</option><option value="Partially Received">Partially Received</option><option value="Fully Received">Fully Received</option><option value="Closed Short">Closed Short</option><option value="Cancelled">Cancelled</option></select><select id="af-history-date" onchange="afRenderPurchases()" class="border border-stone-200 rounded-xl p-2 text-xs bg-white"><option value="all">All Purchase Dates</option><option value="today">Today</option><option value="7days">Last 7 Days</option><option value="month">This Month</option></select></div>
+        <div id="af-purchase-list" class="space-y-2 text-xs text-stone-600">Open Inventory to load purchases.</div>
+        <p class="text-[10px] text-stone-500">Receipts are stored privately in Google Drive; opening the Drive file requires permission to the file.</p>
+      </section>
+
       <!-- Ingredient Visual Cards -->
       <div id="stock-list" class="space-y-2.5"></div>
     </section>
@@ -912,6 +928,21 @@
         <div id="an-ingredients-summary" class="text-xs font-semibold text-stone-600"></div>
         <div id="an-ingredients-breakdown" class="space-y-2"></div>
         <p class="text-[10px] text-amber-800 bg-amber-50 p-2 rounded-lg border border-amber-100">Based on order delivery dates (all statuses), today's recipe quantities and today's pack prices. This is not a historical actual-stock-movement or purchase-cost report. No stock is deducted.</p>
+      </section>
+
+
+      <!-- AFK v12.3 purchase analytics: purchase date and received date are separate -->
+      <section class="card-soft rounded-2xl p-4 space-y-3" id="af-restock-analytics">
+        <div><h2 class="text-sm font-extrabold text-stone-900">Restock &amp; Purchasing Analysis</h2><p class="text-[11px] text-stone-500">Purchase spending is based on purchase dates. Received quantity is based on receipt dates.</p></div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          <label class="text-xs font-bold">Date Filter<select id="af-restock-filter" onchange="afRenderPurchaseAnalysis()" class="block w-full mt-1 p-2 border rounded-lg bg-white"><option value="today">Today</option><option value="yesterday">Yesterday</option><option value="7days">Last 7 Days</option><option value="month">This Month</option><option value="all">All Dates</option><option value="custom">Custom Range</option></select></label>
+          <label class="text-xs font-bold">From<input id="af-restock-from" type="date" onchange="afRenderPurchaseAnalysis()" class="block w-full mt-1 p-2 border rounded-lg bg-white" /></label>
+          <label class="text-xs font-bold">To<input id="af-restock-to" type="date" onchange="afRenderPurchaseAnalysis()" class="block w-full mt-1 p-2 border rounded-lg bg-white" /></label>
+        </div>
+        <div id="af-restock-summary" class="grid grid-cols-2 gap-2"></div>
+        <div id="af-restock-breakdown" class="space-y-2"></div>
+        <div class="flex flex-wrap gap-2"><button onclick="afExportPurchaseCSV()" class="rounded-xl border border-stone-200 bg-white text-xs font-bold px-3 py-2">Export Purchase CSV</button><button onclick="afPrintPurchaseReport()" class="rounded-xl border border-stone-200 bg-white text-xs font-bold px-3 py-2">Print / Save PDF</button><button onclick="switchDashTab('stok')" class="rounded-xl bg-stone-900 text-white text-xs font-bold px-3 py-2">View Purchase History</button></div>
+        <p class="text-[10px] bg-amber-50 border border-amber-100 text-amber-800 rounded-xl p-2">Purchase spending is not the same as recipe usage cost. This report does not double-count it as cost of goods sold.</p>
       </section>
 
       <!-- Smart Business Insights -->
@@ -1052,6 +1083,51 @@
   <!-- ========================================================= -->
   <!-- MODAL: APPEARANCE / THEME SETTINGS                        -->
   <!-- ========================================================= -->
+
+  <!-- AFK v12.3 purchase form -->
+  <div id="af-purchase-modal" class="hidden fixed inset-0 z-[75] bg-stone-900/60 flex justify-center items-end sm:items-center p-0 sm:p-4">
+    <div class="bg-white w-full max-w-xl max-h-[93vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl p-4 space-y-3">
+      <div class="flex justify-between items-center"><h3 class="font-extrabold text-base">New Purchase Record</h3><button onclick="afClosePurchaseModal()" class="rounded-lg bg-stone-100 p-2" aria-label="Close">✕</button></div>
+      <div class="grid grid-cols-2 gap-2">
+        <label class="text-xs">Purchase Date<input id="af-p-date" type="date" class="w-full border rounded-xl p-2 mt-1" /></label>
+        <label class="text-xs">Channel<select id="af-p-channel" class="w-full border rounded-xl p-2 mt-1"><option>Physical Store</option><option>Shopee</option><option>Lazada</option><option>Online Other</option><option>Supplier</option></select></label>
+      </div>
+      <label class="block text-xs">Supplier / Shop Name<input id="af-p-supplier" class="block w-full border rounded-xl p-2 mt-1" placeholder="Shop or supplier" /></label>
+      <div class="grid grid-cols-2 gap-2">
+        <label class="text-xs">Payment Status<select id="af-p-payment" class="w-full border rounded-xl p-2 mt-1"><option>Paid</option><option>Unpaid</option><option>Partial</option><option>Unspecified</option></select></label>
+        <label class="text-xs">Order / Tracking Reference<input id="af-p-tracking" class="w-full border rounded-xl p-2 mt-1" /></label>
+      </div>
+      <label class="block text-xs">Notes<input id="af-p-notes" class="block w-full border rounded-xl p-2 mt-1" /></label>
+      <div id="af-p-items" class="space-y-2"></div>
+      <button onclick="afAddPurchaseLine()" class="w-full rounded-xl border border-stone-200 px-3 py-2 text-xs font-bold">+ Add another ingredient</button>
+      <div class="bg-stone-50 rounded-xl px-3 py-2 text-xs font-bold" id="af-p-total">Total: RM 0.00</div>
+      <p class="text-[10px] text-stone-500">Saving a purchase does not update Inventory. You can record items purchased online before delivery.</p>
+      <button id="af-p-save" onclick="afSavePurchase()" class="w-full bg-stone-900 text-white font-bold rounded-xl py-3">Save Purchase (No Stock Change)</button>
+    </div>
+  </div>
+  <!-- AFK v12.3 item receiving / correcting modal -->
+  <div id="af-receive-modal" class="hidden fixed inset-0 z-[76] bg-stone-900/60 flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl p-4 space-y-3 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center"><h3 class="font-extrabold">Receive / Correct Stock</h3><button onclick="afCloseReceiveModal()" class="rounded-lg bg-stone-100 p-2">✕</button></div>
+      <div id="af-r-info" class="text-xs text-stone-600"></div>
+      <label class="block text-xs">Date<input id="af-r-date" type="date" class="w-full mt-1 border rounded-xl p-2" /></label>
+      <label class="block text-xs">Quantity received now<input id="af-r-qty" type="number" step="any" min="0.000001" oninput="afShowReceivePreview()" class="w-full mt-1 border rounded-xl p-2" /></label>
+      <label class="block text-xs">Notes<input id="af-r-notes" class="w-full mt-1 border rounded-xl p-2" placeholder="Delivery or adjustment details" /></label>
+      <p id="af-r-preview" class="rounded-xl bg-stone-50 p-2 text-xs"></p>
+      <button id="af-r-save" onclick="afConfirmReceive()" class="w-full bg-emerald-700 text-white rounded-xl font-bold py-3">Confirm & Update Inventory</button>
+    </div>
+  </div>
+  <!-- AFK v12.3 attachment dialog -->
+  <div id="af-upload-modal" class="hidden fixed inset-0 z-[76] bg-stone-900/60 flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl p-4 space-y-3">
+      <div class="flex justify-between items-center"><h3 class="font-extrabold">Attach Receipt / Delivery Photo</h3><button onclick="afCloseUploadModal()" class="rounded-lg bg-stone-100 p-2">✕</button></div>
+      <label class="block text-xs">Attachment Category<select id="af-u-category" class="w-full border rounded-xl p-2 mt-1"><option>Receipt</option><option>Payment Proof</option><option>Delivery Photo</option><option>Damage Proof</option></select></label>
+      <input id="af-u-file" type="file" accept="image/jpeg,image/png,application/pdf" class="w-full text-xs border rounded-xl p-2" />
+      <p class="text-[11px] text-stone-500">JPEG, PNG or PDF, up to 1.4 MB. The file remains private in the Apps Script owner's Drive. To view it, sign into an account with Drive access.</p>
+      <button id="af-u-save" onclick="afUploadReceipt()" class="w-full bg-stone-900 text-white rounded-xl font-bold py-3">Upload to Private Drive</button>
+    </div>
+  </div>
+
   <div id="appearance-modal" class="fixed inset-0 z-[60] hidden bg-stone-900/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="bg-white w-full max-w-xl rounded-t-3xl sm:rounded-3xl p-5 max-h-[92vh] overflow-y-auto space-y-4 animate-in">
       <div class="flex items-center justify-between border-b border-stone-100 pb-3">
@@ -3458,7 +3534,9 @@
       });
       if (tabName === 'kalendar') renderCalendar();
       if (tabName === 'stok') renderStockList();
+      if (tabName === 'stok') afLoadPurchases(true);
       if (tabName === 'analisis') renderAnalytics();
+      if (tabName === 'analisis') afLoadPurchases(true);
       if (window.lucide) lucide.createIcons();
     }
 
@@ -5146,6 +5224,7 @@
     function renderAnalytics() {
       initAnalyticsRangeControls();
       renderIngredientUsageAnalytics();
+      afRenderPurchaseAnalysis();
 
       // Each displayed metric, insight and chart uses its own independent date range.
       const orderCountOrders = getAnalyticsOrders('orderCount');
@@ -5423,6 +5502,194 @@
       }
       if (window.lucide) lucide.createIcons();
     });
+
+    /* AF Kitchen v12.3 Purchase Management front-end addition. */
+    let afPurchaseData={purchases:[],items:[],receipts:[],attachments:[]};
+    let afPurchaseBusy=false,afPurchaseLoaded=false,afPurchaseLines=[],afPurchaseTarget='',afReceiveTarget=null,afReceivingCorrection=false;
+    function afId(prefix){return prefix+'_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,12);}
+    function afE(s){return escapeHtmlText(String(s==null?'':s));}
+    function afNum(v){return Number(v)||0;}
+    function afPurchDate(d){return String(d||'').slice(0,10);}
+    function afDateInRange(s){
+      const filter=document.getElementById('af-restock-filter')?.value||'today',date=afPurchDate(s),today=getTodayISO();
+      const fromInput=document.getElementById('af-restock-from')?.value, toInput=document.getElementById('af-restock-to')?.value;
+      if(filter==='all')return true;
+      if(filter==='today')return date===today;
+      const day=(offset)=>{const x=new Date(today+'T12:00:00');x.setDate(x.getDate()+offset);return [x.getFullYear(),String(x.getMonth()+1).padStart(2,'0'),String(x.getDate()).padStart(2,'0')].join('-');};
+      if(filter==='yesterday')return date===day(-1);
+      if(filter==='7days')return date>=day(-6)&&date<=today;
+      if(filter==='month')return date.slice(0,7)===today.slice(0,7);
+      if(filter==='custom')return Boolean(fromInput&&toInput)&&date>=fromInput&&date<=toInput;
+      return false;
+    }
+    async function afLoadPurchases(force){
+      if(afPurchaseBusy || !config.scriptUrl || !config.pin)return;
+      if(afPurchaseLoaded&&!force){afRenderPurchases();afRenderPurchaseAnalysis();return;}
+      afPurchaseBusy=true;
+      try{
+        const res=await pushCloudAction({action:'purchaseList'});
+        if(!res||!res.ok)throw Error(res?.message||res?.error||'Cloud not connected');
+        afPurchaseData=res.purchaseData||{purchases:[],items:[],receipts:[],attachments:[]};afPurchaseLoaded=true;
+        afRenderPurchases();afRenderPurchaseAnalysis();
+      }catch(err){const d=document.getElementById('af-purchase-list');if(d)d.textContent='Unable to load purchases: '+err.message;}
+      finally{afPurchaseBusy=false;}
+    }
+    function afPurchaseRemaining(item){
+      const got=(afPurchaseData.receipts||[]).filter(r=>r.itemId===item.id).reduce((t,r)=>t+Number(r.qty),0);
+      return {received:got,remaining:Math.max(0,Number(item.qty)-got)};
+    }
+    function afPurchaseStatus(p){
+      const items=afPurchaseData.items.filter(x=>x.purchaseId===p.id);
+      if(!items.length)return p.status;
+      const pending=items.reduce((t,x)=>t+afPurchaseRemaining(x).remaining,0);
+      const totalR=items.reduce((t,x)=>t+afPurchaseRemaining(x).received,0);
+      if(p.status==='Cancelled'||p.status==='Closed Short')return p.status;
+      return pending<=0?'Fully Received':totalR>0?'Partially Received':'Ordered';
+    }
+    function afRenderPurchases(){
+      const dest=document.getElementById('af-purchase-list');if(!dest)return;
+      const query=(document.getElementById('af-purchase-search')?.value||'').trim().toLowerCase();
+      const purchases=[...(afPurchaseData.purchases||[])].sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+      const today=getTodayISO(),from7=(()=>{const d=new Date(today+'T12:00:00');d.setDate(d.getDate()-6);return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');})();
+      const statusFilter=document.getElementById('af-history-status')?.value||'all',dateFilter=document.getElementById('af-history-date')?.value||'all';
+      const result=purchases.filter(p=>[p.supplier,p.date,p.id,p.channel,...afPurchaseData.items.filter(i=>i.purchaseId===p.id).map(i=>i.name)].join(' ').toLowerCase().includes(query)&& (statusFilter==='all'||afPurchaseStatus(p)===statusFilter) && (dateFilter==='all'||dateFilter==='today'&&p.date===today||dateFilter==='7days'&&p.date>=from7&&p.date<=today||dateFilter==='month'&&p.date.slice(0,7)===today.slice(0,7)));
+      if(!result.length){dest.innerHTML='<p class="text-xs text-stone-500">No purchases recorded yet.</p>';return;}
+      dest.innerHTML=result.map(p=>{
+        const its=afPurchaseData.items.filter(x=>x.purchaseId===p.id),status=afPurchaseStatus(p);
+        const receiptLinks=(afPurchaseData.attachments||[]).filter(x=>x.purchaseId===p.id).map(f=>`<a class="underline text-amber-700" rel="noopener" target="_blank" href="https://drive.google.com/file/d/${encodeURIComponent(f.fileId)}/view">${afE(f.name)}</a>`).join(' · ');
+        const list=its.map(it=>{const q=afPurchaseRemaining(it),canReceive=q.remaining>0&&!['Closed Short','Cancelled'].includes(status);
+          return `<div class="rounded-xl bg-stone-50 p-2 space-y-1"><div class="flex justify-between gap-2"><span class="font-semibold">${afE(it.name)}</span><span class="font-mono-num">${q.received}/${it.qty} ${afE(it.unit)}</span></div><div class="text-[10px] text-stone-500">Pending ${+q.remaining.toFixed(4)} ${afE(it.unit)} · ${fmtMoney(it.total)}</div><div class="flex flex-wrap gap-2">${canReceive?`<button class="text-emerald-800 font-bold underline" onclick="afOpenReceive('${afE(p.id)}','${afE(it.id)}',false)">Receive items</button>`:''}${q.received>0&&!['Cancelled','Closed Short'].includes(status)?`<button class="text-amber-800 font-bold underline" onclick="afOpenReceive('${afE(p.id)}','${afE(it.id)}',true)">Correction</button>`:''}</div></div>`}).join('');
+        return `<div class="border border-stone-200 rounded-xl p-3 space-y-2"><div class="flex justify-between gap-2"><div class="min-w-0"><div class="font-extrabold text-stone-900">${afE(p.supplier)} <span class="text-[10px] text-stone-400">${afE(p.channel)}</span></div><div class="text-[10px] text-stone-500">${afE(p.date)} · ${afE(p.id)} · ${afE(p.tracking||'')}</div></div><div class="text-right shrink-0 font-bold">${fmtMoney(p.total)}<div class="text-[10px] text-amber-700">${afE(status)}</div></div></div><div class="space-y-1.5">${list}</div><div class="flex flex-wrap gap-2 text-[11px]"><button class="rounded-lg border px-2 py-1" onclick="afOpenUploadModal('${afE(p.id)}')">📎 Add Receipt / Photo</button>${status==='Ordered'?`<button class="rounded-lg border px-2 py-1" onclick="afEditPurchase('${afE(p.id)}')">Edit</button>`:''}${!['Cancelled','Closed Short','Fully Received'].includes(status)?`<button class="rounded-lg border px-2 py-1 text-rose-700" onclick="afClosePurchase('${afE(p.id)}')">${status==='Ordered'?'Cancel Purchase':'Close Remaining'}</button>`:''}</div>${receiptLinks?'<div class="text-[10px]">Files: '+receiptLinks+'</div>':''}</div>`;
+      }).join('');
+    }
+    function afAddPurchaseLine(initial){
+      afPurchaseLines.push(initial||{id:afId('PI'),ingredientId:config.ingredients?.[0]?.id||'',qty:'',total:'',notes:''});
+      afRenderPurchaseLines();
+    }
+    function afReadPurchaseInputs(){
+      afPurchaseLines.forEach((l,i)=>{
+        const base=document.getElementById('af-pl-'+i);if(!base)return;
+        l.ingredientId=base.querySelector('[data-field="ingredient"]')?.value||'';
+        l.qty=base.querySelector('[data-field="qty"]')?.value||'';
+        l.total=base.querySelector('[data-field="total"]')?.value||'';
+        l.notes=base.querySelector('[data-field="notes"]')?.value||'';
+      });
+    }
+    function afRenderPurchaseLines(){
+      const target=document.getElementById('af-p-items');if(!target)return;
+      const options=(config.ingredients||[]).map(i=>`<option value="${afE(i.id)}">${afE(i.name)} (${afE(i.unit)})</option>`).join('');
+      target.innerHTML=afPurchaseLines.map((l,i)=>`<div class="bg-stone-50 border border-stone-200 p-2 rounded-xl space-y-2" id="af-pl-${i}"><div class="flex justify-between"><span class="text-xs font-bold">Item ${i+1}</span><button class="text-rose-700 text-xs" onclick="afRemovePurchaseLine(${i})">Delete</button></div><select data-field="ingredient" onchange="afReadPurchaseInputs()" class="w-full border bg-white rounded-lg p-2 text-xs">${options}</select><div class="grid grid-cols-2 gap-2"><label class="text-xs">Quantity (stock unit)<input data-field="qty" type="number" min="0" step="any" oninput="afUpdatePurchaseTotal()" value="${afE(l.qty)}" class="w-full mt-1 border p-2 rounded-lg" /></label><label class="text-xs">Total Cost (RM)<input data-field="total" type="number" min="0" step="0.01" oninput="afUpdatePurchaseTotal()" value="${afE(l.total)}" class="w-full mt-1 border p-2 rounded-lg" /></label></div><input data-field="notes" value="${afE(l.notes||'')}" placeholder="Optional item notes" class="w-full border p-2 rounded-lg text-xs" /></div>`).join('');
+      afPurchaseLines.forEach((l,i)=>{const select=document.querySelector(`#af-pl-${i} select`);if(select)select.value=l.ingredientId;});
+      afUpdatePurchaseTotal();
+    }
+    function afUpdatePurchaseTotal(){afReadPurchaseInputs();document.getElementById('af-p-total').textContent='Total: '+fmtMoney(afPurchaseLines.reduce((t,l)=>t+Math.max(0,Number(l.total)||0),0));}
+    function afRemovePurchaseLine(i){afReadPurchaseInputs();if(afPurchaseLines.length<2){showToast('Keep at least one item.',true);return;}afPurchaseLines.splice(i,1);afRenderPurchaseLines();}
+    function afOpenPurchaseModal(){
+      afPurchaseTarget='';afPurchaseLines=[];
+      document.getElementById('af-p-date').value=getTodayISO();document.getElementById('af-p-supplier').value='';document.getElementById('af-p-notes').value='';document.getElementById('af-p-tracking').value='';document.getElementById('af-p-channel').value='Physical Store';
+      document.getElementById('af-purchase-modal').classList.remove('hidden');afAddPurchaseLine();
+    }
+    function afEditPurchase(id){
+      const p=afPurchaseData.purchases.find(x=>x.id===id);if(!p)return;afOpenPurchaseModal();afPurchaseTarget=id;
+      document.getElementById('af-p-date').value=p.date;document.getElementById('af-p-supplier').value=p.supplier;document.getElementById('af-p-notes').value=p.notes||'';document.getElementById('af-p-tracking').value=p.tracking||'';document.getElementById('af-p-channel').value=p.channel;document.getElementById('af-p-payment').value=p.paymentStatus||'Unspecified';
+      afPurchaseLines=afPurchaseData.items.filter(i=>i.purchaseId===id).map(i=>({id:i.id,ingredientId:i.ingredientId,qty:i.qty,total:i.total,notes:i.notes}));afRenderPurchaseLines();
+    }
+    function afClosePurchaseModal(){document.getElementById('af-purchase-modal').classList.add('hidden');}
+    async function afSubmitPurchaseAction(payload,button){
+      if(!config.scriptUrl){showToast('Cloud URL is required to save purchases.',true);return false;}
+      if(button){button.disabled=true;button.textContent='Saving...';}
+      try{
+        const result=await pushCloudAction(payload);
+        if(!result||!result.ok)throw Error((result?.error||'FAILED')+': '+(result?.message||''));
+        if(result.purchaseData){afPurchaseData=result.purchaseData;afPurchaseLoaded=true;}
+        renderStockList();afRenderPurchases();afRenderPurchaseAnalysis();showToast(result.message||'Saved to Cloud.');return true;
+      }catch(e){showToast('Cloud save failed: '+e.message,true);return false;}
+      finally{if(button){button.disabled=false;button.textContent=button.dataset.original||'Save';}}
+    }
+    async function afSavePurchase(){
+      afReadPurchaseInputs();
+      if(!afPurchaseLines.length||afPurchaseLines.some(l=>!l.ingredientId||!Number.isFinite(Number(l.qty))||Number(l.qty)<=0||l.total===''||Number(l.total)<0)){showToast('Enter a valid quantity and total cost for every item.',true);return;}
+      const btn=document.getElementById('af-p-save');btn.dataset.original=btn.textContent;
+      const id=afPurchaseTarget||afId('PO');
+      const purchase={id,date:document.getElementById('af-p-date').value,supplier:document.getElementById('af-p-supplier').value.trim(),channel:document.getElementById('af-p-channel').value,notes:document.getElementById('af-p-notes').value,tracking:document.getElementById('af-p-tracking').value,paymentStatus:document.getElementById('af-p-payment').value,items:afPurchaseLines.map(l=>({id:l.id,ingredientId:l.ingredientId,qty:Number(l.qty),total:Number(l.total),notes:l.notes}))};
+      if(!purchase.supplier||!purchase.date){showToast('Purchase date and supplier are required.',true);return;}
+      if(await afSubmitPurchaseAction({action:afPurchaseTarget?'purchaseUpdate':'purchaseCreate',purchase},btn))afClosePurchaseModal();
+    }
+    function afOpenReceive(pid,iid,correction){
+      const it=afPurchaseData.items.find(x=>x.id===iid&&x.purchaseId===pid);if(!it)return;
+      afReceiveTarget={pid,iid,item:it};afReceivingCorrection=Boolean(correction);
+      const balance=afPurchaseRemaining(it);
+      document.getElementById('af-r-info').textContent=it.name+' · '+(correction?'Already received: '+balance.received:'Pending: '+balance.remaining)+' '+it.unit;
+      document.getElementById('af-r-date').value=getTodayISO();document.getElementById('af-r-qty').value='';document.getElementById('af-r-notes').value='';document.getElementById('af-r-qty').max=correction?balance.received:balance.remaining;
+      document.getElementById('af-r-save').textContent=correction?'Confirm Negative Correction':'Confirm & Update Inventory';
+      document.getElementById('af-receive-modal').classList.remove('hidden');afShowReceivePreview();
+    }
+    function afShowReceivePreview(){
+      const {item}=afReceiveTarget||{};if(!item)return;
+      const q=Number(document.getElementById('af-r-qty').value)||0;
+      document.getElementById('af-r-preview').textContent=(afReceivingCorrection?'Inventory adjustment: -':'Inventory addition: +')+q+' '+item.unit+'. The change will be committed only after Cloud confirmation.';
+    }
+    function afCloseReceiveModal(){document.getElementById('af-receive-modal').classList.add('hidden');}
+    async function afConfirmReceive(){
+      if(!afReceiveTarget)return;
+      const q=Number(document.getElementById('af-r-qty').value),limit=afReceivingCorrection?afPurchaseRemaining(afReceiveTarget.item).received:afPurchaseRemaining(afReceiveTarget.item).remaining;
+      if(!Number.isFinite(q)||q<=0||q>limit||!document.getElementById('af-r-qty').value){showToast('Quantity must be more than zero and not exceed '+limit,true);return;}
+      const btn=document.getElementById('af-r-save');btn.dataset.original=btn.textContent;
+      const payload={action:afReceivingCorrection?'purchaseCorrect':'purchaseReceive',purchaseId:afReceiveTarget.pid,itemId:afReceiveTarget.iid,movementId:afId('MOV'),qty:afReceivingCorrection?-q:q,date:document.getElementById('af-r-date').value,notes:document.getElementById('af-r-notes').value};
+      // A timeout is ambiguous: don't automatically generate another receiving ID.
+      if(await afSubmitPurchaseAction(payload,btn)){afCloseReceiveModal();await syncFromCloud(true,true);}
+      else showToast('If save timed out, refresh Purchase History before attempting again.',true);
+    }
+    async function afClosePurchase(pid){
+      if(!confirm('Close outstanding purchase quantities? No additional stock will be received for this purchase.'))return;
+      await afSubmitPurchaseAction({action:'purchaseClose',purchaseId:pid},null);
+    }
+    function afOpenUploadModal(pid){afPurchaseTarget=pid;document.getElementById('af-u-file').value='';document.getElementById('af-upload-modal').classList.remove('hidden');}
+    function afCloseUploadModal(){document.getElementById('af-upload-modal').classList.add('hidden');}
+    async function afUploadReceipt(){
+      const file=document.getElementById('af-u-file').files[0];
+      if(!file||!['image/jpeg','image/png','application/pdf'].includes(file.type)||file.size>1400000){showToast('Choose JPG, PNG or PDF up to 1.4 MB.',true);return;}
+      const button=document.getElementById('af-u-save');button.dataset.original=button.textContent;
+      let data;
+      try{data=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result).split(',')[1]);reader.onerror=()=>reject(Error('Unable to read receipt'));reader.readAsDataURL(file);});}
+      catch(e){showToast(e.message,true);return;}
+      const payload={action:'purchaseUpload',purchaseId:afPurchaseTarget,attachmentId:afId('ATT'),filename:file.name,mime:file.type,base64:data,category:document.getElementById('af-u-category').value};
+      if(await afSubmitPurchaseAction(payload,button))afCloseUploadModal();
+    }
+    function afRenderPurchaseAnalysis(){
+      const sum=document.getElementById('af-restock-summary'),details=document.getElementById('af-restock-breakdown');if(!sum||!details)return;
+      const purchases=afPurchaseData.purchases.filter(p=>afDateInRange(p.date)&&p.status!=='Cancelled');
+      const ids=new Set(purchases.map(p=>p.id));
+      const items=afPurchaseData.items.filter(i=>ids.has(i.purchaseId));
+      const receipts=afPurchaseData.receipts.filter(r=>afDateInRange(r.date));
+      const spend=purchases.reduce((t,p)=>t+Number(p.total||0),0),pending=afPurchaseData.purchases.filter(p=>['Ordered','Partially Received'].includes(afPurchaseStatus(p))).length;
+      const kpis=[['Purchase Cost',fmtMoney(spend)],['Purchases',purchases.length],['Pending Purchases (All)',pending],['Receiving Events',receipts.length]];
+      sum.innerHTML=kpis.map(([a,b])=>`<div class="bg-stone-50 border rounded-xl p-2"><div class="text-[10px] text-stone-500">${afE(a)}</div><div class="font-extrabold text-base">${afE(b)}</div></div>`).join('');
+      const byIngredient=new Map(),bySupplier=new Map();
+      items.forEach(i=>{const x=byIngredient.get(i.ingredientId)||{name:i.name,total:0,qty:0,unit:i.unit};x.qty+=i.qty;x.total+=i.total;byIngredient.set(i.ingredientId,x);});
+      purchases.forEach(p=>bySupplier.set(p.supplier,(bySupplier.get(p.supplier)||0)+p.total));
+      const receivedById=new Map();receipts.forEach(r=>{const ing=(config.ingredients||[]).find(i=>i.id===r.ingredientId);const x=receivedById.get(r.ingredientId)||{name:ing?.name||r.ingredientId,unit:ing?.unit||'',qty:0};x.qty+=r.qty;receivedById.set(r.ingredientId,x);});
+      const section=(title,arr,empty)=>`<div class="border rounded-xl p-3"><h3 class="text-xs font-extrabold mb-2">${title}</h3>${arr.length?arr.join(''):`<p class="text-xs text-stone-400">${empty}</p>`}</div>`;
+      const ing=[...byIngredient.values()].sort((a,b)=>b.total-a.total).map(x=>`<div class="flex justify-between text-xs py-1 border-b border-stone-100 gap-2"><span>${afE(x.name)} · ${+x.qty.toFixed(3)} ${afE(x.unit)}</span><b>${fmtMoney(x.total)}</b></div>`);
+      const suppliers=[...bySupplier.entries()].sort((a,b)=>b[1]-a[1]).map(([n,v])=>`<div class="flex justify-between text-xs py-1 border-b border-stone-100"><span>${afE(n)}</span><b>${fmtMoney(v)}</b></div>`);
+      const rec=[...receivedById.values()].map(x=>`<div class="flex justify-between text-xs py-1 border-b border-stone-100"><span>${afE(x.name)}</span><b>${+x.qty.toFixed(3)} ${afE(x.unit)}</b></div>`);
+      details.innerHTML=section('Purchases by Ingredient (Purchase Date)',ing,'No purchases in this period')+section('Spend by Supplier',suppliers,'No purchase data')+section('Quantities Actually Received (Received Date)',rec,'No goods received in this period');
+    }
+    function afPrintPurchaseReport(){
+      const purchases=afPurchaseData.purchases.filter(p=>afDateInRange(p.date)&&p.status!=='Cancelled');
+      const total=purchases.reduce((t,p)=>t+Number(p.total||0),0);
+      const rows=purchases.map(p=>`<tr><td>${afE(p.date)}</td><td>${afE(p.supplier)}</td><td>${afE(p.channel)}</td><td>${afE(afPurchaseStatus(p))}</td><td style="text-align:right">${fmtMoney(p.total)}</td></tr>`).join('');
+      const report=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>AF Kitchen Purchase Report</title><style>body{font-family:Arial,sans-serif;padding:22px;color:#222}table{width:100%;border-collapse:collapse;font-size:12px}td,th{border-bottom:1px solid #ddd;padding:8px;text-align:left}h1{font-size:20px}button{padding:10px;margin-bottom:12px}@media print{button{display:none}}</style></head><body><button onclick="window.print()">Print / Save as PDF</button><h1>AF Kitchen — Purchase Report</h1><p>Generated ${afE(getTodayISO())} · ${purchases.length} purchase records</p><table><thead><tr><th>Date</th><th>Supplier</th><th>Channel</th><th>Status</th><th>Purchase Cost</th></tr></thead><tbody>${rows}</tbody></table><h3>Total Purchase Cost: ${fmtMoney(total)}</h3><p>Purchase costs are not production usage costs. Receipts are retained in Google Drive.</p></body></html>`;
+      const win=window.open('','_blank');if(!win){showToast('Allow pop-ups to print purchase report.',true);return;}win.document.open();win.document.write(report);win.document.close();
+    }
+    function afExportPurchaseCSV(){
+      const headers=['Purchase ID','Date','Supplier','Channel','Status','Ingredient','Qty Ordered','Unit','Item Cost','Received','Pending'];
+      const rows=[headers];
+      afPurchaseData.purchases.forEach(p=>afPurchaseData.items.filter(i=>i.purchaseId===p.id).forEach(i=>{const q=afPurchaseRemaining(i);rows.push([p.id,p.date,p.supplier,p.channel,afPurchaseStatus(p),i.name,i.qty,i.unit,i.total,q.received,q.remaining]);}));
+      const csv=rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');
+      const url=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download='af-kitchen-purchases-'+getTodayISO()+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+    }
+
   </script>
 </body>
 </html>
