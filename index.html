@@ -5516,9 +5516,9 @@
         return [value.getFullYear(),String(value.getMonth()+1).padStart(2,'0'),String(value.getDate()).padStart(2,'0')].join('-');
       }
       const raw=String(value).trim();
-      const iso=raw.match(/^(\\d{4}-\\d{2}-\\d{2})(?:$|[T\\s])/);
+      const iso=raw.match(/^(\d{4}-\d{2}-\d{2})(?:$|[T\s])/);
       if(iso)return iso[1];
-      const english=raw.match(/^(?:Sun|Mon|Tue|Wed|Thu|Fri|Sat)\\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\\s+(\\d{1,2})\\s+(\\d{4})\\b/i);
+      const english=raw.match(/^(?:Sun|Mon|Tue|Wed|Thu|Fri|Sat)\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+(\d{1,2})\s+(\d{4})\b/i);
       if(english){
         const month=['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'].indexOf(english[1].toLowerCase())+1;
         return english[3]+'-'+String(month).padStart(2,'0')+'-'+english[2].padStart(2,'0');
