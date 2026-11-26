@@ -5509,7 +5509,25 @@
     function afId(prefix){return prefix+'_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,12);}
     function afE(s){return escapeHtmlText(String(s==null?'':s));}
     function afNum(v){return Number(v)||0;}
-    function afPurchDate(d){return String(d||'').slice(0,10);}
+    // Normalize dates from both new ISO backend responses and historical Sheets text dates.
+    function afPurchDate(value){
+      if(value==null||value==='')return '';
+      if(value instanceof Date&&!Number.isNaN(value.getTime())){
+        return [value.getFullYear(),String(value.getMonth()+1).padStart(2,'0'),String(value.getDate()).padStart(2,'0')].join('-');
+      }
+      const raw=String(value).trim();
+      const iso=raw.match(/^(\\d{4}-\\d{2}-\\d{2})(?:$|[T\\s])/);
+      if(iso)return iso[1];
+      const english=raw.match(/^(?:Sun|Mon|Tue|Wed|Thu|Fri|Sat)\\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\\s+(\\d{1,2})\\s+(\\d{4})\\b/i);
+      if(english){
+        const month=['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'].indexOf(english[1].toLowerCase())+1;
+        return english[3]+'-'+String(month).padStart(2,'0')+'-'+english[2].padStart(2,'0');
+      }
+      const parsed=new Date(raw);
+      if(!Number.isNaN(parsed.getTime()))
+        return [parsed.getFullYear(),String(parsed.getMonth()+1).padStart(2,'0'),String(parsed.getDate()).padStart(2,'0')].join('-');
+      return '';
+    }
     function afDateInRange(s){
       const filter=document.getElementById('af-restock-filter')?.value||'today',date=afPurchDate(s),today=getTodayISO();
       const fromInput=document.getElementById('af-restock-from')?.value, toInput=document.getElementById('af-restock-to')?.value;
@@ -5549,10 +5567,16 @@
     function afRenderPurchases(){
       const dest=document.getElementById('af-purchase-list');if(!dest)return;
       const query=(document.getElementById('af-purchase-search')?.value||'').trim().toLowerCase();
-      const purchases=[...(afPurchaseData.purchases||[])].sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+      const purchases=[...(afPurchaseData.purchases||[])].sort((a,b)=>afPurchDate(b.date).localeCompare(afPurchDate(a.date)));
       const today=getTodayISO(),from7=(()=>{const d=new Date(today+'T12:00:00');d.setDate(d.getDate()-6);return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');})();
       const statusFilter=document.getElementById('af-history-status')?.value||'all',dateFilter=document.getElementById('af-history-date')?.value||'all';
-      const result=purchases.filter(p=>[p.supplier,p.date,p.id,p.channel,...afPurchaseData.items.filter(i=>i.purchaseId===p.id).map(i=>i.name)].join(' ').toLowerCase().includes(query)&& (statusFilter==='all'||afPurchaseStatus(p)===statusFilter) && (dateFilter==='all'||dateFilter==='today'&&p.date===today||dateFilter==='7days'&&p.date>=from7&&p.date<=today||dateFilter==='month'&&p.date.slice(0,7)===today.slice(0,7)));
+      const result=purchases.filter(p=>{
+        const date=afPurchDate(p.date);
+        const matchesSearch=[p.supplier,p.date,p.id,p.channel,...afPurchaseData.items.filter(i=>i.purchaseId===p.id).map(i=>i.name)].join(' ').toLowerCase().includes(query);
+        const matchesStatus=statusFilter==='all'||afPurchaseStatus(p)===statusFilter;
+        const matchesDate=dateFilter==='all'||(Boolean(date)&&(dateFilter==='today'&&date===today||dateFilter==='7days'&&date>=from7&&date<=today||dateFilter==='month'&&date.slice(0,7)===today.slice(0,7)));
+        return matchesSearch&&matchesStatus&&matchesDate;
+      });
       if(!result.length){dest.innerHTML='<p class="text-xs text-stone-500">No purchases recorded yet.</p>';return;}
       dest.innerHTML=result.map(p=>{
         const its=afPurchaseData.items.filter(x=>x.purchaseId===p.id),status=afPurchaseStatus(p);
